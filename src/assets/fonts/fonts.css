@@ -1,0 +1,54 @@
+@font-face {
+    font-family: 'Aktiv Grotesk Ex';
+    src: url('AktivGroteskEx-Regular.woff2') format('woff2'),
+        url('AktivGroteskEx-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+@font-face {
+    font-family: 'TAN - AESOP';
+    src: url('TANAESOP.woff2') format('woff2'),
+        url('TANAESOP.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'TAN - AESOP';
+    src: url('TANAESOP.woff2') format('woff2'),
+        url('TANAESOP.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'TAN - AESOP';
+    src: url('TANAESOP.woff2') format('woff2'),
+        url('TANAESOP.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'TAN - AESOP';
+    src: url('TANAESOP.woff2') format('woff2'),
+        url('TANAESOP.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'AktivGrotesk';
+    src: url('AktivGrotesk-Regular.woff2') format('woff2'),
+        url('AktivGrotesk-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}

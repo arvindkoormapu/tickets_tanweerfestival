@@ -1,0 +1,17 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "module": "system",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "allowUnreachableCode": false,
+        "strictNullChecks": true,
+        "sourceMap": true,
+        "jsx": "react-jsx"
+    },
+    "files": ["src/**/*"],
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "src/**/*.spec.js"]
+}
+
+

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Tanweer Festival - Reverent. Nourishing. Transformative.</title>
+    <meta
+      name="viewport"
+      content="width=device-width, minimum-scale=1.0, maximum-scale = 1.0, user-scalable = no, initial-scale=1"
+    />
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link
+      rel="apple-app-site-association file"
+      href="/.well-known/apple-developer-merchantid-domain-association"
+    />
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
+    <meta name="apple-mobile-web-app-title" content="Tanweer" />
+    <meta name="application-name" content="Tanweer" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      property="og:title"
+      content="Tanweer Festival - Reverent. Nourishing. Transformative."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://tanweerfestival.com/" />
+    <meta
+      property="og:image"
+      content="https://api.tanweerfestival.com/files/og.jpg"
+    />
+    <meta
+      property="og:description"
+      content="We are a catalyst for creating unity and a platform for gathering our elders– they are the original people. We connect Keepers with Seekers from all walks of life in reverence and remembrance of the old ways. In doing so, we empower the tribal cultures of the world by channeling revenues downstream to their respective communities so they may flourish."
+    />
+    <script>
+      !(function () {
+        var analytics = (window.analytics = window.analytics || []);
+        if (!analytics.initialize)
+          if (analytics.invoked)
+            window.console &&
+              console.error &&
+              console.error("Segment snippet included twice.");
+          else {
+            analytics.invoked = !0;
+            analytics.methods = [
+              "trackSubmit",
+              "trackClick",
+              "trackLink",
+              "trackForm",
+              "pageview",
+              "identify",
+              "reset",
+              "group",
+              "track",
+              "ready",
+              "alias",
+              "debug",
+              "page",
+              "once",
+              "off",
+              "on",
+              "addSourceMiddleware",
+              "addIntegrationMiddleware",
+              "setAnonymousId",
+              "addDestinationMiddleware",
+            ];
+            analytics.factory = function (e) {
+              return function () {
+                if (window.analytics.initialized)
+                  return window.analytics[e].apply(window.analytics, arguments);
+                var i = Array.prototype.slice.call(arguments);
+                i.unshift(e);
+                analytics.push(i);
+                return analytics;
+              };
+            };
+            for (var i = 0; i < analytics.methods.length; i++) {
+              var key = analytics.methods[i];
+              analytics[key] = analytics.factory(key);
+            }
+            analytics.load = function (key, i) {
+              var t = document.createElement("script");
+              t.type = "text/javascript";
+              t.async = !0;
+              t.src =
+                "https://cdn.segment.com/analytics.js/v1/" +
+                key +
+                "/analytics.min.js";
+              var n = document.getElementsByTagName("script")[0];
+              n.parentNode.insertBefore(t, n);
+              analytics._loadOptions = i;
+            };
+            analytics._writeKey = "oCwlZalFH6GznmLxDH4QSegai1KViF5h";
+            analytics.SNIPPET_VERSION = "4.16.1";
+            analytics.load("oCwlZalFH6GznmLxDH4QSegai1KViF5h");
+            // analytics.page();
+          }
+      })();
+    </script>
+    <!-- <script type="text/javascript">
+      (function (c, l, a, r, i, t, y) {
+        c[a] =
+          c[a] ||
+          function () {
+            (c[a].q = c[a].q || []).push(arguments);
+          };
+        t = l.createElement(r);
+        t.async = 1;
+        t.src = "https://www.clarity.ms/tag/" + i;
+        y = l.getElementsByTagName(r)[0];
+        y.parentNode.insertBefore(t, y);
+      })(window, document, "clarity", "script", "j4a22d7wbp");
+    </script> -->
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
+</html>
