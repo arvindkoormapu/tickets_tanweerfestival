@@ -167,37 +167,42 @@ export default function Addons({
   };
 
   // Handle Date Selection
-  const handleDateChange = (addon_id, date) => {
-    setAddonList((prevAddonList) =>
-      prevAddonList.map((addon) => {
-        if (addon.id === addon_id) {
-          const existingDateIndex = addon.selectedDates.findIndex(
-            (d) => d.date === date
-          );
+// Handle Date Selection
+const handleDateChange = (addon_id, date, groupedDates) => {
+  setAddonList((prevAddonList) =>
+    prevAddonList.map((addon) => {
+      if (addon.id === addon_id) {
+        const existingDateIndex = addon.selectedDates.findIndex(
+          (d) => d.date === date
+        );
 
-          if (existingDateIndex !== -1) {
-            // Date already exists, remove it
-            const newSelectedDates = [...addon.selectedDates];
-            newSelectedDates.splice(existingDateIndex, 1); // Remove the date
-            return { ...addon, selectedDates: newSelectedDates };
-          } else {
-            // Add the new date with a null time slot and time_slot_id
-            return {
-              ...addon,
-              selectedDates: [
-                ...addon.selectedDates,
-                { date, timeSlot: null, time_slot_id: null },
-              ],
-            };
-          }
+        if (existingDateIndex !== -1) {
+          // Date already exists, remove it
+          const newSelectedDates = [...addon.selectedDates];
+          newSelectedDates.splice(existingDateIndex, 1); // Remove the date
+          return { ...addon, selectedDates: newSelectedDates };
+        } else {
+          // Safely access groupedDates
+          const timeSlotId = groupedDates?.[date]?.find(slot => slot.time_slot === null)?.id || null;
+
+          // Add the new date with the time slot and corresponding time_slot_id
+          return {
+            ...addon,
+            selectedDates: [
+              ...addon.selectedDates,
+              { date, timeSlot: null, time_slot_id: timeSlotId }, // Use the obtained time_slot_id
+            ],
+          };
         }
-        return addon;
-      })
-    );
+      }
+      return addon;
+    })
+  );
 
-    // Update the active date
-    setActiveDate(date);
-  };
+  // Update the active date
+  setActiveDate(date);
+};
+
 
   // Handle Time Slot Selection
   const handleSlotChange = (addon_id, e, date) => {
@@ -433,7 +438,7 @@ export default function Addons({
                                                 (d) => d.date === date
                                               )}
                                               onChange={() =>
-                                                handleDateChange(addon.id, date)
+                                                handleDateChange(addon.id, date, groupedDates)
                                               } // Toggle checkbox state
                                               className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                             />

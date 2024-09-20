@@ -141,7 +141,11 @@ export default function Ticket({
           "default",
           { month: "short" }
         )}`; // e.g., "22 Nov"
-        return `${formattedDate} : ${slot.slot_time}`; // e.g., "22 Nov : 12:00 PM"
+
+        // Only add the time if it exists, without leading space
+        return slot.slot_time
+          ? `${formattedDate} : ${slot.slot_time}`
+          : formattedDate; // e.g., "22 Nov : 12:00 PM" or "22 Nov"
       })
       .join(", "); // Join the formatted strings with a comma
   };
@@ -295,7 +299,10 @@ export default function Ticket({
                       </div>
                       <div className="w-full flex flex-col items-start justify-between">
                         <DataCol topData={"Ticket"} bottomData={elm.name} />
-                        <DataCol topData={"Date"} bottomData={formatSlots(elm.slots)} />
+                        <DataCol
+                          topData={"Date"}
+                          bottomData={formatSlots(elm.slots)}
+                        />
                         <DataCol topData={"Quantity"} bottomData={elm.qty} />
                         <DataCol
                           topData={"Price"}
