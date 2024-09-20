@@ -306,19 +306,19 @@ export default function Events() {
               return { ticket_id: tkt.id, qty: selectedTicket.qty };
             }),
           addons: addonList
-          .filter((addon) => addon.qty > 0) // Filter addons with quantity greater than 0
-          .flatMap((addon) => {
-            // Check if there are multiple selected dates
-            return addon.selectedDates.map((selectedDate) => {
-              return {
-                id: addon.id,
-                qty: addon.qty,
-                price: addon.price, // Assuming you have the price here
-                time_slot_id: selectedDate.time_slot_id, // Use the time_slot_id from selectedDates
-                event_date: selectedDate.date, // Use the date from selectedDates
-              };
-            });
-          }),
+            .filter((addon) => addon.qty > 0) // Filter addons with quantity greater than 0
+            .flatMap((addon) => {
+              // Check if there are multiple selected dates
+              return addon.selectedDates.map((selectedDate) => {
+                return {
+                  id: addon.id,
+                  qty: addon.qty,
+                  price: addon.price, // Assuming you have the price here
+                  time_slot_id: selectedDate.time_slot_id, // Use the time_slot_id from selectedDates
+                  event_date: selectedDate.date, // Use the date from selectedDates
+                };
+              });
+            }),
         },
       ],
       coupon: coupon,
@@ -564,7 +564,7 @@ export default function Events() {
             addonInfo: addonList
               .filter((add) => add.qty > 0)
               .map((addon) => {
-                console.log('selectedDates', addon.selectedDates);
+                console.log("selectedDates", addon.selectedDates);
                 const selectedDateTime = addon.selectedDates || [];
                 return {
                   name: addon.name,
@@ -572,14 +572,23 @@ export default function Events() {
                   Quantity: addon.qty,
                   Price: `${addon.price * addon.qty} AED`,
                   "date&time": selectedDateTime
-                    .map(
-                      (slot) =>
-                        `${calculateDay(slot.date)} - ${formatDate(
-                          slot.date
-                        )} - ${slot.timeSlot || ""}` // Format: "Day X - 22 Nov"
-                    )
-                    .filter((entry) => entry.trim() !== "") // Filter out empty or incomplete entries
-                    .join(", "),
+                    .map((slot) => {
+                      const formattedDate = `${calculateDay(
+                        slot.date
+                      )} - ${formatDate(slot.date)}${
+                        slot.timeSlot ? ` - ${slot.timeSlot}` : ""
+                      }`;
+
+                      // Only return a div if formattedDate is not empty
+                      return formattedDate.trim() !== "" ? (
+                        <div key={slot.date}>
+                          {" "}
+                          {/* Use a unique key, such as slot.date */}
+                          {formattedDate}
+                        </div>
+                      ) : null;
+                    })
+                    .filter((entry) => entry !== null), // Filter out null entries
                 };
               }),
           }}

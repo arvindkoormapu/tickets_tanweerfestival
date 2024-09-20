@@ -168,13 +168,19 @@ export default function Addons({
 
   // Handle Date Selection
   const handleDateChange = (addon_id, date) => {
-    setActiveDate(date); // Set the active tab to the selected date
     setAddonList((prevAddonList) =>
       prevAddonList.map((addon) => {
         if (addon.id === addon_id) {
-          // Check if the date already exists in selectedDates
-          const existingDate = addon.selectedDates.find((d) => d.date === date);
-          if (!existingDate) {
+          const existingDateIndex = addon.selectedDates.findIndex(
+            (d) => d.date === date
+          );
+
+          if (existingDateIndex !== -1) {
+            // Date already exists, remove it
+            const newSelectedDates = [...addon.selectedDates];
+            newSelectedDates.splice(existingDateIndex, 1); // Remove the date
+            return { ...addon, selectedDates: newSelectedDates };
+          } else {
             // Add the new date with a null time slot and time_slot_id
             return {
               ...addon,
@@ -188,6 +194,9 @@ export default function Addons({
         return addon;
       })
     );
+
+    // Update the active date
+    setActiveDate(date);
   };
 
   // Handle Time Slot Selection
@@ -413,61 +422,105 @@ export default function Addons({
                                     </h3>
                                     <div className="flex space-x-4 mb-4">
                                       {Object.keys(groupedDates).map((date) => (
-                                        <button
-                                          key={date}
-                                          onClick={() =>
-                                            handleDateChange(addon.id, date)
-                                          }
-                                          className={`px-4 py-2 border text-l-orange text-sm rounded-md ${
-                                            activeDate === date
-                                              ? "bg-blue-500 text-white"
-                                              : "bg-gray-100 text-black"
-                                          } hover:bg-blue-200`}
-                                        >
-                                          {`${calculateDay(
-                                            date
-                                          )} - ${formatDate(date)}`}
-                                        </button>
+                                        <div key={date} className="mb-4">
+                                          {" "}
+                                          {/* Add margin-bottom for spacing */}
+                                          <div className="flex items-center">
+                                            <input
+                                              type="checkbox"
+                                              id={date}
+                                              checked={addon.selectedDates.some(
+                                                (d) => d.date === date
+                                              )}
+                                              onChange={() =>
+                                                handleDateChange(addon.id, date)
+                                              } // Toggle checkbox state
+                                              className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                            />
+                                            <label
+                                              htmlFor={date}
+                                              className="ml-2 text-l-orange text-sm cursor-pointer"
+                                              onClick={(e) => {
+                                                e.preventDefault(); // Prevent checkbox toggle on label click
+                                                setActiveDate(date); // Show time slots on label click
+                                              }}
+                                            >
+                                              {`${calculateDay(
+                                                date
+                                              )} - ${formatDate(date)}`}
+                                            </label>
+                                          </div>
+                                          {/* Show time slots below the date label if this date is active */}
+                                          {activeDate === date && (
+                                            <div className="mt-2">
+                                              {" "}
+                                              {/* Margin-top for spacing */}
+                                              {addon.selectedDates.map(
+                                                (selectedDateObj) =>
+                                                  selectedDateObj.date ===
+                                                  date ? (
+                                                    groupedDates[
+                                                      selectedDateObj.date
+                                                    ]?.some(
+                                                      (slot) =>
+                                                        slot.time_slot !== null
+                                                    ) ? ( // Check for non-null time slots
+                                                      <div
+                                                        key={
+                                                          selectedDateObj.date
+                                                        }
+                                                      >
+                                                        {groupedDates[
+                                                          selectedDateObj.date
+                                                        ].map(
+                                                          (slot) =>
+                                                            slot.time_slot !==
+                                                              null && ( // Render only if time_slot is not null
+                                                              <label
+                                                                key={slot.id}
+                                                                className="flex items-center mb-2 cursor-pointer"
+                                                              >
+                                                                <input
+                                                                  type="radio"
+                                                                  name={`time_slot_${addon.id}_${selectedDateObj.date}`}
+                                                                  value={
+                                                                    slot.time_slot
+                                                                  }
+                                                                  data-timeslot-id={
+                                                                    slot.id
+                                                                  }
+                                                                  checked={
+                                                                    selectedDateObj.timeSlot ===
+                                                                    slot.time_slot
+                                                                  }
+                                                                  onChange={(
+                                                                    e
+                                                                  ) =>
+                                                                    handleSlotChange(
+                                                                      addon.id,
+                                                                      e,
+                                                                      selectedDateObj.date
+                                                                    )
+                                                                  }
+                                                                  className="h-5 w-5 border border-gray-300 rounded-full checked:bg-[#fbe899] checked:border-[#fbe899] focus:outline-none mr-3"
+                                                                />
+                                                                <span className="text-l-orange text-sm">
+                                                                  {
+                                                                    slot.time_slot
+                                                                  }
+                                                                </span>
+                                                              </label>
+                                                            )
+                                                        )}
+                                                      </div>
+                                                    ) : null
+                                                  ) : null
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
                                       ))}
                                     </div>
-                                    {/* Display the time slots when a date tab is clicked */}
-                                    {addon.selectedDates.map(
-                                      (selectedDateObj) =>
-                                        selectedDateObj.date === activeDate ? (
-                                          <div key={selectedDateObj.date}>
-                                            {groupedDates[
-                                              selectedDateObj.date
-                                            ]?.map((slot) => (
-                                              <label
-                                                key={slot.id}
-                                                className="flex items-center mb-2 cursor-pointer"
-                                              >
-                                                <input
-                                                  type="radio"
-                                                  name={`time_slot_${addon.id}_${selectedDateObj.date}`}
-                                                  value={slot.time_slot}
-                                                  data-timeslot-id={slot.id}
-                                                  checked={
-                                                    selectedDateObj.timeSlot ===
-                                                    slot.time_slot
-                                                  }
-                                                  onChange={(e) =>
-                                                    handleSlotChange(
-                                                      addon.id,
-                                                      e,
-                                                      selectedDateObj.date
-                                                    )
-                                                  }
-                                                  className="h-5 w-5 border border-gray-300 rounded-full checked:bg-[#fbe899] checked:border-[#fbe899] focus:outline-none mr-3"
-                                                />
-                                                <span className="text-l-orange text-sm">
-                                                  {slot.time_slot}
-                                                </span>
-                                              </label>
-                                            ))}
-                                          </div>
-                                        ) : null
-                                    )}
                                   </div>
                                 </>
                               )}
