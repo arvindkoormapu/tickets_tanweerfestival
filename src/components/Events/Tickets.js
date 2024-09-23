@@ -37,7 +37,7 @@ export default function Tickets({
   packageLoading,
 }) {
   const [isPopupOpen, setIspopupOpen] = useState(false);
-  const filters = ["All", "Day Pass", "Festival Pass", "Wave 1", "Wave 2"];
+  const filters = ["All", "Day Pass", "Festival Pass"];
   const navigate = useNavigate();
 
   const handleExpand = (ticket) => {
