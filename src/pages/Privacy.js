@@ -145,11 +145,11 @@ export default function Privacy() {
                 install or use any of our Services; we may also receive User
                 Information about you from third parties (e.g., our affiliate
                 partners.); and we may also create User Information about you,
-                such as records of your interactions with us. Experience Sharjah
+                such as records of your interactions with us. Tanweer Festival
                 is not responsible for Personal Information you volunteer about
                 yourself in public areas of the Services. This Policy does not
                 cover the practices of third parties who may provide information
-                about you to the Experience Sharjah.
+                about you to the Tanweer Festival.
               </div>
               <div className="mb-3 text-[15px]">
                 PURPOSES FOR WHICH WE MAY PROCESS YOUR INFORMATION
@@ -212,7 +212,7 @@ export default function Privacy() {
                 ))}
               </ul>
               <div className="mb-3 text-[12px]">
-                Experience Sharjah may use third-party advertising service
+                Tanweer Festival may use third-party advertising service
                 companies for online behavioral advertising (“OBA”) or
                 otherwise, and perform related services when you use our
                 Services. These third-party advertising companies employ cookies
