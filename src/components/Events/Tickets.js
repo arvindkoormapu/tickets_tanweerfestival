@@ -11,6 +11,9 @@ import carelDownWhite from "../../assets/carel-down-white.svg";
 import { notifyError, notifyInfo } from "../../utils/notifyToast";
 import Loader from "../Loader";
 import { useNavigate } from "../../../node_modules/react-router-dom/dist/index";
+import { Link } from "react-router-dom";
+import mastercardLogos from "../../mastercard.jpg";
+import visaLogos from "../../visa.png";
 
 export default function Tickets({
   tempTicketList,
@@ -190,7 +193,7 @@ export default function Tickets({
               />
             )}
           </div>
-          <div className="flex w-full overflow-scroll gap-[12px]">
+          <div className="flex w-full overflow-x-auto gap-[12px] scrollbar-thin">
             {filters.map((filter, i) => (
               <div
                 key={i}
@@ -771,6 +774,28 @@ export default function Tickets({
           </div>
           {loading && <Loader />}
           <CaretIcon />
+        </div>
+        <div className="flex flex-row justify-between px-[1rem] bg-[#fff] py-[0.2rem]">
+          <div className="flex flex-row justify-between gap-[12px]">
+            <img
+              src={visaLogos}
+              alt="Visa and Mastercard Logos"
+              className={`h-[24px] w-[24px] object-contain`}
+            />
+            <img
+              src={mastercardLogos}
+              alt="Visa and Mastercard Logos"
+              className={`h-[24px] w-[24px] object-contain`}
+            />
+          </div>
+          <div className="flex flex-row justify-between gap-[12px]">
+            <Link to="/privacy-policy" className="text-[12px]">
+              Privacy Policy
+            </Link>
+            <Link to="/terms-conditions" className="text-[12px]">
+              Terms & conditions
+            </Link>
+          </div>
         </div>
       </div>
       <Popup isOpen={isPopupOpen} width="w-[90vw] sm:w-[50vw]">

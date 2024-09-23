@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import Ticket from "./pages/Ticket";
 import LoginRedirect from "./pages/Login-Redirect";
 import TC from "./pages/TC";
+import Privacy from "./pages/Privacy"
 
 export default function App() {
   const routes = [
@@ -24,6 +25,7 @@ export default function App() {
     { path: "/view-ticket/:purchase_number", page: Ticket },
     { path: "/login-redirect", page: LoginRedirect },
     { path: "/terms-conditions", page: TC },
+    { path: "/privacy-policy", page: Privacy },
   ];
 
   useEffect(() => {

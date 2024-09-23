@@ -9,6 +9,7 @@ import { title } from "../constants/index";
 import moment from "moment";
 import Popup from "../components/Popup";
 import { profileDetails } from "../ProfileApi";
+import axios from "axios";
 
 export default function Events() {
   const [step, setStep] = useState(0);
@@ -42,6 +43,8 @@ export default function Events() {
   const [timer, setTimer] = useState("15:00");
   const [isPopupOpen, setPopupOpen] = useState(false);
   const [addonFilter, setAddonFilter] = useState("All");
+  const [filters, setFilters] = useState([]);
+  const [subCategories, setSubCategories] = useState({});
   const Ref = useRef(null);
 
   const getTimeRemaining = (e) => {
@@ -97,6 +100,35 @@ export default function Events() {
 
     return totalSeconds;
   }
+
+  const transformData = (data) => {
+    const filters = ["All", ...data.map((item) => item.Tag)];
+    const subCategories = data.reduce((acc, item) => {
+      acc[item.Tag] = item.subTags;
+      return acc;
+    }, {});
+
+    return { filters, subCategories };
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await axios.get(
+          `${process.env.REACT_APP_BASE_URL}/?action=tagsList`
+        );
+        if (data) {
+          const { filters, subCategories } = transformData(data.data);
+          setFilters(filters);
+          setSubCategories(subCategories);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (step === 4) {
@@ -521,6 +553,8 @@ export default function Events() {
           setAddonFilter={setAddonFilter}
           loading={loading}
           dates={dateList}
+          filters={filters}
+          subCategories={subCategories}
         />
       )}
       {step === 3 && (

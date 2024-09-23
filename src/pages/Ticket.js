@@ -158,27 +158,34 @@ export default function Ticket({
             <BackButton />
           </Link>
           {orderDetails.length > 0 && (
-            <div className="flex justify-start items-center mt-10 gap-4 w-auto">
+            <div className="flex flex-col justify-start items-start mt-10 w-auto">
               <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
                 Ticket &nbsp; #{orderDetails[0].order_number}
               </h2>
+              <h5 className="text-start text-[16px] leading-9 tracking-tight text-primary-orange">
+                Date: &nbsp; {orderDetails[0].items.packages[0].date.join(", ")}
+              </h5>
+              <div className="flex flex-row justify-between items-start mt-0 w-full">
+                {/* <h5 className="text-start text-[16px] leading-9 tracking-tight text-primary-orange">
+                  {orderDetails[0].ticketData[0].ticket_name}
+                </h5> */}
+                <h5 className="text-start text-[16px] leading-9 tracking-tight text-primary-orange">
+                  Total: &nbsp; AED {orderDetails[0].total}
+                </h5>
+              </div>
             </div>
           )}
           {/* TICKET IMAGE PART */}
           {orderDetails.length > 0 || loading ? (
             <>
-              {orderDetails.map((order) =>
-                order.ticketData.qrcodes.map((qrcode) => (
-                  <div className="mt-4" key={order.order_number}>
-                    {/* <img
-                      src={ticketTopLog}
-                      className="relative w-full mb-[-0.5%]"
-                    /> */}
-                    <div className="ticketInfo w-full top-0 bg-d-orange p-5">
-                      <div
-                        className="flex flex-row items-center"
-                        key={qrcode.id}
-                      >
+              <div className="ticketInfo w-full top-0 bg-d-orange p-5">
+                {orderDetails.map((order) =>
+                  order.ticketData.qrcodes.map((qrcode, index) => (
+                    <div key={qrcode.id}>
+                      <h5 className="text-xs font-medium text-left text-white">
+                        Ticket {index + 1} of {order.ticketData.qrcodes.length}
+                      </h5>
+                      <div className="flex flex-row items-center">
                         <div className="pr-5">
                           <QRCode
                             size={100}
@@ -192,28 +199,27 @@ export default function Ticket({
                             topData={"Ticket"}
                             bottomData={order.ticketData[0].ticket_name}
                           />
-                          <DataCol
+                          <button className="bg-blue-500 text-xs text-white font-bold py-2 rounded hover:bg-blue-700 transition duration-200">
+                            Download Ticket pdf
+                          </button>
+                          {/*  <DataCol
                             topData={"Date"}
                             bottomData={order.items.packages[0].date.join(", ")}
                           />
                           <DataCol
-                            topData={"Quantity"}
-                            bottomData={order.ticketData[0].qty}
-                          />
-                          <DataCol
                             topData={"Price"}
                             bottomData={"AED " + order.total}
-                          />
+                          /> */}
                         </div>
                       </div>
+                      {/* Divider */}
+                      {index < order.ticketData.qrcodes.length - 1 && (
+                        <div className="border-b border-white my-4" />
+                      )}
                     </div>
-                    {/* <img
-                      src={ticketBottom}
-                      className="relative rotate-0 w-full mt-[-0.5%]"
-                    /> */}
-                  </div>
-                ))
-              )}
+                  ))
+                )}
+              </div>
             </>
           ) : (
             <div className="my-12">
