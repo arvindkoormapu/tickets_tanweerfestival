@@ -116,7 +116,7 @@ export default function Ticket({
           });
           setLoading(false);
         }
-      }, 2000);
+      }, 1000);
     };
 
     getOrderDetails();
