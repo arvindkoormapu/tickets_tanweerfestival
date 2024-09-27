@@ -242,8 +242,13 @@ export default function Pay({
         </div>
 
         <div id="embed-target"></div>
-
-        <iframe id="saleiframe" name="saleiframe" style={{ width: '100%', height: '100%' }}></iframe>
+        <div style="height:600px;">
+          <iframe
+            id="saleiframe"
+            name="saleiframe"
+            style={{ width: "100%", height: "100%" }}
+          ></iframe>
+        </div>
 
         {/* <div className="flex justify-center items-center space-x-6 mt-8">
           <img
