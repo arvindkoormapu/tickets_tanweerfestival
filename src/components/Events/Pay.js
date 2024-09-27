@@ -243,13 +243,13 @@ export default function Pay({
 
         <div id="embed-target" className="m-5"></div>
         
-        {/* <div style={{height: '432px'}} className="m-5">
+        <div style={{height: '432px'}} className="m-5">
           <iframe
             id="saleiframe"
             name="saleiframe"
             style={{ width: "100%", height: "100%" }}
           ></iframe>
-        </div> */}
+        </div>
 
         {/* <div className="flex justify-center items-center space-x-6 mt-8">
           <img
