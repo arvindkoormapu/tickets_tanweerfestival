@@ -68,11 +68,8 @@ export default function Ticket({
     window.analytics.page();
     document.title = `Ticket - ${title}`;
     const getOrderDetails = async () => {
-      const storedData = localStorage.getItem("lastAnalyticsData");
-      const getPurchaseDetails = JSON.parse(storedData);
-      setOrderDetails(getPurchaseDetails);
       await axios.get(
-        `${process.env.REACT_APP_BASE_URL}payment/magnati/mpg/success.php?order_ID=${getPurchaseDetails.purchase_number}`
+        `${process.env.REACT_APP_BASE_URL}payment/magnati/mpg/success.php?order_ID=${params.purchase_number}`
       );
 
       const formData = new FormData();
