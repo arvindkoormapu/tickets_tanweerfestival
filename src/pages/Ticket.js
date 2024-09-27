@@ -64,37 +64,17 @@ export default function Ticket({
 
   const params = useParams();
 
-  const fetchData = async () => {
-    try {
-      const storedData = localStorage.getItem("lastAnalyticsData");
-      if (storedData) {
-        const getPurchaseDetails = JSON.parse(storedData);
-        setOrderDetails(getPurchaseDetails);
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}payment/magnati/mpg/success.php?order_ID=${getPurchaseDetails.purchase_number}`,
-        );
-        // if (response.success) {
-        //   const tempData = response.data.find(
-        //     (purchase) => purchase.purchase_number === params.purchase_number
-        //   );
-        //   setPurchaseList(tempData);
-        // }
-        setLoading(false);
-
-      } else {
-        console.log("No data found in localStorage");
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     window.analytics.page();
     document.title = `Ticket - ${title}`;
     const getOrderDetails = async () => {
+      const storedData = localStorage.getItem("lastAnalyticsData");
+      const getPurchaseDetails = JSON.parse(storedData);
+      setOrderDetails(getPurchaseDetails);
+      await axios.get(
+        `${process.env.REACT_APP_BASE_URL}payment/magnati/mpg/success.php?order_ID=${getPurchaseDetails.purchase_number}`
+      );
+
       const formData = new FormData();
       formData.append("action", "orderHistory");
       formData.append("purchase_number", params.purchase_number);
@@ -137,21 +117,9 @@ export default function Ticket({
           ],
         });
         setLoading(false);
-      } else getPurchaseList();
+      }
     };
-    const getPurchaseList = async () => {
-      // const formData = new FormData();
-      // formData.append("action", "purchaseListing");
-      // const data = await fetchClient(formData, "POST", "");
-      // if (data) {
-      //   const tempData = data.data.find(
-      //     (purchase) => purchase.purchase_number === params.purchase_number
-      //   );
-      //   setPurchaseList(tempData);
-      // }
-      fetchData()
-      setLoading(false);
-    };
+
     getOrderDetails();
   }, []);
 
