@@ -42,7 +42,7 @@ export default function Pay({
     txntype: "sale",
     chargetotal: "",
     authenticateTransaction: true,
-    paymentMethod: 'applePay',
+    paymentMethod: "applePay",
     parentUri: `${process.env.REACT_APP_URL}`,
     oid: "",
     currency: "784",
@@ -98,37 +98,39 @@ export default function Pay({
 
   const payOnline = (paymentMethod) => {
     if (formData.hashExtended) {
-      formData.paymentMethod = paymentMethod
-      const form = document.createElement("form");
-      form.action = "https://test.ipg-online.com/connect/gateway/processing";
-      form.method = "POST";
-      form.target = "saleiframe";
+      formData.paymentMethod = paymentMethod;
+      setTimeout(() => {
+        const form = document.createElement("form");
+        form.action = "https://test.ipg-online.com/connect/gateway/processing";
+        form.method = "POST";
+        form.target = "saleiframe";
 
-      Object.keys(formData).forEach((key) => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = formData[key];
-        form.appendChild(input);
-      });
+        Object.keys(formData).forEach((key) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = formData[key];
+          form.appendChild(input);
+        });
 
-      document.body.appendChild(form);
-      form.submit();
+        document.body.appendChild(form);
+        form.submit();
+      }, 5000);
     }
   };
 
   const handlePayment = (paymentMethod) => {
     if (paymentMethod === "card") {
       handlePayNowClick(window);
-      setShowCard(true)
-      setShowWallet(false)
+      setShowCard(true);
+      setShowWallet(false);
     } else if (
       paymentMethod === "applePay" ||
       paymentMethod === "googlePay" ||
       paymentMethod === "samsungPay"
     ) {
-      setShowCard(false)
-      setShowWallet(true)
+      setShowCard(false);
+      setShowWallet(true);
       payOnline(paymentMethod);
     }
   };
@@ -316,13 +318,21 @@ export default function Pay({
           </div>
         </div>
 
-        <div id="embed-target" className="m-5" style={{display: showCard ? "inline" : "none"}}></div>
+        <div
+          id="embed-target"
+          className="m-5"
+          style={{ display: showCard ? "inline" : "none" }}
+        ></div>
 
         <div style={{ height: "432px" }} className="m-5">
           <iframe
             id="saleiframe"
             name="saleiframe"
-            style={{ width: "100%", height: "100%", display: showWallet ? "inline" : "none" }}
+            style={{
+              width: "100%",
+              height: "100%",
+              display: showWallet ? "inline" : "none",
+            }}
             title="Payment Processing Frame"
           ></iframe>
         </div>
