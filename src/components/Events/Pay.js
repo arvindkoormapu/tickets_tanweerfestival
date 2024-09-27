@@ -41,7 +41,7 @@ export default function Pay({
     txntype: "sale",
     chargetotal: "",
     authenticateTransaction: true,
-    paymentMethod: "googlePay",
+    paymentMethod: "",
     parentUri: `${process.env.REACT_APP_URL}`,
     oid: "",
     currency: "784",
@@ -297,11 +297,11 @@ export default function Pay({
 
         <div
           id="embed-target"
-          className="m-5"
+          className="mx-5 m-5"
           style={{ display: showCard ? "inline" : "none" }}
         ></div>
 
-        <div style={{ height: "432px" }} className="m-5">
+        <div style={{ height: "432px" }} className="mx-5 m-5">
           <iframe
             id="saleiframe"
             name="saleiframe"
