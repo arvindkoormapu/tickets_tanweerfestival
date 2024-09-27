@@ -27,81 +27,81 @@ export default function Pay({
   handleClosePay,
 }) {
   const [checkout, setCheckout] = useState(null);
-  const [formData, setFormData] = useState({
-    hash_algorithm: "HMACSHA256",
-    checkoutoption: "combinedpage",
-    language: "en_US",
-    hashExtended: "",
-    mobileMode: true,
-    storename: "811187409",
-    timezone: "Asia/Dubai",
-    txndatetime: "",
-    txntype: "sale",
-    chargetotal: "",
-    authenticateTransaction: true,
-    parentUri: `${process.env.REACT_APP_URL}`,
-    oid: "",
-    currency: "784",
-    responseFailURL: `${process.env.REACT_APP_URL}order-details`,
-    responseSuccessURL: `${process.env.REACT_APP_URL}order-details`,
-    transactionNotificationURL:
-      "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
-  });
+  // const [formData, setFormData] = useState({
+  //   hash_algorithm: "HMACSHA256",
+  //   checkoutoption: "combinedpage",
+  //   language: "en_US",
+  //   hashExtended: "",
+  //   mobileMode: true,
+  //   storename: "811187409",
+  //   timezone: "Asia/Dubai",
+  //   txndatetime: "",
+  //   txntype: "sale",
+  //   chargetotal: "",
+  //   authenticateTransaction: true,
+  //   parentUri: `${process.env.REACT_APP_URL}`,
+  //   oid: "",
+  //   currency: "784",
+  //   responseFailURL: `${process.env.REACT_APP_URL}order-details`,
+  //   responseSuccessURL: `${process.env.REACT_APP_URL}order-details`,
+  //   transactionNotificationURL:
+  //     "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
+  // });
 
-  useEffect(() => {
-    const newTxnDatetime = moment()
-      .tz(formData.timezone)
-      .format("YYYY:MM:DD-HH:mm:ss");
-    setFormData((prev) => ({
-      ...prev,
-      txndatetime: newTxnDatetime,
-      oid: purchaseData.purchase_number,
-      chargetotal: purchaseData.total
-    }));
-  }, []);
+  // useEffect(() => {
+  //   const newTxnDatetime = moment()
+  //     .tz(formData.timezone)
+  //     .format("YYYY:MM:DD-HH:mm:ss");
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     txndatetime: newTxnDatetime,
+  //     oid: purchaseData.purchase_number,
+  //     chargetotal: purchaseData.total
+  //   }));
+  // }, []);
 
-  // Recalculate hash when txndatetime, oid, or paymentMethod changes
-  useEffect(() => {
-    if (formData.txndatetime && formData.oid) {
-      const messageSignatureContent = Object.keys(formData)
-        .filter((key) => key !== "hashExtended")
-        .sort()
-        .map((key) => formData[key])
-        .join("|");
+  // // Recalculate hash when txndatetime, oid, or paymentMethod changes
+  // useEffect(() => {
+  //   if (formData.txndatetime && formData.oid) {
+  //     const messageSignatureContent = Object.keys(formData)
+  //       .filter((key) => key !== "hashExtended")
+  //       .sort()
+  //       .map((key) => formData[key])
+  //       .join("|");
 
-      const messageSignature = CryptoJS.HmacSHA256(
-        messageSignatureContent,
-        'n+Gs"37vQE'
-      );
-      const messageSignatureBase64 =
-        CryptoJS.enc.Base64.stringify(messageSignature);
+  //     const messageSignature = CryptoJS.HmacSHA256(
+  //       messageSignatureContent,
+  //       'n+Gs"37vQE'
+  //     );
+  //     const messageSignatureBase64 =
+  //       CryptoJS.enc.Base64.stringify(messageSignature);
 
-      setFormData((prev) => ({
-        ...prev,
-        hashExtended: messageSignatureBase64,
-      }));
-    }
-  }, [formData.txndatetime, formData.oid]);
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       hashExtended: messageSignatureBase64,
+  //     }));
+  //   }
+  // }, [formData.txndatetime, formData.oid]);
 
-  useEffect(() => {
-    if (formData.hashExtended) {
-      const form = document.createElement("form");
-      form.action = "https://test.ipg-online.com/connect/gateway/processing";
-      form.method = "POST";
-      form.target = "saleiframe";
+  // useEffect(() => {
+  //   if (formData.hashExtended) {
+  //     const form = document.createElement("form");
+  //     form.action = "https://test.ipg-online.com/connect/gateway/processing";
+  //     form.method = "POST";
+  //     form.target = "saleiframe";
 
-      Object.keys(formData).forEach((key) => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = formData[key];
-        form.appendChild(input);
-      });
+  //     Object.keys(formData).forEach((key) => {
+  //       const input = document.createElement("input");
+  //       input.type = "hidden";
+  //       input.name = key;
+  //       input.value = formData[key];
+  //       form.appendChild(input);
+  //     });
 
-      document.body.appendChild(form);
-      form.submit();
-    }
-  }, [formData.hashExtended]);
+  //     document.body.appendChild(form);
+  //     form.submit();
+  //   }
+  // }, [formData.hashExtended]);
 
   // Working code MPGS - START
 
@@ -241,15 +241,15 @@ export default function Pay({
           </div>
         </div>
 
-        <div id="embed-target" style={{height: '600px'}} className="m-5"></div>
+        <div id="embed-target" className="m-5"></div>
         
-        <div style={{height: '432px'}} className="m-5">
+        {/* <div style={{height: '432px'}} className="m-5">
           <iframe
             id="saleiframe"
             name="saleiframe"
             style={{ width: "100%", height: "100%" }}
           ></iframe>
-        </div>
+        </div> */}
 
         {/* <div className="flex justify-center items-center space-x-6 mt-8">
           <img
