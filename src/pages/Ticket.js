@@ -71,50 +71,52 @@ export default function Ticket({
       await axios.get(
         `${process.env.REACT_APP_BASE_URL}payment/magnati/mpg/success.php?order_ID=${params.purchase_number}`
       );
+      setTimeout(async () => {
+        const formData = new FormData();
+        formData.append("action", "orderHistory");
+        formData.append("purchase_number", params.purchase_number);
+        const data = await fetchClient(formData, "POST", "");
+        if (data.data.length) {
+          setOrderDetails(data.data);
 
-      const formData = new FormData();
-      formData.append("action", "orderHistory");
-      formData.append("purchase_number", params.purchase_number);
-      const data = await fetchClient(formData, "POST", "");
-      if (data.data.length) {
-        setOrderDetails(data.data);
+          // Calculate the number of days
+          const numberOfDays =
+            data.data[0]?.items?.packages[0].date.length || 1;
 
-        // Calculate the number of days
-        const numberOfDays = data.data[0]?.items?.packages[0].date.length || 1;
+          // Calculate the number of tickets
+          // const numberOfTickets = parseInt(data.data[0]?.ticketData[0].qty) || 1;
 
-        // Calculate the number of tickets
-        // const numberOfTickets = parseInt(data.data[0]?.ticketData[0].qty) || 1;
+          // Calculate the price total
+          const priceTotal = data.data[0]?.ticketData[0].price * numberOfDays;
 
-        // Calculate the price total
-        const priceTotal = data.data[0]?.ticketData[0].price * numberOfDays;
+          console.log(numberOfDays);
+          //  console.log(numberOfTickets);
+          console.log(priceTotal);
 
-        console.log(numberOfDays);
-        //  console.log(numberOfTickets);
-        console.log(priceTotal);
+          setPriceTotal(priceTotal);
 
-        setPriceTotal(priceTotal);
-
-        if (data.data[0].items.packages[0].date.length) {
-          const dates = data.data[0].items.packages[0].date.map((dt) =>
-            moment(dt)
-          );
-          const minDate = moment.min(dates).format("YYYY-MM-DD");
-          setCalendarDate(minDate);
+          if (data.data[0].items.packages[0].date.length) {
+            const dates = data.data[0].items.packages[0].date.map((dt) =>
+              moment(dt)
+            );
+            const minDate = moment.min(dates).format("YYYY-MM-DD");
+            setCalendarDate(minDate);
+          }
+          window.analytics.track("Order Completed", {
+            total: data.data[0].total,
+            checkout_id: data.data[0].purchase_number,
+            order_id: data.data[0].order_number,
+            currency: "AED",
+            products: [
+              {
+                name: data.data[0].ticketData[0].ticket_name,
+                price: data.data[0].ticketData[0].price,
+              },
+            ],
+          });
+          setLoading(false);
         }
-        window.analytics.track("Order Completed", {
-          total: data.data[0].total,
-          checkout_id: data.data[0].purchase_number,
-          order_id: data.data[0].order_number,
-          currency: "AED",
-          products: [
-            {
-              name: data.data[0].ticketData[0].ticket_name,
-              price: data.data[0].ticketData[0].price,
-            },
-          ],
-        });
-        setLoading(false);
-      }
+      }, 2000);
     };
 
     getOrderDetails();
