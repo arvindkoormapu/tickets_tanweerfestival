@@ -37,7 +37,7 @@ export default function Pay({
     timezone: "Asia/Dubai",
     txndatetime: "",
     txntype: "sale",
-    chargetotal: "13.00",
+    chargetotal: "",
     authenticateTransaction: true,
     paymentMethod: "",
     parentUri: `${process.env.REACT_APP_URL}`,
@@ -57,6 +57,7 @@ export default function Pay({
       ...prev,
       txndatetime: newTxnDatetime,
       oid: purchaseData.purchase_number,
+      chargetotal: purchaseData.total
     }));
   }, []);
 
@@ -241,9 +242,9 @@ export default function Pay({
           </div>
         </div>
 
-        <div id="embed-target" style={{height: "432px"}}></div>
+        <div id="embed-target" style={{height: "432px"}} className="m-5"></div>
         
-        <div style={{height: '432px'}}>
+        <div style={{height: '432px'}} className="m-5">
           <iframe
             id="saleiframe"
             name="saleiframe"
