@@ -27,7 +27,6 @@ export default function Pay({
   handleClosePay,
 }) {
   const [checkout, setCheckout] = useState(null);
-  // const [paymentMethod, setPaymentMethod] = useState("");
   const [isApplePayAvailable, setIsApplePayAvailable] = useState(false);
   const [formData, setFormData] = useState({
     hash_algorithm: "HMACSHA256",
@@ -41,6 +40,7 @@ export default function Pay({
     txntype: "sale",
     chargetotal: "",
     authenticateTransaction: true,
+    paymentMethod: 'applePay',
     parentUri: `${process.env.REACT_APP_URL}`,
     oid: "",
     currency: "784",
