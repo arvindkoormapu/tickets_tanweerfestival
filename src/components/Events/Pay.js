@@ -41,12 +41,12 @@ export default function Pay({
     txntype: "sale",
     chargetotal: "",
     authenticateTransaction: true,
-    paymentMethod: "v",
+    paymentMethod: "m",
     parentUri: `${process.env.REACT_APP_URL}`,
     oid: "",
     currency: "784",
-    responseFailURL: `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`,
-    responseSuccessURL: `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`,
+    responseFailURL: `${process.env.REACT_APP_URL}api/payment/magnati/ipg/webhook.php`,
+    responseSuccessURL: `${process.env.REACT_APP_URL}api/payment/magnati/ipg/webhook.php`,
     transactionNotificationURL:
       "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
   });
@@ -100,7 +100,7 @@ export default function Pay({
       const form = document.createElement("form");
       form.action = "https://test.ipg-online.com/connect/gateway/processing";
       form.method = "POST";
-      form.target = "saleiframe";
+      // form.target = "saleiframe";
 
       Object.keys(formData).forEach((key) => {
         const input = document.createElement("input");

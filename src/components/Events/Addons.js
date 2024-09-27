@@ -5,6 +5,7 @@ import CaretIcon from "../Icons/CaretIcon";
 import carelSvg from "../../assets/caret.svg";
 import carelWhite from "../../assets/caretWhite.svg";
 import Loader from "../Loader";
+import { toast } from "react-toastify";
 
 const noop = () => null;
 
@@ -309,10 +310,26 @@ export default function Addons({
     return addonList.every((addon) => {
       // Check if quantity is greater than 0 and if dates are selected
       return (
-        (addon.qty > 0 && addon.selectedDates.length > 0) ||
+        (addon.qty > 0 && addon?.selectedDates?.length > 0) ||
         addon.qty === 0
       );
     });
+  };
+
+  const handleNextStepWithValidation = () => {
+    // Check if any addon has quantity selected but no date selected
+    const hasMissingDate = addonList.some(
+      (addon) => addon.qty > 0 && addon.selectedDates.length === 0
+    );
+  
+    if (hasMissingDate) {
+      // Show toast message if date is not selected for any addon with quantity
+      toast.error("Please select a date for all addons with selected quantity.");
+      return; // Prevent proceeding to the next step
+    }
+  
+    // If all addons with quantity have dates selected, proceed to next step
+    handleNextStep();
   };
 
   return (
