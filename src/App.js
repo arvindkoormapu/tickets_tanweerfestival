@@ -11,7 +11,9 @@ import Profile from "./pages/Profile";
 import Ticket from "./pages/Ticket";
 import LoginRedirect from "./pages/Login-Redirect";
 import TC from "./pages/TC";
-import Privacy from "./pages/Privacy"
+import Privacy from "./pages/Privacy";
+import OrderDetails from "./pages/OrderDetails";
+
 
 export default function App() {
   const routes = [
@@ -26,6 +28,8 @@ export default function App() {
     { path: "/login-redirect", page: LoginRedirect },
     { path: "/terms-conditions", page: TC },
     { path: "/privacy-policy", page: Privacy },
+    { path: "/order-details", page: OrderDetails },
+
   ];
 
   useEffect(() => {

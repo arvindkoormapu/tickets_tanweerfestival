@@ -1,13 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
-import BackButton from "../BackButton";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import CaretIcon from "../Icons/CaretIcon";
-import applePay from "../../assets/applePay.png";
-import bankCard from "../../assets/bank.svg";
-import { useNavigate } from "react-router-dom";
 import Popup from "../Popup";
-import moment from "../../../node_modules/moment/moment";
 import CounterDownTimer from "../CounterDownTimer";
-import Loader from "../Loader";
+import moment from "moment-timezone";
+import CryptoJS from "crypto-js";
+import googlePay from "../../pngwing.com (1).png";
+import applePay from "../../pngwing.com.png";
 
 export default function Pay({
   handlePay = () => {},
@@ -28,78 +26,186 @@ export default function Pay({
   setCloseToStep0,
   handleClosePay,
 }) {
-  const navigate = useNavigate();
-  const cvcRef = useRef();
-  const expiryRef = useRef();
-  const [payFormData, setPayFormData] = useState({
-    card: "",
+  const [checkout, setCheckout] = useState(null);
+  const [formData, setFormData] = useState({
+    hash_algorithm: "HMACSHA256",
+    checkoutoption: "combinedpage",
+    language: "en_US",
+    hashExtended: "",
+    mobileMode: true,
+    storename: "811187409",
+    timezone: "Asia/Dubai",
+    txndatetime: "",
+    txntype: "sale",
+    chargetotal: "13.00",
+    authenticateTransaction: true,
+    paymentMethod: "",
+    parentUri: "https://www.ipg-online.com/mcs/flow/msearch?execution=e2s2",
+    oid: "",
+    currency: "784",
+    responseFailURL: `${process.env.REACT_APP_URL}order-details`,
+    responseSuccessURL: `${process.env.REACT_APP_URL}order-details`,
+    transactionNotificationURL:
+      "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
   });
 
-  const handleFormData = (data) => {
-    const handleSpacer = (text, spacer = " ", limiter = 4) => {
-      let formattedText = text.replace(/[^0-9\s]/g, "");
-      formattedText = formattedText.split(" ").join("");
-      if (formattedText.length > 0) {
-        formattedText = formattedText
-          .match(new RegExp(`.{1,${limiter}}`, "g"))
-          .join(spacer);
+  useEffect(() => {
+    const newTxnDatetime = moment()
+      .tz(formData.timezone)
+      .format("YYYY:MM:DD-HH:mm:ss");
+    setFormData((prev) => ({
+      ...prev,
+      txndatetime: newTxnDatetime,
+      oid: purchaseData.purchase_number,
+    }));
+  }, []);
+
+  // Recalculate hash when txndatetime, oid, or paymentMethod changes
+  useEffect(() => {
+    if (formData.txndatetime && formData.oid) {
+      const messageSignatureContent = Object.keys(formData)
+        .filter((key) => key !== "hashExtended")
+        .sort()
+        .map((key) => formData[key])
+        .join("|");
+
+      const messageSignature = CryptoJS.HmacSHA256(
+        messageSignatureContent,
+        'n+Gs"37vQE'
+      );
+      const messageSignatureBase64 =
+        CryptoJS.enc.Base64.stringify(messageSignature);
+
+      setFormData((prev) => ({
+        ...prev,
+        hashExtended: messageSignatureBase64,
+      }));
+    }
+  }, [formData.txndatetime, formData.oid]);
+
+  useEffect(() => {
+    if (formData.hashExtended) {
+      const form = document.createElement("form");
+      form.action = "https://test.ipg-online.com/connect/gateway/processing";
+      form.method = "POST";
+      form.target = "saleiframe";
+
+      Object.keys(formData).forEach((key) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = formData[key];
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+    }
+  }, [formData.hashExtended]);
+
+  // Working code MPGS - START
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src =
+      "https://ap-gateway.mastercard.com/static/checkout/checkout.min.js";
+    script.async = true;
+    script.onload = async (err) => {
+      setCheckout(window.Checkout);
+    };
+    script.onerror = (error) => {
+      console.log("script error: ", error);
+    };
+    document.head.appendChild(script);
+  }, []);
+
+  const configureCheckout = useCallback(
+    async (window, session) => {
+      if (window?.Checkout) {
+        try {
+          window?.Checkout?.configure({
+            session: {
+              id: session,
+            },
+          });
+        } catch (error) {
+          console.log("error: ", error);
+        }
       }
-      return formattedText;
+    },
+    [checkout]
+  );
+
+  const handleEmbeddedPage = useCallback((window) => {
+    if (window?.Checkout) {
+      window?.Checkout.showEmbeddedPage("#embed-target");
+    }
+  }, []);
+
+  const initiateCheckoutSession = async (window) => {
+    const url = `${process.env.REACT_APP_MASTERCARD_URL}/api/rest/version/83/merchant/${process.env.REACT_APP_MERCHANT_ID}/session`;
+    const payload = {
+      apiOperation: "INITIATE_CHECKOUT",
+      checkoutMode: "WEBSITE",
+      interaction: {
+        operation: "PURCHASE",
+        displayControl: { billingAddress: "HIDE" },
+        merchant: {
+          name: "JK Enterprises LLC",
+          url: "http://localhost:3000/",
+        },
+        returnUrl: `${process.env.REACT_APP_BASE_URL}order-details`,
+      },
+      order: {
+        currency: "AED",
+        amount: purchaseData.total,
+        id: purchaseData.purchase_number,
+        description: "Goods and Services",
+      },
     };
 
-    // mutable values
-    let { name, value } = data;
+    const credentials = btoa(
+      `merchant.${process.env.REACT_APP_MERCHANT_ID}:${process.env.REACT_APP_MERCHANT_PASSWORD}`
+    );
 
-    if (name === "name") {
-      value = value.replace(/[^a-zA-Z\s]/g, "");
-      if (value.length > 50) {
-        alert("Too many characters.");
-        return;
-      }
-    } else if (name === "card") {
-      value = handleSpacer(value);
-      if (value.length > 24) {
-        expiryRef.current.focus();
-        handleFormData(expiryRef.current);
-        return;
-      }
-    } else if (name === "expiry") {
-      value = handleSpacer(value, undefined, 2);
-      if (value.length > 5) {
-        cvcRef.current.focus();
-        handleFormData(cvcRef.current);
-        return;
-      }
-    } else if (name === "cvc") {
-      value = value.replace(/[^0-9]/g, "");
+    try {
+      await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${credentials}`,
+        },
+        body: JSON.stringify(payload),
+      })
+        .then(async (res) => {
+          const data = await res.json();
+          if (data && data.session && data.session.id) {
+            await configureCheckout(window, data.session.id);
+          }
+        })
+        .catch((err) => {
+          console.log("err: ", err);
+        });
+    } catch (error) {}
+  };
 
-      if (String(value.length) > 3) {
-        return;
-      }
+  const handlePayNowClick = async (window) => {
+    await initiateCheckoutSession(window);
+    handleEmbeddedPage(window);
+  };
+
+  useEffect(() => {
+    if (window) {
+      handlePayNowClick(window);
     }
+  }, [window]);
 
-    setPayFormData((prevState) => {
-      return {
-        ...prevState,
-        [name]: value,
-      };
-    });
-  };
-
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    handlePay();
-    alert("process payment");
-    navigate("/ticket");
-  };
+  // Working code MPGS - END
 
   return (
     <div className="pay flex flex-col min-h-full   sm:px-6 sm:py-12   h-[100vh] sm:h-auto pb-0  ">
       <div className="flex-1 flex-col sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6   h-min-[100vh] sm:h-auto pb-0 justify-between">
         <div className="px-6 pt-12  sm:mx-auto sm:w-full xs:max-w-xs">
-          {/* <span onClick={handlePreviousStep}>
-            <BackButton />
-          </span> */}
           <div className="w-full flex justify-end">
             <button className="text-[20px] font-bold" onClick={handleClosePay}>
               &#x2715;
@@ -134,170 +240,88 @@ export default function Pay({
             </p>
           </div>
         </div>
-        {/* <img
+
+        <div id="embed-target"></div>
+
+        <iframe id="saleiframe" name="saleiframe" style={{ width: '100%', height: '100%' }}></iframe>
+
+        {/* <div className="flex justify-center items-center space-x-6 mt-8">
+          <img
             src={applePay}
-            alt="applePay"
-            // #note: apple pay should have separate handling
-            onClick={handlePay}
-            className="w-full object-contain my-10"
-          /> */}
-        <div className="my-8 ">
-          {/* {applePaymentUrl && (
-            <iframe
-              title="appleFrame"
-              src={applePaymentUrl}
-              width="100%"
-              height="60px"
-              frameBorder="0"
-              allow="payment *"
-            />
-          )} */}
-          {/* <iframe
-            className="mt-6"
-            title="creditCardFrame"
-            src={paymentUrl}
-            width="100%"
-            height="560px"
-            frameBorder="0"
-            allow="payment *"
-          /> */}
-          {/* <p className="text-base font-medium   text-left text-[#707072] my-5">
-              Pay with bank card
-            </p>
-            <div className="relative" style={{ margin: 0 }}>
+            alt="Apple Pay"
+            onClick={() => handlePaymentMethodChange("applePay")}
+            className="cursor-pointer w-20 h-[100%]"
+          />
+          <span className="border-l border-gray-400 h-10"></span>
+          <img
+            src={googlePay}
+            alt="Google Pay"
+            onClick={() => handlePaymentMethodChange("googlePay")}
+            className="cursor-pointer w-20 h-[100%]"
+          />
+        </div> */}
+
+        {/* <div className="mx-5">
+          <h3 className="text-primary-orange w-[100%] text-sm mb-2">
+            Payment Method:
+          </h3>
+          <div className="flex flex-col space-y-2">
+            <label className="flex items-center cursor-pointer">
               <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                placeholder=" "
-                value={payFormData.name}
-                onChange={(e) => handleFormData(e.target)}
-                className={`border ${
-                  payFormData.name?.length
-                    ? "border-formDarkGray border-solid border-2"
-                    : "border-[#b7b7b7]  border-solid border-2"
-                } outline-none ring-transparent w-full rounded-lg   px-[28px] py-[16px]   items-center focus:ring focus:border-primary-400 focus:placeholder-transparent mt-2`}
+                type="radio"
+                name="paymentMethod"
+                value="card"
+                className="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500"
               />
-              <label
-                htmlFor="email"
-                className={`absolute pointer-events-none left-[1.8rem]  text-formSubGray transition-all duration-300 ${
-                  payFormData.name
-                    ? "text-xs top-[1rem]"
-                    : "text-md top-[1.5rem]"
-                }`}
-              >
-                Name
-              </label>
-            </div>
-            <div className="relative" style={{ margin: 0 }}>
+              <span className="ml-2 text-gray-700 text-sm">Pay from Card</span>
+            </label>
+
+            <label className="flex items-center cursor-pointer">
               <input
-                id="card"
-                name="card"
-                type="text"
-                required
-                placeholder=" "
-                value={payFormData.card}
-                onChange={(e) => handleFormData(e.target)}
-                className={`border ${
-                  payFormData.card?.length
-                    ? "border-formDarkGray border-solid border-2"
-                    : "border-[#b7b7b7]  border-solid border-2"
-                } outline-none ring-transparent w-full rounded-lg   px-[4rem] py-[16px]   items-center focus:ring focus:border-primary-400 focus:placeholder-transparent mt-2`}
+                type="radio"
+                name="paymentMethod"
+                value="apple"
+                className="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500"
               />
-              <img
-                src={bankCard}
-                alt="bankcard"
-                className={`absolute left-[1.8rem] top-[1.8rem]  `}
+              <span className="ml-2 text-gray-700 text-sm">Apple Pay</span>
+            </label>
+
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="google"
+                className="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500"
               />
-              <label
-                htmlFor="email"
-                className={`absolute pointer-events-none left-[4rem]  text-formSubGray transition-all duration-300 ${
-                  payFormData.card
-                    ? "text-xs top-[1rem]"
-                    : "text-md top-[1.5rem]"
-                }`}
-              >
-                Card number
-              </label>
-            </div>
-            <div className="grid grid-flow-col auto-rows-max gap-2 ">
-              <div className="relative m-0 w-full">
-                <input
-                  id="expiry"
-                  name="expiry"
-                  type="text"
-                  ref={expiryRef}
-                  required
-                  placeholder=" "
-                  value={payFormData.expiry}
-                  onChange={(e) => handleFormData(e.target)}
-                  className={`border ${
-                    payFormData.expiry?.length
-                      ? "border-formDarkGray border-solid border-2"
-                      : "border-[#b7b7b7]  border-solid border-2"
-                  } outline-none ring-transparent w-full  rounded-lg   px-[28px] py-[16px]   items-center focus:ring focus:border-primary-400 focus:placeholder-transparent mt-2`}
-                />
-                <label
-                  htmlFor="email"
-                  className={`absolute pointer-events-none left-[1.8rem]  text-formSubGray transition-all duration-300 ${
-                    payFormData.expiry
-                      ? "text-xs top-[1rem]"
-                      : "text-md top-[1.5rem]"
-                  }`}
-                >
-                  MM YY
-                </label>
-              </div>
-              <div className="relative m-0 w-full">
-                <input
-                  id="cvc"
-                  name="cvc"
-                  ref={cvcRef}
-                  type="password"
-                  maxLength="3"
-                  required
-                  placeholder=" "
-                  value={payFormData.cvc}
-                  onChange={(e) => handleFormData(e.target)}
-                  className={`border ${
-                    payFormData.cvc?.length
-                      ? "border-formDarkGray border-solid border-2"
-                      : "border-[#b7b7b7]  border-solid border-2"
-                  } outline-none ring-transparent w-full flex-[0.4]   rounded-lg   px-[28px] py-[16px]   items-center focus:ring focus:border-primary-400 focus:placeholder-transparent mt-2`}
-                />
-                <label
-                  htmlFor="email"
-                  className={`absolute pointer-events-none left-[1.8rem]  text-formSubGray transition-all duration-300 ${
-                    payFormData.cvc
-                      ? "text-xs top-[1rem]  left-[1.5rem]"
-                      : "text-md top-[1.5rem] "
-                  }`}
-                >
-                  CVC
-                </label>
-              </div>
-            </div> */}
-        </div>
-        <div className="flex w-full   sticky sm:static bottom-0 sm:bottom-auto   ">
+              <span className="ml-2 text-gray-700 text-sm">Google Pay</span>
+            </label>
+
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="samsung"
+                className="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500"
+              />
+              <span className="ml-2 text-gray-700 text-sm">Samsung Pay</span>
+            </label>
+          </div>
+        </div> */}
+
+        {/* <div className="flex w-full   sticky sm:static bottom-0 sm:bottom-auto   ">
           <button
-            onClick={paymentProcess}
-            disabled={
-              loading
-              //  ||
-              // !payFormData.name?.length ||
-              // !payFormData.card?.length ||
-              // !payFormData.cvc?.length ||
-              // !payFormData.expiry?.length
-            }
+            // onClick={paymentProcess}
+            onClick={() => handlePayNowClick(window)}
+            disabled={loading}
             className={`flex sm:my-10 h-16 sm:rounded-lg w-full justify-center items-center ${
               !loading && "cursor-pointer"
             }   overflow-hidden  px-[1rem] py-[2rem] text-base px-[28px] py-[16px] text-center bg-primary-orange font-medium text-white shadow-sm focus-visible:outline`}
           >
             Pay now{loading && <Loader />}
           </button>
-        </div>
+        </div> */}
       </div>
+
       <Popup isOpen={isPopupOpen} width="w-[90vw] sm:w-[50vw]">
         <h2 className="text-xl font-bold mb-2 text-center">Session Expired</h2>
         <p className="text-center m-3">
@@ -314,37 +338,6 @@ export default function Pay({
           </div>
         </div>
       </Popup>
-      {/* <Popup isOpen={isPopupOpen} width="w-1/3">
-        <h2 className="text-xl font-bold mb-2 text-center">Session Expired</h2>
-        <p className="text-center">
-          Your Ticket booking session has been expired.
-        </p>
-        <div
-          onClick={closePopup}
-          className="flex justify-between items-center text-white bg-black px-[1rem] py-[2rem] cursor-pointer mt-12"
-        >
-          Start new Booking
-          <CaretIcon />
-        </div>
-      </Popup> */}
-      {/* <Popup isOpen={closeToStep0} width="w-1/4">
-        <h2 className="text-xl font-bold mb-2 text-center">Cancel purchase</h2>
-        <p className="text-center">This will restart booking.</p>
-        <div className="flex gap-4 justify-center">
-          <div
-            onClick={() => setCloseToStep0(false)}
-            className="w-[10rem] flex justify-between items-center text-white bg-black px-[1rem] py-[2rem] cursor-pointer mt-12"
-          >
-            Continue
-          </div>
-          <div
-            onClick={() => setStep(0)}
-            className="w-[10rem] flex justify-between items-center text-white bg-black px-[1rem] py-[2rem] cursor-pointer mt-12"
-          >
-            Cancel booking
-          </div>
-        </div>
-      </Popup> */}
     </div>
   );
 }

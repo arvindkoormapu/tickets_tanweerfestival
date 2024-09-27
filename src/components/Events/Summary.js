@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import Popup from "../Popup";
 import BackButton from "../BackButton";
 import CaretIcon from "../Icons/CaretIcon";
-import CounterDownTimer from "../CounterDownTimer";
 import Loader from "../Loader";
 
 const noop = () => {
@@ -20,7 +19,6 @@ const DataLine = ({
         <p className="text-xs capitalize font-medium text-left flex-1 text-primary-orange">
           {leftData}
         </p>
-        {/* #note: font-medium in design */}
         <p className="text-xs capitalize font-semibold text-right text-primary-orange w-[40%]">
           {rightData}
         </p>
@@ -87,36 +85,18 @@ export default function Summary({
         <span onClick={handlePreviousStep}>
           <BackButton />
         </span>
-
-        {/* <div className="flex justify-end">
-          <button
-            className="text-[20px] font-bold"
-            onClick={() => setCloseToStep0(true)}
-          >
-            &#x2715;
-          </button>
-        </div> */}
         <h2 className="mt-10 mb-[2rem] text-left w-full sm:w-full  text-4xl leading-9 tracking-tight text-primary-orange">
           Your order summary
         </h2>
       </div>
-      {/*
-                Time to complete - COUNTDOWN
-            */}
-      {/* <CounterDownTimer timer={timer} percent={percent} /> */}
 
       <div className="flex flex-1  flex-col px-6 pt-5 sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6   h-min-[100vh] sm:h-auto pb-0 justify-between">
         <div className=" ">
-          {/* <DataLine
-            leftData={"Order number"}
-            rightData={orderData.orderNumber}
-          />
-          <DataLine leftData={"Order date"} rightData={orderData.orderDate} /> */}
-          {orderData.ticketInfo.map((ticket) => (
+          {orderData.ticketInfo.map((ticket, i) => (
             <div
+              key={i}
               className={`summaryCard rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500   bg-[#FFF7E0] mt-5 `}
             >
-              {/* #note: font-medium in design */}
               <p className="text-base font-semibold text-left text-primary-orange mb-3  ">
                 {selectedTicket.package_name}
               </p>
@@ -125,12 +105,12 @@ export default function Summary({
               ))}
             </div>
           ))}
-          {orderData.addonInfo.map((addon) => (
+          {orderData.addonInfo.map((addon, i) => (
             <div
+              key={i}
               className={`summaryCard rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500    bg-[#FFF7E0] my-5   `}
             >
-              {/* #note: font-medium in design */}
-              <p className="text-base font-semibold text-left text-primary-orange mb-3  ">
+              <p className="text-base font-semibold text-left text-primary-orange mb-3">
                 Add-on{" "}
               </p>
               {Object.keys(addon).map((key) => (
@@ -138,11 +118,7 @@ export default function Summary({
               ))}
             </div>
           ))}
-          {/* <DataLine
-            leftData={`Tax (${orderData.taxPercentage}%)`}
-            rightData={orderData.tax}
-          />
-          <DataLine leftData={`Discount`} rightData={orderData.discount} /> */}
+
           {/* COUPON CODE  */}
           <div className="relative w-full">
             <input
@@ -156,8 +132,6 @@ export default function Summary({
             />{" "}
             <label
               onClick={applyCoupon}
-              // htmlFor="coupon"
-              //   className={`border outline-none ring-transparent w-full rounded-[30px] px-[28px] py-[16px]  flex items-center focus:ring focus:border-primary-400 focus:placeholder-transparent mt-2`}
               className="absolute right-[2rem] top-[2.5rem] text-xs font-medium text-left text-[#111] transition-all duration-300
                 top-[2.5rem]
                cursor-pointer"
@@ -181,13 +155,8 @@ export default function Summary({
         </div>
       </div>
       <div className="sm:mx-auto  w-full sm:w-full sm:max-w-md sticky sm:static bottom-0 sm:bottom-auto mt-6">
-        {/* <div className="flex justify-between items-center text-white bg-black p-[1rem] text-[14px] border-b-[2px] border-white">
-          <div>Total</div>
-          <div>{payAmount} AED</div>
-        </div> */}
         <div
           onClick={handlePay}
-          // onClick={handleNextStep}
           className={`relative overflow-hidden flex justify-between items-center text-screen-light bg-primary-orange px-[1rem] py-[2rem] ${
             !loading && "cursor-pointer"
           }`}
@@ -209,7 +178,6 @@ export default function Summary({
         <div className="flex gap-0 sm:gap-2 justify-center flex-col  ">
           <div
             onClick={closePopup}
-            // className="flex justify-between items-center text-white bg-black px-[1rem] py-[2rem] cursor-pointer mt-12"
             className="w-full text-center  flex   justify-center items-center text-white bg-black px-[1rem] py-[1rem] cursor-pointer mt-2"
           >
             Start new Booking

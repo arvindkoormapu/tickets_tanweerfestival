@@ -229,7 +229,7 @@ export default function Tickets({
                       y="0"
                       width="100%"
                       height="100%"
-                      clip-path="url(#clip-path)"
+                      clipPath="url(#clip-path)"
                       // style='fill: url("#fill");'
                     ></rect>
                     <defs>
@@ -478,8 +478,8 @@ export default function Tickets({
                       <linearGradient id="fill">
                         <stop
                           offset="0.599964"
-                          stop-color="#f3f3f3"
-                          stop-opacity="1"
+                          stopColor="#f3f3f3"
+                          stopOpacity="1"
                         >
                           <animate
                             attributeName="offset"
@@ -491,8 +491,8 @@ export default function Tickets({
                         </stop>
                         <stop
                           offset="1.59996"
-                          stop-color="#fff2e5"
-                          stop-opacity="1"
+                          stopColor="#fff2e5"
+                          stopOpacity="1"
                         >
                           <animate
                             attributeName="offset"
@@ -504,8 +504,8 @@ export default function Tickets({
                         </stop>
                         <stop
                           offset="2.59996"
-                          stop-color="#f3f3f3"
-                          stop-opacity="1"
+                          stopColor="#f3f3f3"
+                          stopOpacity="1"
                         >
                           <animate
                             attributeName="offset"

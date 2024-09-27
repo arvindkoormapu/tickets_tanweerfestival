@@ -138,7 +138,6 @@ export default function Events() {
         // for each second I want to reduce the percent length
         const newPercentage =
           (convertMinutesToSeconds(timer) / (15 * 60)) * 100;
-        console.log(newPercentage);
         if (newPercentage > 0) {
           setPercent(newPercentage);
           // setPercent((currentTime) => {
@@ -173,7 +172,6 @@ export default function Events() {
       formData.append("action", "packages");
       const data = await fetchClient(formData, "POST", "");
       if (data) {
-        console.log(data.data);
         const tempList = data.data.map((list) => {
           const selected = selectedTicket.id === list.id;
           return {
@@ -216,7 +214,6 @@ export default function Events() {
         "GET",
         `?action=eventInventory&url_slug=${selectedTicket.url_slug}`
       );
-      console.log(data.data);
       setInventoryList(data.data);
       setLoading(false);
       nextStep();
@@ -228,7 +225,6 @@ export default function Events() {
         "GET",
         `?action=addonInventory&url_slug=${selectedTicket.url_slug}`
       );
-      console.log(data.data);
       const tempList = data.data.map((inventory) => {
         const selected = addonList.find((add) => add.id === inventory.id);
         return {
@@ -255,7 +251,6 @@ export default function Events() {
         `?action=packageDetails&url_slug=${selectedTicket.url_slug}`
       );
       if (data) {
-        console.log(data.data);
         datePicker = data.data.enable_date_picker === "1";
         addons = data.data.enable_addons === "1";
         setEnableDate(datePicker);
@@ -355,12 +350,10 @@ export default function Events() {
       ],
       coupon: coupon,
     };
-    console.log(param);
     const formData = new FormData();
     formData.append("action", "createPurchase");
     formData.append("items", JSON.stringify(param));
     const data = await fetchClient(formData, "POST", "");
-    console.log(data);
     if (data.purchase_number) {
       window.analytics.track("Checkout Started", {
         order_id: data.purchase_number,
@@ -373,6 +366,10 @@ export default function Events() {
           },
         ],
       });
+
+      // Storing the data in localStorage
+      localStorage.setItem("lastAnalyticsData", JSON.stringify(data));
+
       setPurchaseData(data);
       setStep(4);
     }
@@ -441,7 +438,6 @@ export default function Events() {
       ],
       coupon: coupon,
     };
-    console.log(param);
     const formData = new FormData();
     formData.append("action", "validateCoupon");
     formData.append("items", JSON.stringify(param));
@@ -454,7 +450,6 @@ export default function Events() {
       if (data.data.coupon)
         setDeductedValue(data.data.packages[0].deducted_value);
     }
-    console.log(data);
     setLoading(false);
   };
 
@@ -598,7 +593,6 @@ export default function Events() {
             addonInfo: addonList
               .filter((add) => add.qty > 0)
               .map((addon) => {
-                console.log("selectedDates", addon.selectedDates);
                 const selectedDateTime = addon.selectedDates || [];
                 return {
                   name: addon.name,

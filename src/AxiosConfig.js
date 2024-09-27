@@ -17,7 +17,6 @@ export const fetchClient = (data, method, url) => {
 
   axiosInstance.interceptors.response.use(
     (res) => {
-      console.log(res);
       if (res.data.success || res.data.succcess) {
         if (res.data.message) {
           notifySuccess(res.data.message);

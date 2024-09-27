@@ -9,6 +9,7 @@ export default function TC() {
     document.title = `Terms & Conditions - ${title}`;
   }, []);
   const termsConditions = [
+    "<span style='font-weight: bolder; font-size: larger'>Method of Payment:</span> Card Types accepted and Currency: Inclusion is mandatory and below is the recommended statement subject to amendment as applicable. “We accept payments online using Visa and MasterCard credit/debit card in AED (or any other agreed currency)”. The logo of the accepted cards is to be mentioned on their Home page and on their Payment check out page.",
     "<span style='font-weight: bolder; font-size: larger'>Refund Policy and Ticket Assignment.</span> All sales are final. No refund, no exchange and no cancellation permitted. Purchased Tickets are not assignable, transferable, or re-saleable to any third party.",
     "Purchaser shall be allowed re-entry if Purchaser wishes to leave and come back on the event date or take a break during the event.",
     "Purchased Tickets are not replaceable. Purchaser shall be responsible for the safe keeping of the Purchased Ticket. Seller shall not be responsible for lost, stolen damaged, destroyed Purchased Ticket.",

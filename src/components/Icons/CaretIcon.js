@@ -17,7 +17,7 @@ const CaretIcon = ({
     <path
       d="M1.47459 1.0338L8.44159 7.9998L1.47459 14.9668"
       stroke={stroke ? stroke : "white"}
-      stroke-width={strokeWidth ? strokeWidth : "1.5"}
+      strokeWidth={strokeWidth ? strokeWidth : "1.5"}
     />
   </svg>
 );

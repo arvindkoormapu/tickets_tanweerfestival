@@ -68,7 +68,7 @@ export default function DatePicker({
   };
 
   return (
-    <div className="tickets flex flex-col min-h-full   sm:px-6 sm:py-12 lg:px-8 h-[100vh] sm:h-auto pb-0  ">
+    <div className="tickets flex flex-col min-h-full   sm:px-6 sm:py-12 lg:px-8 h-[100vh] sm:h-auto pb-0 ">
       <div className="flex flex-1 flex-col px-6 pt-12 sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6 sm:py-12  lg:px-8 h-min-[100vh] sm:h-auto pb-0 justify-start">
         <span onClick={handlePreviousStep}>
           <BackButton />
@@ -81,6 +81,7 @@ export default function DatePicker({
             const { day, month, year } = dataFromDate(date.title);
             return (
               <div
+                key={i}
                 onClick={() => handleSelectDate(date)}
                 className={`date h-[108px] px-5 mb-5  w-full flex items-center justify-between
                                   rounded-lg hover:opacity-95 transition-all duration-500 ${
@@ -147,7 +148,7 @@ export default function DatePicker({
                               <path
                                 d="M5 11.435L9.753 16.188L18.939 7"
                                 stroke="#D27322"
-                                stroke-width="1.5"
+                                strokeWidth="1.5"
                               />
                             </svg>
                           )}
