@@ -154,7 +154,7 @@ export default function Pay({
           name: "JK Enterprises LLC",
           url: "http://localhost:3000/",
         },
-        returnUrl: `${process.env.REACT_APP_BASE_URL}order-details`,
+        returnUrl: `${process.env.REACT_APP_URL}order-details`,
       },
       order: {
         currency: "AED",
