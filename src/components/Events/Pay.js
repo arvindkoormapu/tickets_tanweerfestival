@@ -27,81 +27,105 @@ export default function Pay({
   handleClosePay,
 }) {
   const [checkout, setCheckout] = useState(null);
-  // const [formData, setFormData] = useState({
-  //   hash_algorithm: "HMACSHA256",
-  //   checkoutoption: "combinedpage",
-  //   language: "en_US",
-  //   hashExtended: "",
-  //   mobileMode: true,
-  //   storename: "811187409",
-  //   timezone: "Asia/Dubai",
-  //   txndatetime: "",
-  //   txntype: "sale",
-  //   chargetotal: "",
-  //   authenticateTransaction: true,
-  //   parentUri: `${process.env.REACT_APP_URL}`,
-  //   oid: "",
-  //   currency: "784",
-  //   responseFailURL: `${process.env.REACT_APP_URL}order-details`,
-  //   responseSuccessURL: `${process.env.REACT_APP_URL}order-details`,
-  //   transactionNotificationURL:
-  //     "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
-  // });
+  // const [paymentMethod, setPaymentMethod] = useState("");
+  const [isApplePayAvailable, setIsApplePayAvailable] = useState(false);
+  const [formData, setFormData] = useState({
+    hash_algorithm: "HMACSHA256",
+    checkoutoption: "combinedpage",
+    language: "en_US",
+    hashExtended: "",
+    mobileMode: true,
+    storename: "811187409",
+    timezone: "Asia/Dubai",
+    txndatetime: "",
+    txntype: "sale",
+    chargetotal: "",
+    authenticateTransaction: true,
+    parentUri: `${process.env.REACT_APP_URL}`,
+    oid: "",
+    currency: "784",
+    responseFailURL: `${process.env.REACT_APP_URL}order-details`,
+    responseSuccessURL: `${process.env.REACT_APP_URL}order-details`,
+    transactionNotificationURL:
+      "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
+  });
 
-  // useEffect(() => {
-  //   const newTxnDatetime = moment()
-  //     .tz(formData.timezone)
-  //     .format("YYYY:MM:DD-HH:mm:ss");
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     txndatetime: newTxnDatetime,
-  //     oid: purchaseData.purchase_number,
-  //     chargetotal: purchaseData.total
-  //   }));
-  // }, []);
+  useEffect(() => {
+    setIsApplePayAvailable(
+      (typeof navigator !== "undefined" &&
+        navigator.userAgent.includes("Safari") &&
+        !navigator.userAgent.includes("Chrome")) ||
+        /iP(hone|ad|od)/.test(navigator.platform)
+    );
+  }, []);
 
-  // // Recalculate hash when txndatetime, oid, or paymentMethod changes
-  // useEffect(() => {
-  //   if (formData.txndatetime && formData.oid) {
-  //     const messageSignatureContent = Object.keys(formData)
-  //       .filter((key) => key !== "hashExtended")
-  //       .sort()
-  //       .map((key) => formData[key])
-  //       .join("|");
+  useEffect(() => {
+    const newTxnDatetime = moment()
+      .tz(formData.timezone)
+      .format("YYYY:MM:DD-HH:mm:ss");
+    setFormData((prev) => ({
+      ...prev,
+      txndatetime: newTxnDatetime,
+      oid: purchaseData.purchase_number,
+      chargetotal: purchaseData.total,
+    }));
+  }, []);
 
-  //     const messageSignature = CryptoJS.HmacSHA256(
-  //       messageSignatureContent,
-  //       'n+Gs"37vQE'
-  //     );
-  //     const messageSignatureBase64 =
-  //       CryptoJS.enc.Base64.stringify(messageSignature);
+  // Recalculate hash when txndatetime, oid, or paymentMethod changes
+  useEffect(() => {
+    if (formData.txndatetime && formData.oid) {
+      const messageSignatureContent = Object.keys(formData)
+        .filter((key) => key !== "hashExtended")
+        .sort()
+        .map((key) => formData[key])
+        .join("|");
 
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       hashExtended: messageSignatureBase64,
-  //     }));
-  //   }
-  // }, [formData.txndatetime, formData.oid]);
+      const messageSignature = CryptoJS.HmacSHA256(
+        messageSignatureContent,
+        'n+Gs"37vQE'
+      );
+      const messageSignatureBase64 =
+        CryptoJS.enc.Base64.stringify(messageSignature);
 
-  // useEffect(() => {
-  //   if (formData.hashExtended) {
-  //     const form = document.createElement("form");
-  //     form.action = "https://test.ipg-online.com/connect/gateway/processing";
-  //     form.method = "POST";
-  //     form.target = "saleiframe";
+      setFormData((prev) => ({
+        ...prev,
+        hashExtended: messageSignatureBase64,
+      }));
+    }
+  }, [formData.txndatetime, formData.oid]);
 
-  //     Object.keys(formData).forEach((key) => {
-  //       const input = document.createElement("input");
-  //       input.type = "hidden";
-  //       input.name = key;
-  //       input.value = formData[key];
-  //       form.appendChild(input);
-  //     });
+  const payOnline = (paymentMethod) => {
+    if (formData.hashExtended) {
+      formData.paymentMethod = paymentMethod
+      const form = document.createElement("form");
+      form.action = "https://test.ipg-online.com/connect/gateway/processing";
+      form.method = "POST";
+      form.target = "saleiframe";
 
-  //     document.body.appendChild(form);
-  //     form.submit();
-  //   }
-  // }, [formData.hashExtended]);
+      Object.keys(formData).forEach((key) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = formData[key];
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+    }
+  };
+
+  const handlePayment = (paymentMethod) => {
+    if (paymentMethod === "card") {
+      handlePayNowClick(window);
+    } else if (
+      paymentMethod === "applePay" ||
+      paymentMethod === "googlePay" ||
+      paymentMethod === "samsungPay"
+    ) {
+      payOnline(paymentMethod);
+    }
+  };
 
   // Working code MPGS - START
 
@@ -194,11 +218,14 @@ export default function Pay({
     handleEmbeddedPage(window);
   };
 
-  useEffect(() => {
-    if (window) {
-      handlePayNowClick(window);
-    }
-  }, [window]);
+  const payWithCard = useCallback(
+    async (window) => {
+      if (window) {
+        handlePayNowClick(window);
+      }
+    },
+    [window]
+  );
 
   // Working code MPGS - END
 
@@ -241,78 +268,67 @@ export default function Pay({
           </div>
         </div>
 
-        <div id="embed-target" className="m-5"></div>
-        
-        <div style={{height: '432px'}} className="m-5">
-          <iframe
-            id="saleiframe"
-            name="saleiframe"
-            style={{ width: "100%", height: "100%" }}
-          ></iframe>
-        </div>
-
-        {/* <div className="flex justify-center items-center space-x-6 mt-8">
-          <img
-            src={applePay}
-            alt="Apple Pay"
-            onClick={() => handlePaymentMethodChange("applePay")}
-            className="cursor-pointer w-20 h-[100%]"
-          />
-          <span className="border-l border-gray-400 h-10"></span>
-          <img
-            src={googlePay}
-            alt="Google Pay"
-            onClick={() => handlePaymentMethodChange("googlePay")}
-            className="cursor-pointer w-20 h-[100%]"
-          />
-        </div> */}
-
-        {/* <div className="mx-5">
-          <h3 className="text-primary-orange w-[100%] text-sm mb-2">
-            Payment Method:
-          </h3>
-          <div className="flex flex-col space-y-2">
-            <label className="flex items-center cursor-pointer">
+        <div className="flex flex-col p-5">
+          <h3 className="mb-4 text-lg font-semibold">Payment Method</h3>
+          <div className="space-y-4">
+            <label className="flex items-center space-x-2">
               <input
                 type="radio"
                 name="paymentMethod"
                 value="card"
-                className="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500"
+                onChange={() => handlePayment("card")}
+                className="text-blue-600"
               />
-              <span className="ml-2 text-gray-700 text-sm">Pay from Card</span>
+              <span>Pay with Card</span>
             </label>
 
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="apple"
-                className="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500"
-              />
-              <span className="ml-2 text-gray-700 text-sm">Apple Pay</span>
-            </label>
+            {isApplePayAvailable && (
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="apple"
+                  onChange={() => handlePayment("applePay")}
+                  className="text-blue-600"
+                />
+                <span>Apple Pay</span>
+              </label>
+            )}
 
-            <label className="flex items-center cursor-pointer">
+            <label className="flex items-center space-x-2">
               <input
                 type="radio"
                 name="paymentMethod"
                 value="google"
-                className="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500"
+                onChange={() => handlePayment("googlePay")}
+                className="text-blue-600"
               />
-              <span className="ml-2 text-gray-700 text-sm">Google Pay</span>
+              <span>Google Pay</span>
             </label>
 
-            <label className="flex items-center cursor-pointer">
+            <label className="flex items-center space-x-2">
               <input
                 type="radio"
                 name="paymentMethod"
                 value="samsung"
-                className="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500"
+                onChange={() => handlePayment("samsungPay")}
+                className="text-blue-600"
               />
-              <span className="ml-2 text-gray-700 text-sm">Samsung Pay</span>
+              <span>Samsung Pay</span>
             </label>
           </div>
-        </div> */}
+        </div>
+
+        <div id="embed-target" className="m-5"></div>
+
+        <div style={{ height: "432px" }} className="m-5">
+          <iframe
+            id="saleiframe"
+            name="saleiframe"
+            style={{ width: "100%", height: "100%" }}
+            title="Payment Processing Frame"
+          ></iframe>
+        </div>
 
         {/* <div className="flex w-full   sticky sm:static bottom-0 sm:bottom-auto   ">
           <button
