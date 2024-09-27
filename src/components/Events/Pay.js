@@ -46,8 +46,8 @@ export default function Pay({
     parentUri: `${process.env.REACT_APP_URL}`,
     oid: "",
     currency: "784",
-    responseFailURL: `${process.env.REACT_APP_URL}order-details`,
-    responseSuccessURL: `${process.env.REACT_APP_URL}order-details`,
+    responseFailURL: `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`,
+    responseSuccessURL: `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`,
     transactionNotificationURL:
       "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
   });
@@ -187,7 +187,7 @@ export default function Pay({
           name: "JK Enterprises LLC",
           url: "http://localhost:3000/",
         },
-        returnUrl: `${process.env.REACT_APP_URL}order-details`,
+        returnUrl: `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`,
       },
       order: {
         currency: "AED",
