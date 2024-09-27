@@ -42,7 +42,7 @@ export default function Pay({
     txntype: "sale",
     chargetotal: "",
     authenticateTransaction: true,
-    paymentMethod: "applePay",
+    paymentMethod: "googlePay",
     parentUri: `${process.env.REACT_APP_URL}`,
     oid: "",
     currency: "784",
@@ -96,26 +96,23 @@ export default function Pay({
     }
   }, [formData.txndatetime, formData.oid]);
 
-  const payOnline = (paymentMethod) => {
+  const payOnline = () => {
     if (formData.hashExtended) {
-      formData.paymentMethod = paymentMethod;
-      setTimeout(() => {
-        const form = document.createElement("form");
-        form.action = "https://test.ipg-online.com/connect/gateway/processing";
-        form.method = "POST";
-        form.target = "saleiframe";
+      const form = document.createElement("form");
+      form.action = "https://test.ipg-online.com/connect/gateway/processing";
+      form.method = "POST";
+      // form.target = "saleiframe";
 
-        Object.keys(formData).forEach((key) => {
-          const input = document.createElement("input");
-          input.type = "hidden";
-          input.name = key;
-          input.value = formData[key];
-          form.appendChild(input);
-        });
+      Object.keys(formData).forEach((key) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = formData[key];
+        form.appendChild(input);
+      });
 
-        document.body.appendChild(form);
-        form.submit();
-      }, 5000);
+      document.body.appendChild(form);
+      form.submit();
     }
   };
 
@@ -129,6 +126,10 @@ export default function Pay({
       paymentMethod === "googlePay" ||
       paymentMethod === "samsungPay"
     ) {
+      // setFormData((prev) => ({
+      //   ...prev,
+      //   paymentMethod: paymentMethod,
+      // }));
       setShowCard(false);
       setShowWallet(true);
       payOnline(paymentMethod);
