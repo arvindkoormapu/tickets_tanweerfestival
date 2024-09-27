@@ -101,7 +101,7 @@ export default function Pay({
       const form = document.createElement("form");
       form.action = "https://test.ipg-online.com/connect/gateway/processing";
       form.method = "POST";
-      // form.target = "saleiframe";
+      form.target = "saleiframe";
 
       Object.keys(formData).forEach((key) => {
         const input = document.createElement("input");
