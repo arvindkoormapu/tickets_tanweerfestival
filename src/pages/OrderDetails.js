@@ -16,9 +16,8 @@ export default function OrderDetails() {
         if (storedData) {
           const getPurchaseDetails = JSON.parse(storedData);
           setOrderDetails(getPurchaseDetails);
-          const response = await axios.post(
+          const response = await axios.get(
             `${process.env.REACT_APP_BASE_URL}payment/magnati/mpg/success.php?order_ID=${getPurchaseDetails.purchase_number}`,
-            {}
           );
           console.log("data", response.data);
           setStatus("success");

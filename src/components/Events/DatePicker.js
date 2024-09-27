@@ -182,7 +182,7 @@ export default function DatePicker({
         >
           <div className="w-full flex justify-between text-screen-light">
             <span>Total Cost: AED {payAmount}</span>
-            <span className="mr-8">Select your dates</span>
+            <span className="mr-8">{dates.filter((date) => date.selected).length ? "Continue" : "Select your dates"}</span>
           </div>
           {loading && <Loader />}
           <CaretIcon />

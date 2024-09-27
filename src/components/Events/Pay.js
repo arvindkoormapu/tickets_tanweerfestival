@@ -28,6 +28,8 @@ export default function Pay({
 }) {
   const [checkout, setCheckout] = useState(null);
   const [isApplePayAvailable, setIsApplePayAvailable] = useState(false);
+  const [showCard, setShowCard] = useState(false);
+  const [showWallet, setShowWallet] = useState(false);
   const [formData, setFormData] = useState({
     hash_algorithm: "HMACSHA256",
     checkoutoption: "combinedpage",
@@ -118,11 +120,15 @@ export default function Pay({
   const handlePayment = (paymentMethod) => {
     if (paymentMethod === "card") {
       handlePayNowClick(window);
+      setShowCard(true)
+      setShowWallet(false)
     } else if (
       paymentMethod === "applePay" ||
       paymentMethod === "googlePay" ||
       paymentMethod === "samsungPay"
     ) {
+      setShowCard(false)
+      setShowWallet(true)
       payOnline(paymentMethod);
     }
   };
@@ -218,15 +224,6 @@ export default function Pay({
     handleEmbeddedPage(window);
   };
 
-  const payWithCard = useCallback(
-    async (window) => {
-      if (window) {
-        handlePayNowClick(window);
-      }
-    },
-    [window]
-  );
-
   // Working code MPGS - END
 
   return (
@@ -319,13 +316,13 @@ export default function Pay({
           </div>
         </div>
 
-        <div id="embed-target" className="m-5"></div>
+        <div id="embed-target" className="m-5" style={{display: showCard ? "inline" : "none"}}></div>
 
         <div style={{ height: "432px" }} className="m-5">
           <iframe
             id="saleiframe"
             name="saleiframe"
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: "100%", height: "100%", display: showWallet ? "inline" : "none" }}
             title="Payment Processing Frame"
           ></iframe>
         </div>
