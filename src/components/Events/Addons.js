@@ -23,9 +23,9 @@ export default function Addons({
   setAddonFilter,
   dates,
   filters,
-  subCategories,
+  subCategories
 }) {
-  const [activeDate, setActiveDate] = useState("All");
+  const [activeDate, setActiveDate] = useState();
   const [selectedSubCategory, setSelectedSubCategory] = useState(null);
 
   useEffect(() => {
@@ -71,7 +71,6 @@ export default function Addons({
       });
     };
     const orgList = updateList(addonList);
-    console.log('orgList', orgList)
     setAddonList(orgList);
   };
 
@@ -151,6 +150,48 @@ export default function Addons({
   };
 
   // Handle Date Selection
+  // const handleDateChange = (addon_id, date, groupedDates) => {
+  //   setAddonList((prevAddonList) =>
+  //     prevAddonList.map((addon) => {
+  //       if (addon.id === addon_id) {
+  //         const isMultiSelect = groupedDates[date].some(
+  //           (slot) => slot.time_slot === null
+  //         );
+  //         const existingDateIndex = addon.selectedDates.findIndex(
+  //           (d) => d.date === date
+  //         );
+
+  //         if (existingDateIndex !== -1) {
+  //           // For multi-select, allow toggling off
+  //           const newSelectedDates = [...addon.selectedDates];
+  //           newSelectedDates.splice(existingDateIndex, 1);
+  //           return { ...addon, selectedDates: newSelectedDates };
+  //         } else {
+  //           // For single-select, clear all other dates
+  //           const timeSlotId =
+  //             groupedDates[date].find((slot) => slot.time_slot === null)?.id ||
+  //             null;
+  //           const newDate = { date, timeSlot: null, time_slot_id: timeSlotId };
+  //           const updatedSelectedDates = isMultiSelect
+  //             ? [...addon.selectedDates, newDate]
+  //             : [newDate];
+
+  //           return {
+  //             ...addon,
+  //             selectedDates: updatedSelectedDates,
+  //           };
+  //         }
+  //       }
+  //       return addon;
+  //     })
+  //   );
+
+  //   // Update the active date only if it's not a multi-select date
+  //   setActiveDate(
+  //     groupedDates[date].some((slot) => slot.time_slot !== null) ? date : null
+  //   );
+  // };
+
   const handleDateChange = (addon_id, date, groupedDates) => {
     setAddonList((prevAddonList) =>
       prevAddonList.map((addon) => {
@@ -161,22 +202,30 @@ export default function Addons({
           const existingDateIndex = addon.selectedDates.findIndex(
             (d) => d.date === date
           );
-
+  
           if (existingDateIndex !== -1) {
             // For multi-select, allow toggling off
             const newSelectedDates = [...addon.selectedDates];
             newSelectedDates.splice(existingDateIndex, 1);
             return { ...addon, selectedDates: newSelectedDates };
           } else {
-            // For single-select, clear all other dates
-            const timeSlotId =
-              groupedDates[date].find((slot) => slot.time_slot === null)?.id ||
-              null;
-            const newDate = { date, timeSlot: null, time_slot_id: timeSlotId };
+            // Automatically select time slot if only one is available
+            const availableSlots = groupedDates[date].filter(
+              (slot) => slot.time_slot !== null
+            );
+            const timeSlotId = availableSlots.length === 1 ? availableSlots[0].id : null;
+            const timeSlot = availableSlots.length === 1 ? availableSlots[0].time_slot : null;
+  
+            const newDate = {
+              date,
+              timeSlot,
+              time_slot_id: timeSlotId
+            };
+  
             const updatedSelectedDates = isMultiSelect
               ? [...addon.selectedDates, newDate]
               : [newDate];
-
+  
             return {
               ...addon,
               selectedDates: updatedSelectedDates,
@@ -186,12 +235,13 @@ export default function Addons({
         return addon;
       })
     );
-
+  
     // Update the active date only if it's not a multi-select date
     setActiveDate(
       groupedDates[date].some((slot) => slot.time_slot !== null) ? date : null
     );
   };
+  
 
   // Handle Time Slot Selection
   const handleSlotChange = (addon_id, e, date) => {
@@ -254,6 +304,16 @@ export default function Addons({
     .sort((a, b) => a.position - b.position);
 
   const availableSubCategories = subCategories[addonFilter] || [];
+
+  const canProceed = () => {
+    return addonList.every((addon) => {
+      // Check if quantity is greater than 0 and if dates are selected
+      return (
+        (addon.qty > 0 && addon.selectedDates.length > 0) ||
+        addon.qty === 0
+      );
+    });
+  };
 
   return (
     <div className="addons flex flex-col min-h-full sm:px-6 sm:py-12 h-[100vh] sm:h-auto pb-0">
@@ -615,7 +675,7 @@ export default function Addons({
       </div>
       <div className="sm:mx-auto  w-full sm:w-full sm:max-w-md sticky sm:static bottom-0 sm:bottom-auto">
         <div
-          onClick={handleNextStep}
+          onClick={canProceed() ? handleNextStep : null}
           className={`relative overflow-hidden flex justify-between items-center text-white bg-primary-orange px-[1rem] py-[2rem] ${
             !loading && "cursor-pointer"
           }`}

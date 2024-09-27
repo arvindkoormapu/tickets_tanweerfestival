@@ -45,6 +45,7 @@ export default function Events() {
   const [addonFilter, setAddonFilter] = useState("All");
   const [filters, setFilters] = useState([]);
   const [subCategories, setSubCategories] = useState({});
+
   const Ref = useRef(null);
 
   const getTimeRemaining = (e) => {
@@ -304,18 +305,40 @@ export default function Events() {
     );
   };
 
+  // useEffect(() => {
+  //   var total = 0;
+  //   const dateQty = dateList.filter((date) => date.selected).length;
+  //   if (Object.keys(selectedTicket).length)
+  //     total = selectedTicket.price * selectedTicket.qty;
+  //   if (dateQty) total = total * dateQty;
+  //   if (addonList.length) {
+  //     addonList.map((addon) => (total = total + addon.price * addon.qty));
+  //   }
+  //   total = total - deductedValue;
+
+  //   setPayAmount(total);
+  // }, [addonList, dateList, selectedTicket.qty, selectedTicket, deductedValue]);
+
   useEffect(() => {
-    var total = 0;
-    const dateQty = dateList.filter((date) => date.selected).length;
-    if (Object.keys(selectedTicket).length)
-      total = selectedTicket.price * selectedTicket.qty;
-    if (dateQty) total = total * dateQty;
-    if (addonList.length) {
-      addonList.map((addon) => (total = total + addon.price * addon.qty));
-    }
-    total = total - deductedValue;
-    setPayAmount(total);
-  }, [addonList, dateList, selectedTicket.qty, selectedTicket, deductedValue]);
+    let total = 0; 
+    const ticketQty = selectedTicket.qty || 0;
+    const ticketPrice = selectedTicket.price || 0;
+    const ticketTotal = ticketPrice * ticketQty; 
+    
+    total += ticketTotal;
+
+    addonList.forEach(addon => {
+        if (addon.qty > 0) {
+            const dateCount = addon.selectedDates ? addon.selectedDates.length : 1; 
+            const addonTotal = addon.price * addon.qty * dateCount; 
+            total += addonTotal; 
+        }
+    });
+
+    total -= deductedValue;
+
+    setPayAmount(total); 
+}, [addonList, dateList, selectedTicket.qty, selectedTicket.price, deductedValue]);
 
   const handlePay = async () => {
     if (loading) {
@@ -594,11 +617,11 @@ export default function Events() {
               .filter((add) => add.qty > 0)
               .map((addon) => {
                 const selectedDateTime = addon.selectedDates || [];
+                const dateCount = addon.selectedDates ? addon.selectedDates.length : 1
                 return {
                   name: addon.name,
                   "Unit price": `${addon.price} AED`,
                   Quantity: addon.qty,
-                  Price: `${addon.price * addon.qty} AED`,
                   "date&time": selectedDateTime
                     .map((slot) => {
                       const formattedDate = `${calculateDay(
@@ -617,6 +640,7 @@ export default function Events() {
                       ) : null;
                     })
                     .filter((entry) => entry !== null), // Filter out null entries
+                    "Price": `${addon.price * addon.qty * dateCount} AED`,
                 };
               }),
           }}

@@ -4,8 +4,7 @@ import Popup from "../Popup";
 import CounterDownTimer from "../CounterDownTimer";
 import moment from "moment-timezone";
 import CryptoJS from "crypto-js";
-import googlePay from "../../pngwing.com (1).png";
-import applePay from "../../pngwing.com.png";
+import { fetchClient } from "../../AxiosConfig";
 
 export default function Pay({
   handlePay = () => {},
@@ -176,50 +175,27 @@ export default function Pay({
   }, []);
 
   const initiateCheckoutSession = async (window) => {
-    const url = `${process.env.REACT_APP_MASTERCARD_URL}/api/rest/version/83/merchant/${process.env.REACT_APP_MERCHANT_ID}/session`;
-    const payload = {
-      apiOperation: "INITIATE_CHECKOUT",
-      checkoutMode: "WEBSITE",
-      interaction: {
-        operation: "PURCHASE",
-        displayControl: { billingAddress: "HIDE" },
-        merchant: {
-          name: "JK Enterprises LLC",
-          url: "http://localhost:3000/",
-        },
-        returnUrl: `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`,
-      },
-      order: {
-        currency: "AED",
-        amount: purchaseData.total,
-        id: purchaseData.purchase_number,
-        description: "Goods and Services",
-      },
-    };
-
-    const credentials = btoa(
-      `merchant.${process.env.REACT_APP_MERCHANT_ID}:${process.env.REACT_APP_MERCHANT_PASSWORD}`
-    );
-
+    const url = `${process.env.REACT_APP_BASE_URL}/?action=mpgSession`;
+    const formData = new FormData();
+    formData.append("returnUrl", `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`);
+    formData.append("amount", purchaseData.total);
+    formData.append("id", purchaseData.purchase_number);
+  
     try {
-      await fetch(url, {
+      const response = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Basic ${credentials}`,
-        },
-        body: JSON.stringify(payload),
-      })
-        .then(async (res) => {
-          const data = await res.json();
-          if (data && data.session && data.session.id) {
-            await configureCheckout(window, data.session.id);
-          }
-        })
-        .catch((err) => {
-          console.log("err: ", err);
-        });
-    } catch (error) {}
+        body: formData, // No need to set Content-Type when using FormData
+      });
+  
+      const data = await response.json();
+      if (data && data.session && data.session.id) {
+        await configureCheckout(window, data.session.id);
+      } else {
+        console.log("Session ID not found in response");
+      }
+    } catch (error) {
+      console.log("Error: ", error);
+    }
   };
 
   const handlePayNowClick = async (window) => {
