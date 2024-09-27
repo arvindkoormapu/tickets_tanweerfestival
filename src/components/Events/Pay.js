@@ -241,7 +241,7 @@ export default function Pay({
           </div>
         </div>
 
-        <div id="embed-target" style={{height: "432px"}} className="m-5"></div>
+        <div id="embed-target" className="m-5"></div>
         
         <div style={{height: '432px'}} className="m-5">
           <iframe
