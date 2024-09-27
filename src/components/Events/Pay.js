@@ -242,7 +242,7 @@ export default function Pay({
         </div>
 
         <div id="embed-target"></div>
-        <div style="height:600px;">
+        <div style={{height: '600px'}}>
           <iframe
             id="saleiframe"
             name="saleiframe"
