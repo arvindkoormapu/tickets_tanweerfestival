@@ -40,7 +40,7 @@ export default function Pay({
     chargetotal: "13.00",
     authenticateTransaction: true,
     paymentMethod: "",
-    parentUri: "https://www.ipg-online.com/mcs/flow/msearch?execution=e2s2",
+    parentUri: `${process.env.REACT_APP_URL}`,
     oid: "",
     currency: "784",
     responseFailURL: `${process.env.REACT_APP_URL}order-details`,
