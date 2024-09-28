@@ -49,7 +49,7 @@ export default function Pay({
     oid: "",
     currency: "784",
     responseFailURL: `${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/webhook.php`,
-    responseSuccessURL: `${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/webhook.php`,
+    responseSuccessURL: `${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/success.php`,
     transactionNotificationURL:
       "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
   });
