@@ -7,12 +7,12 @@ import qrBg from "../assets/qrBg.png";
 // import qr from "../assets/qr.png";
 import QRCode from "react-qr-code";
 import { fetchClient } from "../AxiosConfig";
-import { useParams } from "../../node_modules/react-router-dom/dist/index";
 import moment from "../../node_modules/moment/moment";
 import ticketTopLog from "../assets/ticket-top.png";
 import ticketBottom from "../assets/ticket-bottom.png";
 import { title } from "../constants/index";
 import axios from "axios";
+import { useParams, useLocation } from "react-router-dom";
 
 const noop = () => {
   alert("function called.");
@@ -63,14 +63,19 @@ export default function Ticket({
   const [priceTotal, setPriceTotal] = useState(0);
 
   const params = useParams();
+  const location = useLocation(); // To access the query parameters from the URL
 
   useEffect(() => {
     window.analytics.page();
     document.title = `Ticket - ${title}`;
     const getOrderDetails = async () => {
-      await axios.get(
-        `${process.env.REACT_APP_BASE_URL}payment/magnati/mpg/success.php?order_ID=${params.purchase_number}`
-      );
+      const queryParams = new URLSearchParams(location.search);
+      const resultIndicator = queryParams.get("resultIndicator");
+      if (!resultIndicator) {
+        await axios.get(
+          `${process.env.REACT_APP_BASE_URL}payment/magnati/mpg/success.php?order_ID=${params.purchase_number}`
+        );
+      }
       setTimeout(async () => {
         const formData = new FormData();
         formData.append("action", "orderHistory");
