@@ -45,7 +45,7 @@ export default function Pay({
     chargetotal: "",
     authenticateTransaction: true,
     paymentMethod: "m",
-    parentUri: `${process.env.REACT_APP_BASE_URL}`,
+    parentUri: `${process.env.REACT_APP_URL}`,
     oid: "",
     currency: "784",
     responseFailURL: `${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/webhook.php`,
