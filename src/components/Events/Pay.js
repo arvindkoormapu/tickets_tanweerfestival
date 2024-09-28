@@ -5,6 +5,7 @@ import CounterDownTimer from "../CounterDownTimer";
 import moment from "moment-timezone";
 import CryptoJS from "crypto-js";
 import { fetchClient } from "../../AxiosConfig";
+import { useNavigate } from "../../../node_modules/react-router-dom/dist/index";
 
 export default function Pay({
   handlePay = () => {},
@@ -25,6 +26,8 @@ export default function Pay({
   setCloseToStep0,
   handleClosePay,
 }) {
+  const navigate = useNavigate();
+  const [status, setStatus] = useState('pending');
   const [checkout, setCheckout] = useState(null);
   const [isApplePayAvailable, setIsApplePayAvailable] = useState(false);
   const [showCard, setShowCard] = useState(false);
@@ -45,11 +48,38 @@ export default function Pay({
     parentUri: `${process.env.REACT_APP_URL}`,
     oid: "",
     currency: "784",
-    responseFailURL: `${process.env.REACT_APP_URL}api/payment/magnati/ipg/webhook.php`,
-    responseSuccessURL: `${process.env.REACT_APP_URL}api/payment/magnati/ipg/webhook.php`,
+    responseFailURL: `${process.env.REACT_APP_URL}payment/magnati/ipg/webhook.php`,
+    responseSuccessURL: `${process.env.REACT_APP_URL}payment/magnati/ipg/webhook.php`,
     transactionNotificationURL:
       "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
   });
+
+  useEffect(() => {
+    // Function to fetch the status from the PHP endpoint
+    const fetchWebhookStatus = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/webhook-status.php`); // Adjust your path
+        const data = await response.json();
+        // setStatus(data.status);
+console.log('data from webhook', data)
+
+      } catch (error) {
+        console.error('Error fetching webhook status:', error);
+      }
+    };
+
+    // Poll the webhook status every 3 seconds
+    const interval = setInterval(fetchWebhookStatus, 3000);
+    // Redirect based on the webhook status
+    // if (status === 'success') {
+    //   navigate('/success'); // Redirect to success page
+    // } else if (status === 'fail') {
+    //   navigate('/failure'); // Redirect to failure page
+    // }
+
+    // Cleanup the interval on component unmount
+    return () => clearInterval(interval);
+  }, [status]);
 
   useEffect(() => {
     setIsApplePayAvailable(
@@ -100,7 +130,7 @@ export default function Pay({
       const form = document.createElement("form");
       form.action = "https://test.ipg-online.com/connect/gateway/processing";
       form.method = "POST";
-      // form.target = "saleiframe";
+      form.target = "saleiframe";
 
       Object.keys(formData).forEach((key) => {
         const input = document.createElement("input");
