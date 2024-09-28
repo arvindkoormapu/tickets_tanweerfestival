@@ -45,11 +45,11 @@ export default function Pay({
     chargetotal: "",
     authenticateTransaction: true,
     paymentMethod: "m",
-    parentUri: `${process.env.REACT_APP_URL}`,
+    parentUri: `${process.env.REACT_APP_BASE_URL}`,
     oid: "",
     currency: "784",
-    responseFailURL: `${process.env.REACT_APP_URL}payment/magnati/ipg/webhook.php`,
-    responseSuccessURL: `${process.env.REACT_APP_URL}payment/magnati/ipg/webhook.php`,
+    responseFailURL: `${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/webhook.php`,
+    responseSuccessURL: `${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/webhook.php`,
     transactionNotificationURL:
       "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
   });
