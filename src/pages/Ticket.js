@@ -71,7 +71,7 @@ export default function Ticket({
     const getOrderDetails = async () => {
       const queryParams = new URLSearchParams(location.search);
       const resultIndicator = queryParams.get("resultIndicator");
-      if (!resultIndicator) {
+      if (resultIndicator) {
         await axios.get(
           `${process.env.REACT_APP_BASE_URL}payment/magnati/mpg/success.php?order_ID=${params.purchase_number}`
         );
