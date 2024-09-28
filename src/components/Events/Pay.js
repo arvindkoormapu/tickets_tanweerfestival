@@ -243,7 +243,6 @@ export default function Pay({
             <p className="text-[14px] capitalize font-medium text-left flex-1 text-primary-orange">
               Invoice number
             </p>
-            {/* #note: font-medium in design */}
             <p className="text-xs capitalize font-semibold text-right text-primary-orange w-[40%]">
               {purchaseData.purchase_number}
             </p>
@@ -252,9 +251,7 @@ export default function Pay({
             <p className="text-[14px] capitalize font-medium text-left flex-1 text-primary-orange">
               Total
             </p>
-            {/* #note: font-medium in design */}
             <p className="text-xs capitalize font-semibold text-right text-primary-orange w-[40%]">
-              {/*  moment(new Date()).format("DD/MM/YYYY")    */}
               AED {purchaseData.total}
             </p>
           </div>

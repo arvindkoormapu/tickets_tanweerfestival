@@ -57,6 +57,7 @@ export default function Ticket({
   downloadTicket = noop,
 }) {
   const [loading, setLoading] = useState(true);
+  const [spinner, setSpinner] = useState(false);
   const [orderDetails, setOrderDetails] = useState([]);
   const [purchaseList, setPurchaseList] = useState();
   const [calendarDate, setCalendarDate] = useState("2023-11-24");
@@ -66,6 +67,7 @@ export default function Ticket({
   const location = useLocation(); // To access the query parameters from the URL
 
   useEffect(() => {
+    setSpinner(true);
     window.analytics.page();
     document.title = `Ticket - ${title}`;
     const getOrderDetails = async () => {
@@ -121,6 +123,19 @@ export default function Ticket({
           });
           setLoading(false);
         }
+        else {
+          const formData = new FormData();
+          formData.append("action", "purchaseListing");
+          const data = await fetchClient(formData, "POST", "");
+          if (data) {
+            const tempData = data.data.find(
+              (purchase) => purchase.purchase_number === params.purchase_number
+            );
+            setPurchaseList(tempData);
+          }
+          setLoading(false);
+        }
+        setSpinner(false);
       }, 1000);
     };
 
@@ -150,6 +165,14 @@ export default function Ticket({
       })
       .join(", "); // Join the formatted strings with a comma
   };
+
+  if (spinner) {
+    return (
+      <div className="flex justify-center items-center h-[200px]">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="ticket flex min-h-full">
