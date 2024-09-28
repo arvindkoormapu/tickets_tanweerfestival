@@ -27,11 +27,13 @@ export default function Pay({
   handleClosePay,
 }) {
   const navigate = useNavigate();
-  const [status, setStatus] = useState('pending');
+  const [paymentMethod, sePaymentMethod] = useState(null);
   const [checkout, setCheckout] = useState(null);
   const [isApplePayAvailable, setIsApplePayAvailable] = useState(false);
   const [showCard, setShowCard] = useState(false);
   const [showWallet, setShowWallet] = useState(false);
+  const [spinner, setSpinner] = useState(false);
+  const [hidePaymentMethod, setHidePaymentMethod] = useState(false);
   const [formData, setFormData] = useState({
     hash_algorithm: "HMACSHA256",
     checkoutoption: "combinedpage",
@@ -53,33 +55,6 @@ export default function Pay({
     transactionNotificationURL:
       "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
   });
-
-  useEffect(() => {
-    // Function to fetch the status from the PHP endpoint
-    const fetchWebhookStatus = async () => {
-      try {
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/webhook-status.php`); // Adjust your path
-        const data = await response.json();
-        // setStatus(data.status);
-console.log('data from webhook', data)
-
-      } catch (error) {
-        console.error('Error fetching webhook status:', error);
-      }
-    };
-
-    // Poll the webhook status every 3 seconds
-    const interval = setInterval(fetchWebhookStatus, 3000);
-    // Redirect based on the webhook status
-    // if (status === 'success') {
-    //   navigate('/success'); // Redirect to success page
-    // } else if (status === 'fail') {
-    //   navigate('/failure'); // Redirect to failure page
-    // }
-
-    // Cleanup the interval on component unmount
-    return () => clearInterval(interval);
-  }, [status]);
 
   useEffect(() => {
     setIsApplePayAvailable(
@@ -142,10 +117,15 @@ console.log('data from webhook', data)
 
       document.body.appendChild(form);
       form.submit();
+      setTimeout(() => {
+        setSpinner(false);
+      }, 3000);
     }
   };
 
-  const handlePayment = (paymentMethod) => {
+  const handlePayment = () => {
+    setSpinner(true);
+    setHidePaymentMethod(true);
     if (paymentMethod === "card") {
       handlePayNowClick(window);
       setShowCard(true);
@@ -201,22 +181,28 @@ console.log('data from webhook', data)
   const handleEmbeddedPage = useCallback((window) => {
     if (window?.Checkout) {
       window?.Checkout.showEmbeddedPage("#embed-target");
+      setTimeout(() => {
+        setSpinner(false);
+      }, 3000);
     }
   }, []);
 
   const initiateCheckoutSession = async (window) => {
     const url = `${process.env.REACT_APP_BASE_URL}/?action=mpgSession`;
     const formData = new FormData();
-    formData.append("returnUrl", `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`);
+    formData.append(
+      "returnUrl",
+      `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`
+    );
     formData.append("amount", purchaseData.total);
     formData.append("id", purchaseData.purchase_number);
-  
+
     try {
       const response = await fetch(url, {
         method: "POST",
         body: formData, // No need to set Content-Type when using FormData
       });
-  
+
       const data = await response.json();
       if (data && data.session && data.session.id) {
         await configureCheckout(window, data.session.id);
@@ -274,56 +260,80 @@ console.log('data from webhook', data)
           </div>
         </div>
 
-        <div className="flex flex-col p-5">
-          <h3 className="mb-4 text-lg font-semibold">Payment Method</h3>
-          <div className="space-y-4">
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="card"
-                onChange={() => handlePayment("card")}
-                className="text-blue-600"
-              />
-              <span>Pay with Card</span>
-            </label>
-
-            {isApplePayAvailable && (
-              <label className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="apple"
-                  onChange={() => handlePayment("applePay")}
-                  className="text-blue-600"
-                />
-                <span>Apple Pay</span>
-              </label>
-            )}
-
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="google"
-                onChange={() => handlePayment("googlePay")}
-                className="text-blue-600"
-              />
-              <span>Google Pay</span>
-            </label>
-
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="samsung"
-                onChange={() => handlePayment("samsungPay")}
-                className="text-blue-600"
-              />
-              <span>Samsung Pay</span>
-            </label>
+        {spinner && (
+          <div className="flex justify-center items-center h-[200px]">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
           </div>
-        </div>
+        )}
+
+        {(!hidePaymentMethod && !spinner) && (
+          <>
+            <div className="flex flex-col p-5">
+              <h3 className="mb-4 text-lg font-semibold">
+                Select Payment Method
+              </h3>
+              <div className="space-y-4">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="card"
+                    onChange={() => sePaymentMethod("card")}
+                    className="text-blue-600"
+                  />
+                  <span>Pay with Card</span>
+                </label>
+
+                {isApplePayAvailable && (
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="apple"
+                      onChange={() => sePaymentMethod("applePay")}
+                      className="text-blue-600"
+                    />
+                    <span>Apple Pay</span>
+                  </label>
+                )}
+
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="google"
+                    onChange={() => sePaymentMethod("googlePay")}
+                    className="text-blue-600"
+                  />
+                  <span>Google Pay</span>
+                </label>
+
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="samsung"
+                    onChange={() => sePaymentMethod("samsungPay")}
+                    className="text-blue-600"
+                  />
+                  <span>Samsung Pay</span>
+                </label>
+              </div>
+            </div>
+            <div className="flex w-full sticky sm:static bottom-0 sm:bottom-auto">
+              <button
+                // onClick={paymentProcess}
+                onClick={() => handlePayment()}
+                disabled={loading}
+                className={`flex sm:my-10 h-16 sm:rounded-lg w-full justify-center items-center ${
+                  !loading && "cursor-pointer"
+                }   overflow-hidden  px-[1rem] py-[2rem] text-base px-[28px] py-[16px] text-center bg-primary-orange font-medium text-white shadow-sm focus-visible:outline`}
+              >
+                Continue
+              </button>
+            </div>
+          </>
+        )}
 
         <div
           id="embed-target"
@@ -343,19 +353,6 @@ console.log('data from webhook', data)
             title="Payment Processing Frame"
           ></iframe>
         </div>
-
-        {/* <div className="flex w-full   sticky sm:static bottom-0 sm:bottom-auto   ">
-          <button
-            // onClick={paymentProcess}
-            onClick={() => handlePayNowClick(window)}
-            disabled={loading}
-            className={`flex sm:my-10 h-16 sm:rounded-lg w-full justify-center items-center ${
-              !loading && "cursor-pointer"
-            }   overflow-hidden  px-[1rem] py-[2rem] text-base px-[28px] py-[16px] text-center bg-primary-orange font-medium text-white shadow-sm focus-visible:outline`}
-          >
-            Pay now{loading && <Loader />}
-          </button>
-        </div> */}
       </div>
 
       <Popup isOpen={isPopupOpen} width="w-[90vw] sm:w-[50vw]">
