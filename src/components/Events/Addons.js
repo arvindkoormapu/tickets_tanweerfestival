@@ -62,8 +62,8 @@ export default function Addons({
       return list.map((addon) => {
         if (id === addon.id)
           if (
-            action === quantityActions.INCREMENT &&
-            addon.qty < Number(addon.available_inventory)
+            action === quantityActions.INCREMENT 
+            // && addon.qty < Number(addon.available_inventory)
           )
             addon.qty += 1;
           else if (action === quantityActions.DECREMENT && addon.qty > 0)
@@ -149,49 +149,6 @@ export default function Addons({
 
     return `Day ${dayDifference}`;
   };
-
-  // Handle Date Selection
-  // const handleDateChange = (addon_id, date, groupedDates) => {
-  //   setAddonList((prevAddonList) =>
-  //     prevAddonList.map((addon) => {
-  //       if (addon.id === addon_id) {
-  //         const isMultiSelect = groupedDates[date].some(
-  //           (slot) => slot.time_slot === null
-  //         );
-  //         const existingDateIndex = addon.selectedDates.findIndex(
-  //           (d) => d.date === date
-  //         );
-
-  //         if (existingDateIndex !== -1) {
-  //           // For multi-select, allow toggling off
-  //           const newSelectedDates = [...addon.selectedDates];
-  //           newSelectedDates.splice(existingDateIndex, 1);
-  //           return { ...addon, selectedDates: newSelectedDates };
-  //         } else {
-  //           // For single-select, clear all other dates
-  //           const timeSlotId =
-  //             groupedDates[date].find((slot) => slot.time_slot === null)?.id ||
-  //             null;
-  //           const newDate = { date, timeSlot: null, time_slot_id: timeSlotId };
-  //           const updatedSelectedDates = isMultiSelect
-  //             ? [...addon.selectedDates, newDate]
-  //             : [newDate];
-
-  //           return {
-  //             ...addon,
-  //             selectedDates: updatedSelectedDates,
-  //           };
-  //         }
-  //       }
-  //       return addon;
-  //     })
-  //   );
-
-  //   // Update the active date only if it's not a multi-select date
-  //   setActiveDate(
-  //     groupedDates[date].some((slot) => slot.time_slot !== null) ? date : null
-  //   );
-  // };
 
   const handleDateChange = (addon_id, date, groupedDates) => {
     setAddonList((prevAddonList) =>
@@ -307,28 +264,44 @@ export default function Addons({
   const availableSubCategories = subCategories[addonFilter] || [];
 
   const canProceed = () => {
+    console.log('addonList', addonList);
+  
     return addonList.every((addon) => {
       // Check if quantity is greater than 0 and if dates are selected
+      // If slots array is empty, skip checking selectedDates
       return (
-        (addon.qty > 0 && addon?.selectedDates?.length > 0) ||
+        (addon.qty > 0 && (addon.slots.length === 0 || addon?.selectedDates?.length > 0)) ||
         addon.qty === 0
       );
     });
   };
-
+  
   const handleNextStepWithValidation = () => {
-    // Check if any addon has quantity selected but no date selected
+    console.log('addonList', addonList);
+  
+    // Check if any addon has quantity > 0 but no date selected, skipping the check if slots is empty
     const hasMissingDate = addonList.some(
-      (addon) => addon.qty > 0 && addon.selectedDates.length === 0
+      (addon) => addon.qty > 0 && addon.slots.length > 0 && addon.selectedDates.length === 0
+    );
+  
+    // Check if any addon has date selected but quantity is 0, skipping the check if slots is empty
+    const hasMissingQuantity = addonList.some(
+      (addon) => addon.qty === 0 && addon.slots.length > 0 && addon.selectedDates.length > 0
     );
   
     if (hasMissingDate) {
-      // Show toast message if date is not selected for any addon with quantity
-      toast.error("Please select a date for all addons with selected quantity.");
+      // Show toast message if date is not selected for any addon with selected quantity
+      toast.error("Please select a date for all addons you selected.");
       return; // Prevent proceeding to the next step
     }
   
-    // If all addons with quantity have dates selected, proceed to next step
+    if (hasMissingQuantity) {
+      // Show toast message if quantity is 0 but date is selected
+      toast.error("Please select a quantity for all addons you selected.");
+      return; // Prevent proceeding to the next step
+    }
+  
+    // If both conditions pass, proceed to the next step
     handleNextStep();
   };
 
@@ -380,12 +353,12 @@ export default function Addons({
             </div>
           )}
           <div className="my-6 flex flex-col gap-[30px]">
-            {inventoryCheck() ? (
+            {/* {inventoryCheck() ? ( */}
               <>
                 {filteredAddons.map((addon, i) => {
                   const groupedDates = groupByDate(addon.slots, dates);
                   return (
-                    Number(addon.available_inventory) > 0 && (
+                    // Number(addon.available_inventory) > 0 && (
                       <div
                         key={i}
                         id={`addonCard${addon.id}`}
@@ -593,9 +566,7 @@ export default function Addons({
                                                 }
                                               }}
                                             >
-                                              {`${calculateDay(
-                                                date
-                                              )} - ${formatDate(date)}`}
+                                              {`${formatDate(date)}`}
                                             </label>
                                           </div>
                                           {activeDate === date &&
@@ -678,21 +649,22 @@ export default function Addons({
                           </div>
                         )}
                       </div>
-                    )
+                    // )
                   );
                 })}
               </>
-            ) : (
+            {/* ) : (
               <p className="text-[18px] mt-12 text-d-orange font-medium text-center">
                 Sorry, No Addons are Available
               </p>
-            )}
+            )} */}
           </div>
         </div>
       </div>
       <div className="sm:mx-auto  w-full sm:w-full sm:max-w-md sticky sm:static bottom-0 sm:bottom-auto">
         <div
-          onClick={canProceed() ? handleNextStep : null}
+          // onClick={canProceed() ? handleNextStep : null}
+          onClick={canProceed() && !loading ? handleNextStepWithValidation : null}
           className={`relative overflow-hidden flex justify-between items-center text-white bg-primary-orange px-[1rem] py-[2rem] ${
             !loading && "cursor-pointer"
           }`}

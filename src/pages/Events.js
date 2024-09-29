@@ -318,27 +318,35 @@ export default function Events() {
 
   //   setPayAmount(total);
   // }, [addonList, dateList, selectedTicket.qty, selectedTicket, deductedValue]);
-
   useEffect(() => {
     let total = 0; 
     const ticketQty = selectedTicket.qty || 0;
     const ticketPrice = selectedTicket.price || 0;
-    const ticketTotal = ticketPrice * ticketQty; 
-    
+    const dateQty = dateList.filter((date) => date.selected).length;
+  
+    // Calculate ticket total with selected dates
+    let ticketTotal = ticketPrice * ticketQty;
+    if (dateQty) {
+      ticketTotal *= dateQty;
+    }
     total += ticketTotal;
-
-    addonList.forEach(addon => {
-        if (addon.qty > 0) {
-            const dateCount = addon.selectedDates ? addon.selectedDates.length : 1; 
-            const addonTotal = addon.price * addon.qty * dateCount; 
-            total += addonTotal; 
-        }
+  
+    // Calculate addon total
+    addonList.forEach((addon) => {
+      if (addon.qty > 0) {
+        const dateCount = addon.selectedDates ? addon.selectedDates.length : 1; 
+        const addonTotal = addon.price * addon.qty * dateCount; 
+        total += addonTotal; 
+      }
     });
-
+  
+    // Subtract deducted value
     total -= deductedValue;
-
-    setPayAmount(total); 
-}, [addonList, dateList, selectedTicket.qty, selectedTicket.price, deductedValue]);
+  
+    // Set total to the pay amount
+    setPayAmount(total);
+  }, [addonList, dateList, selectedTicket.qty, selectedTicket.price, deductedValue]);
+  
 
   const handlePay = async () => {
     if (loading) {

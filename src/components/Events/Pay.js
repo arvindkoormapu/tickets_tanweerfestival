@@ -263,7 +263,7 @@ export default function Pay({
           </div>
         )}
 
-        {(!hidePaymentMethod && !spinner) && (
+        {!hidePaymentMethod && !spinner && (
           <>
             <div className="flex flex-col p-5">
               <h3 className="mb-4 text-lg font-semibold">
@@ -332,11 +332,13 @@ export default function Pay({
           </>
         )}
 
-        <div
-          id="embed-target"
-          className="mx-5 m-5"
-          style={{ display: showCard ? "inline" : "none" }}
-        ></div>
+        <div className="mx-5 m-5">
+          <div
+            id="embed-target"
+            className="mx-5 m-5"
+            style={{ display: showCard ? "inline" : "none" }}
+          ></div>
+        </div>
 
         <div style={{ height: "432px" }} className="mx-5 m-5">
           <iframe
