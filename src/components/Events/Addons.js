@@ -80,17 +80,15 @@ export default function Addons({
       addonList.length > 0 &&
       addonList.filter((addon) => {
         const isAvailable = Number(addon.available_inventory) > 0;
-  
-        const matchesFilter = 
-          addonFilter === "All" || 
+
+        const matchesFilter =
+          addonFilter === "All" ||
           addon.tags.some((tag) => {
-            return (
-              typeof tag === "string" 
-                ? tag === addonFilter 
-                : tag.tag === addonFilter
-            );
+            return typeof tag === "string"
+              ? tag === addonFilter
+              : tag.tag === addonFilter;
           });
-  
+
         const matchesSubCategory = selectedSubCategory
           ? addon.tags.some(
               (tag) =>
@@ -99,7 +97,7 @@ export default function Addons({
                 tag.sub_tags.includes(selectedSubCategory)
             )
           : true;
-  
+
         // Return true only if all conditions are satisfied
         return isAvailable && matchesFilter && matchesSubCategory;
       }).length > 0
@@ -158,7 +156,7 @@ export default function Addons({
       prevAddonList.map((addon) => {
         if (addon.id === addon_id) {
           const isMultiSelect = groupedDates[date].some(
-            (slot) => slot.time_slot === null
+            (slot) => slot.time_slot === ""
           );
           const existingDateIndex = addon.selectedDates.findIndex(
             (d) => d.date === date
@@ -172,7 +170,7 @@ export default function Addons({
           } else {
             // Automatically select time slot if only one is available
             const availableSlots = groupedDates[date].filter(
-              (slot) => slot.time_slot !== null
+              (slot) => slot.time_slot !== ""
             );
             const timeSlotId =
               availableSlots.length === 1 ? availableSlots[0].id : null;
@@ -201,7 +199,7 @@ export default function Addons({
 
     // Update the active date only if it's not a multi-select date
     setActiveDate(
-      groupedDates[date].some((slot) => slot.time_slot !== null) ? date : null
+      groupedDates[date].some((slot) => slot.time_slot !== "") ? date : null
     );
   };
 
@@ -241,76 +239,87 @@ export default function Addons({
   };
 
   const filteredAddons = addonList
-  .filter((item) => {
-    // If "All" is selected, return all items
-    if (addonFilter === "All") return true;
+    .filter((item) => {
+      // If "All" is selected, return all items
+      if (addonFilter === "All") return true;
 
-    // If the addonFilter matches directly with the item's tags
-    if (item.tags.includes(addonFilter)) return true;
+      // If the addonFilter matches directly with the item's tags
+      if (item.tags.includes(addonFilter)) return true;
 
-    // Check if item has the addonFilter as an object and selectedSubCategory is in sub_tags
-    return item.tags.some((tag) => {
-      return (
-        typeof tag === "object" &&
-        tag.tag === addonFilter &&
-        (!selectedSubCategory || tag.sub_tags.includes(selectedSubCategory))
-      );
-    });
-  })
-  .sort((a, b) => a.position - b.position);
+      // Check if item has the addonFilter as an object and selectedSubCategory is in sub_tags
+      return item.tags.some((tag) => {
+        return (
+          typeof tag === "object" &&
+          tag.tag === addonFilter &&
+          (!selectedSubCategory || tag.sub_tags.includes(selectedSubCategory))
+        );
+      });
+    })
+    .sort((a, b) => a.position - b.position);
 
-// Get available subcategories based on the selected addonFilter
-const availableSubCategories = subCategories[addonFilter] || [];
+  // Get available subcategories based on the selected addonFilter
+  const availableSubCategories = subCategories[addonFilter] || [];
 
   const canProceed = () => {
-    console.log("addonList", addonList);
-
+    console.log('addonList', addonList);
+  
     return addonList.every((addon) => {
-      // Check if quantity is greater than 0 and if dates are selected
-      // If slots array is empty, skip checking selectedDates
-      return (
-        (addon.qty > 0 &&
-          (addon.slots.length === 0 || addon?.selectedDates?.length > 0)) ||
-        addon.qty === 0
-      );
+      // If qty > 0, check if slots exist and selectedDates is non-empty
+      if (addon.qty > 0) {
+        // If slots are available, ensure that selectedDates is not empty
+        if (addon.slots.length > 0 && addon.selectedDates.length === 0) {
+          return false; // Date must be selected if quantity > 0 and slots exist
+        }
+        return true; // Proceed if quantity > 0 and either slots are empty or date is selected
+      }
+  
+      // If qty === 0, allow proceeding without checking dates or slots
+      return true;
     });
   };
 
   const handleNextStepWithValidation = () => {
-    console.log("addonList1", addonList);
-
+    console.log('addonList', addonList);
+  
     // Check if any addon has quantity > 0 but no date selected, skipping the check if slots is empty
     const hasMissingDate = addonList.some(
-      (addon) =>
-        addon.qty > 0 &&
-        addon.slots.length > 0 &&
-        addon.selectedDates.length === 0
+      (addon) => addon.qty > 0 && addon.slots.length > 0 && addon.selectedDates.length === 0
     );
-
+  
     // Check if any addon has date selected but quantity is 0, skipping the check if slots is empty
     const hasMissingQuantity = addonList.some(
-      (addon) =>
-        addon.qty === 0 &&
-        addon.slots.length > 0 &&
-        addon.selectedDates.length > 0
+      (addon) => addon.qty === 0 && addon.slots.length > 0 && addon.selectedDates.length > 0
     );
-
+  
+    // Check if time slot is required but not selected (i.e., time_slot is an empty string)
+    const hasMissingTimeSlot = addonList.some((addon) =>
+      addon.selectedDates.some(
+        (date) => date.timeSlot !== null && date.timeSlot === "" // Check if time_slot exists but is empty
+      )
+    );
+  
     if (hasMissingDate) {
       // Show toast message if date is not selected for any addon with selected quantity
       toast.error("Please select a date for all addons you selected.");
       return; // Prevent proceeding to the next step
     }
-
+  
     if (hasMissingQuantity) {
       // Show toast message if quantity is 0 but date is selected
       toast.error("Please select a quantity for all addons you selected.");
       return; // Prevent proceeding to the next step
     }
-
-    // If both conditions pass, proceed to the next step
+  
+    if (hasMissingTimeSlot) {
+      // Show toast message if a time slot is required but not selected
+      toast.error("Please select a time slot for all selected dates.");
+      return; // Prevent proceeding to the next step
+    }
+  
+    // If all conditions pass, proceed to the next step
     handleNextStep();
   };
-
+  
   return (
     <div className="addons flex flex-col min-h-full sm:px-6 sm:py-12 h-[100vh] sm:h-auto pb-0">
       <div className="flex flex-1 flex-col px-6 pt-12 sm:mx-auto sm:w-full sm:max-w-lg sm:px-6 sm:py-12 h-[100vh] overflow-y-auto">
@@ -526,55 +535,73 @@ const availableSubCategories = subCategories[addonFilter] || [];
                                     {Object.keys(groupedDates).map((date) => {
                                       const allDayEvent = groupedDates[
                                         date
-                                      ].some((slot) => slot.time_slot === null);
+                                      ].some((slot) => slot.time_slot === "");
                                       return (
                                         <div key={date} className="mb-4">
                                           <div className="flex items-center">
-                                            <input
-                                              type={
-                                                allDayEvent
-                                                  ? "checkbox"
-                                                  : "radio"
-                                              }
-                                              id={date}
-                                              name="date_selection"
-                                              checked={addon.selectedDates?.some(
-                                                (d) => d.date === date
-                                              )}
-                                              onChange={(e) => {
-                                                handleDateChange(
-                                                  addon.id,
-                                                  date,
-                                                  groupedDates,
-                                                  e.target.checked
-                                                );
-                                                setActiveDate(date); // Set active date to show time slots for radio buttons
-                                              }}
-                                              className={`form-${
-                                                allDayEvent
-                                                  ? "checkbox"
-                                                  : "radio"
-                                              } h-4 w-4 text-blue-600 border-gray-300 rounded ${
-                                                allDayEvent
-                                                  ? ""
-                                                  : "rounded-full"
-                                              } focus:ring-blue-500`}
-                                            />
-                                            <label
-                                              htmlFor={date}
-                                              className="ml-2 text-l-orange text-sm cursor-pointer"
-                                              onClick={(e) => {
-                                                e.preventDefault();
-                                                const inputElement =
-                                                  document.getElementById(date);
-                                                if (!inputElement.checked) {
-                                                  inputElement.click();
-                                                }
-                                              }}
-                                            >
-                                              {`${formatDate(date)}`}
-                                            </label>
+                                            {!allDayEvent ? (
+                                              // Tab-like UI when `allDayEvent` is true
+                                              <div
+                                                onClick={() => {
+                                                  handleDateChange(
+                                                    addon.id,
+                                                    date,
+                                                    groupedDates,
+                                                    true
+                                                  );
+                                                  setActiveDate(date); // Set active date to show time slots for tabs
+                                                }}
+                                                className={`cursor-pointer px-4 py-1 border ${
+                                                  addon.selectedDates?.some(
+                                                    (d) => d.date === date
+                                                  )
+                                                    ? "border-blue-600 bg-blue-100 text-white"
+                                                    : "border-gray-300 text-l-orange"
+                                                } rounded-lg text-sm`}
+                                              >
+                                                {formatDate(date)}
+                                              </div>
+                                            ) : (
+                                              // Checkbox UI when `allDayEvent` is false
+                                              <div className="flex items-center">
+                                                <input
+                                                  type="checkbox"
+                                                  id={date}
+                                                  name="date_selection"
+                                                  checked={addon.selectedDates?.some(
+                                                    (d) => d.date === date
+                                                  )}
+                                                  onChange={(e) => {
+                                                    handleDateChange(
+                                                      addon.id,
+                                                      date,
+                                                      groupedDates,
+                                                      e.target.checked
+                                                    );
+                                                    setActiveDate(date); // Set active date to show time slots for checkboxes
+                                                  }}
+                                                  className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                                />
+                                                <label
+                                                  htmlFor={date}
+                                                  className="ml-2 text-l-orange text-sm cursor-pointer"
+                                                  onClick={(e) => {
+                                                    e.preventDefault();
+                                                    const inputElement =
+                                                      document.getElementById(
+                                                        date
+                                                      );
+                                                    if (!inputElement.checked) {
+                                                      inputElement.click();
+                                                    }
+                                                  }}
+                                                >
+                                                  {`${formatDate(date)}`}
+                                                </label>
+                                              </div>
+                                            )}
                                           </div>
+
                                           {activeDate === date &&
                                             !allDayEvent && (
                                               <div className="mt-2">
@@ -670,9 +697,7 @@ const availableSubCategories = subCategories[addonFilter] || [];
       <div className="sm:mx-auto  w-full sm:w-full sm:max-w-md sticky sm:static bottom-0 sm:bottom-auto">
         <div
           // onClick={canProceed() ? handleNextStep : null}
-          onClick={
-            canProceed() && !loading ? handleNextStepWithValidation : null
-          }
+          onClick={!loading ? handleNextStepWithValidation : null}
           className={`relative overflow-hidden flex justify-between items-center text-white bg-primary-orange px-[1rem] py-[2rem] ${
             !loading && "cursor-pointer"
           }`}
