@@ -107,20 +107,46 @@ export default function Tickets({
     setIspopupOpen(false);
   };
 
+  // const handleFilterChange = (filter) => {
+  //   if (loading) {
+  //     return;
+  //   }
+  //   const list = tempTicketList.map((ticket) => {
+  //     ticket.qty = 0;
+  //     ticket.showMore = false;
+  //     return ticket;
+  //   });
+  //   setTicketList(
+  //     filter === "All"
+  //       ? list
+  //       : list.filter((item) => item.tags.includes(filter))
+  //   );
+  //   setSelectedFilter(filter);
+  //   setSelectedTicket({});
+  //   setDateList([]);
+  //   setAddonList([]);
+  // };
+
   const handleFilterChange = (filter) => {
-    if (loading) {
-      return;
-    }
-    const list = tempTicketList.map((ticket) => {
-      ticket.qty = 0;
-      ticket.showMore = false;
-      return ticket;
-    });
-    setTicketList(
+    if (loading) return;
+
+    // Reset the `qty` and `showMore` for each ticket in the temp list
+    const updatedList = tempTicketList.map((ticket) => ({
+      ...ticket,
+      qty: 0,
+      showMore: false,
+    }));
+
+    // Filter the list based on the `filter` matching the `tag` property in `ticket.tags`
+    const filteredList =
       filter === "All"
-        ? list
-        : list.filter((item) => item.tags.includes(filter))
-    );
+        ? updatedList
+        : updatedList.filter((ticket) =>
+            ticket.tags.some((tag) => tag.tag === filter)
+          );
+
+    // Update the state with the filtered list and other selections reset
+    setTicketList(filteredList);
     setSelectedFilter(filter);
     setSelectedTicket({});
     setDateList([]);

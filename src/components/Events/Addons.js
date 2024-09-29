@@ -24,7 +24,7 @@ export default function Addons({
   setAddonFilter,
   dates,
   filters,
-  subCategories
+  subCategories,
 }) {
   const [activeDate, setActiveDate] = useState();
   const [selectedSubCategory, setSelectedSubCategory] = useState(null);
@@ -62,8 +62,8 @@ export default function Addons({
       return list.map((addon) => {
         if (id === addon.id)
           if (
-            action === quantityActions.INCREMENT 
-            // && addon.qty < Number(addon.available_inventory)
+            action === quantityActions.INCREMENT &&
+            addon.qty < Number(addon.available_inventory)
           )
             addon.qty += 1;
           else if (action === quantityActions.DECREMENT && addon.qty > 0)
@@ -80,15 +80,17 @@ export default function Addons({
       addonList.length > 0 &&
       addonList.filter((addon) => {
         const isAvailable = Number(addon.available_inventory) > 0;
-
-        const matchesFilter =
-          addonFilter === "All" ||
-          addon.tags.some((tag) =>
-            typeof tag === "string"
-              ? tag === addonFilter
-              : tag.tag === addonFilter
-          );
-
+  
+        const matchesFilter = 
+          addonFilter === "All" || 
+          addon.tags.some((tag) => {
+            return (
+              typeof tag === "string" 
+                ? tag === addonFilter 
+                : tag.tag === addonFilter
+            );
+          });
+  
         const matchesSubCategory = selectedSubCategory
           ? addon.tags.some(
               (tag) =>
@@ -97,7 +99,8 @@ export default function Addons({
                 tag.sub_tags.includes(selectedSubCategory)
             )
           : true;
-
+  
+        // Return true only if all conditions are satisfied
         return isAvailable && matchesFilter && matchesSubCategory;
       }).length > 0
     );
@@ -160,7 +163,7 @@ export default function Addons({
           const existingDateIndex = addon.selectedDates.findIndex(
             (d) => d.date === date
           );
-  
+
           if (existingDateIndex !== -1) {
             // For multi-select, allow toggling off
             const newSelectedDates = [...addon.selectedDates];
@@ -171,19 +174,21 @@ export default function Addons({
             const availableSlots = groupedDates[date].filter(
               (slot) => slot.time_slot !== null
             );
-            const timeSlotId = availableSlots.length === 1 ? availableSlots[0].id : null;
-            const timeSlot = availableSlots.length === 1 ? availableSlots[0].time_slot : null;
-  
+            const timeSlotId =
+              availableSlots.length === 1 ? availableSlots[0].id : null;
+            const timeSlot =
+              availableSlots.length === 1 ? availableSlots[0].time_slot : null;
+
             const newDate = {
               date,
               timeSlot,
-              time_slot_id: timeSlotId
+              time_slot_id: timeSlotId,
             };
-  
+
             const updatedSelectedDates = isMultiSelect
               ? [...addon.selectedDates, newDate]
               : [newDate];
-  
+
             return {
               ...addon,
               selectedDates: updatedSelectedDates,
@@ -193,13 +198,12 @@ export default function Addons({
         return addon;
       })
     );
-  
+
     // Update the active date only if it's not a multi-select date
     setActiveDate(
       groupedDates[date].some((slot) => slot.time_slot !== null) ? date : null
     );
   };
-  
 
   // Handle Time Slot Selection
   const handleSlotChange = (addon_id, e, date) => {
@@ -236,71 +240,73 @@ export default function Addons({
     setSelectedSubCategory(subCategory);
   };
 
-  // Filter and sort the addons
   const filteredAddons = addonList
-    .filter((item) => {
-      if (addonFilter === "All") return true;
+  .filter((item) => {
+    // If "All" is selected, return all items
+    if (addonFilter === "All") return true;
 
-      if (item.tags.includes(addonFilter)) return true;
+    // If the addonFilter matches directly with the item's tags
+    if (item.tags.includes(addonFilter)) return true;
 
-      return item.tags.some(
-        (tag) =>
-          typeof tag === "object" &&
-          tag.tag === addonFilter &&
-          tag.sub_tags.includes(selectedSubCategory)
+    // Check if item has the addonFilter as an object and selectedSubCategory is in sub_tags
+    return item.tags.some((tag) => {
+      return (
+        typeof tag === "object" &&
+        tag.tag === addonFilter &&
+        (!selectedSubCategory || tag.sub_tags.includes(selectedSubCategory))
       );
-    })
-    .filter((item) => {
-      if (!selectedSubCategory) return true;
-      return item.tags.some(
-        (tag) =>
-          typeof tag === "object" &&
-          tag.tag === "Hotels" &&
-          tag.sub_tags.includes(selectedSubCategory)
-      );
-    })
-    .sort((a, b) => a.position - b.position);
+    });
+  })
+  .sort((a, b) => a.position - b.position);
 
-  const availableSubCategories = subCategories[addonFilter] || [];
+// Get available subcategories based on the selected addonFilter
+const availableSubCategories = subCategories[addonFilter] || [];
 
   const canProceed = () => {
-    console.log('addonList', addonList);
-  
+    console.log("addonList", addonList);
+
     return addonList.every((addon) => {
       // Check if quantity is greater than 0 and if dates are selected
       // If slots array is empty, skip checking selectedDates
       return (
-        (addon.qty > 0 && (addon.slots.length === 0 || addon?.selectedDates?.length > 0)) ||
+        (addon.qty > 0 &&
+          (addon.slots.length === 0 || addon?.selectedDates?.length > 0)) ||
         addon.qty === 0
       );
     });
   };
-  
+
   const handleNextStepWithValidation = () => {
-    console.log('addonList', addonList);
-  
+    console.log("addonList1", addonList);
+
     // Check if any addon has quantity > 0 but no date selected, skipping the check if slots is empty
     const hasMissingDate = addonList.some(
-      (addon) => addon.qty > 0 && addon.slots.length > 0 && addon.selectedDates.length === 0
+      (addon) =>
+        addon.qty > 0 &&
+        addon.slots.length > 0 &&
+        addon.selectedDates.length === 0
     );
-  
+
     // Check if any addon has date selected but quantity is 0, skipping the check if slots is empty
     const hasMissingQuantity = addonList.some(
-      (addon) => addon.qty === 0 && addon.slots.length > 0 && addon.selectedDates.length > 0
+      (addon) =>
+        addon.qty === 0 &&
+        addon.slots.length > 0 &&
+        addon.selectedDates.length > 0
     );
-  
+
     if (hasMissingDate) {
       // Show toast message if date is not selected for any addon with selected quantity
       toast.error("Please select a date for all addons you selected.");
       return; // Prevent proceeding to the next step
     }
-  
+
     if (hasMissingQuantity) {
       // Show toast message if quantity is 0 but date is selected
       toast.error("Please select a quantity for all addons you selected.");
       return; // Prevent proceeding to the next step
     }
-  
+
     // If both conditions pass, proceed to the next step
     handleNextStep();
   };
@@ -353,12 +359,12 @@ export default function Addons({
             </div>
           )}
           <div className="my-6 flex flex-col gap-[30px]">
-            {/* {inventoryCheck() ? ( */}
+            {inventoryCheck() ? (
               <>
                 {filteredAddons.map((addon, i) => {
                   const groupedDates = groupByDate(addon.slots, dates);
                   return (
-                    // Number(addon.available_inventory) > 0 && (
+                    Number(addon.available_inventory) > 0 && (
                       <div
                         key={i}
                         id={`addonCard${addon.id}`}
@@ -649,22 +655,24 @@ export default function Addons({
                           </div>
                         )}
                       </div>
-                    // )
+                    )
                   );
                 })}
               </>
-            {/* ) : (
+            ) : (
               <p className="text-[18px] mt-12 text-d-orange font-medium text-center">
                 Sorry, No Addons are Available
               </p>
-            )} */}
+            )}
           </div>
         </div>
       </div>
       <div className="sm:mx-auto  w-full sm:w-full sm:max-w-md sticky sm:static bottom-0 sm:bottom-auto">
         <div
           // onClick={canProceed() ? handleNextStep : null}
-          onClick={canProceed() && !loading ? handleNextStepWithValidation : null}
+          onClick={
+            canProceed() && !loading ? handleNextStepWithValidation : null
+          }
           className={`relative overflow-hidden flex justify-between items-center text-white bg-primary-orange px-[1rem] py-[2rem] ${
             !loading && "cursor-pointer"
           }`}
