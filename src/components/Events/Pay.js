@@ -98,7 +98,7 @@ export default function Pay({
   }, [formData.txndatetime, formData.oid]);
 
   const payOnline = () => {
-    if (formData.hashExtended && formData.paymentMethod) {
+    if (formData.hashExtended && formData.paymentMethod !== "") {
       const form = document.createElement("form");
       form.action = process.env.REACT_APP_IPG_URL;
       form.method = "POST";
