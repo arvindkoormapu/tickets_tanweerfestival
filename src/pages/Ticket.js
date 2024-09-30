@@ -165,35 +165,20 @@ export default function Ticket({
       .join(", "); // Join the formatted strings with a comma
   };
 
-  const handleDownloadPdf = (path, name) => {
-    const pdfUrl = path
-    
-    // Open the PDF in a new tab
-    const newWindow = window.open(pdfUrl, '_blank');
-  
-   // Check if the new window was successfully opened
-  if (newWindow) {
-    // Set a timeout to trigger download and close the tab after a delay
-    setTimeout(() => {
-      // Create a download link in the new tab
-      const link = newWindow.document.createElement('a');
-      link.href = pdfUrl;
-      link.download = name;
+  const handleDownloadPdf = async (path, name) => {
+    const pdfUrl = path;
 
-      // Append the link to the new window's body and trigger the download
-      newWindow.document.body.appendChild(link);
-      link.click();
-      newWindow.document.body.removeChild(link);
+    const response = await fetch(pdfUrl);
+    const blob = await response.blob();
 
-      // Close the tab after a slight delay (to give the appearance of download)
-      setTimeout(() => {
-        newWindow.close();
-      }, 2000); // 2 seconds delay before closing (adjust as needed)
-    }, 1000); // Start download after 1 second (adjust as needed)
-  } else {
-    console.error('Failed to open new window. Please allow pop-ups in your browser.');
-  }
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute("download", name);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
+
   if (spinner) {
     return (
       <div className="flex justify-center items-center h-[200px]">
