@@ -43,7 +43,7 @@ export default function Pay({
     txntype: "sale",
     chargetotal: "",
     authenticateTransaction: true,
-    paymentMethod: null,
+    paymentMethod: 'googlePay',
     parentUri: `${process.env.REACT_APP_URL}`,
     oid: "",
     currency: "784",
