@@ -43,7 +43,7 @@ export default function Pay({
     txntype: "sale",
     chargetotal: "",
     authenticateTransaction: true,
-    paymentMethod: 'googlePay',
+    paymentMethod: "",
     parentUri: `${process.env.REACT_APP_URL}`,
     oid: "",
     currency: "784",
@@ -98,7 +98,7 @@ export default function Pay({
   }, [formData.txndatetime, formData.oid]);
 
   const payOnline = () => {
-    if (formData.hashExtended) {
+    if (formData.hashExtended && formData.paymentMethod) {
       const form = document.createElement("form");
       form.action = process.env.REACT_APP_IPG_URL;
       form.method = "POST";
