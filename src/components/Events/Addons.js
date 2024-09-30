@@ -259,7 +259,6 @@ export default function Addons({
   const availableSubCategories = subCategories[addonFilter] || [];
 
   const handleNextStepWithValidation = () => {
-    console.log("add", addonList);
     // Check if any addon has quantity > 0 but no date selected, skipping the check if slots is empty
     const hasMissingDate = addonList.some(
       (addon) =>
@@ -524,7 +523,7 @@ export default function Addons({
                               <>
                                 <div>
                                   <h3 className="text-l-orange w-[100%] text-sm mb-2">
-                                    Date & Time:
+                                    Select Date & Time:
                                   </h3>
                                   <div className="flex flex-wrap space-x-4 mb-4">
                                     {Object.keys(groupedDates).map((date) => {
