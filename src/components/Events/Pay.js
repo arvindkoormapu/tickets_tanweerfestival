@@ -121,10 +121,10 @@ export default function Pay({
   };
 
   useEffect(() => {
-    if (formData.paymentMethod) {
+    if (formData.hashExtended && formData.paymentMethod) {
       payOnline();
     }
-  }, [formData.paymentMethod]);
+  }, [formData.hashExtended, formData.paymentMethod]);
 
   const handlePayment = () => {
     setSpinner(true);
