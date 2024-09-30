@@ -4,8 +4,6 @@ import Popup from "../Popup";
 import CounterDownTimer from "../CounterDownTimer";
 import moment from "moment-timezone";
 import CryptoJS from "crypto-js";
-import { fetchClient } from "../../AxiosConfig";
-import { useNavigate } from "../../../node_modules/react-router-dom/dist/index";
 
 export default function Pay({
   handlePay = () => {},
@@ -26,7 +24,6 @@ export default function Pay({
   setCloseToStep0,
   handleClosePay,
 }) {
-  const navigate = useNavigate();
   const [paymentMethod, sePaymentMethod] = useState(null);
   const [checkout, setCheckout] = useState(null);
   const [isApplePayAvailable, setIsApplePayAvailable] = useState(false);
@@ -40,7 +37,7 @@ export default function Pay({
     language: "en_US",
     hashExtended: "",
     mobileMode: true,
-    storename: "811187409",
+    storename: process.env.REACT_APP_STORE,
     timezone: "Asia/Dubai",
     txndatetime: "",
     txntype: "sale",
@@ -88,7 +85,7 @@ export default function Pay({
 
       const messageSignature = CryptoJS.HmacSHA256(
         messageSignatureContent,
-        'n+Gs"37vQE'
+        process.env.REACT_APP_SHARED_SECRET
       );
       const messageSignatureBase64 =
         CryptoJS.enc.Base64.stringify(messageSignature);
@@ -103,7 +100,7 @@ export default function Pay({
   const payOnline = () => {
     if (formData.hashExtended) {
       const form = document.createElement("form");
-      form.action = "https://test.ipg-online.com/connect/gateway/processing";
+      form.action = process.env.REACT_APP_IPG_URL;
       form.method = "POST";
       form.target = "saleiframe";
 

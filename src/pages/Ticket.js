@@ -238,12 +238,12 @@ export default function Ticket({
                           />
                           <button
                             className="bg-blue-500 text-xs text-white font-bold mt-2 px-4 py-1 rounded hover:bg-blue-700 transition duration-200 border border-blue-500"
-                            onClick={() =>
-                              handleDownloadPdf(
-                                qrcode.pdf_path,
-                                order.ticketData[0].ticket_name
-                              )
-                            }
+                            // onClick={() =>
+                            //   handleDownloadPdf(
+                            //     qrcode.pdf_path,
+                            //     order.ticketData[0].ticket_name
+                            //   )
+                            // }
                           >
                             Download Ticket PDF
                           </button>
