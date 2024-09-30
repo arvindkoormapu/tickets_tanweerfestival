@@ -29,12 +29,20 @@ export default function Addons({
   const [activeDate, setActiveDate] = useState();
   const [selectedSubCategory, setSelectedSubCategory] = useState(null);
 
+  // Preselect dates and set activeDate
   useEffect(() => {
     const addonListWithSelectedDates = addonList.map((addon) => ({
       ...addon,
       selectedDates: addon.selectedDates || [],
     }));
     setAddonList(addonListWithSelectedDates);
+
+    // Automatically set activeDate to the first selected date (if any)
+    addonList.forEach((addon) => {
+      if (addon.selectedDates?.length > 0) {
+        setActiveDate(addon.selectedDates[0]?.date); // Set first selected date as active
+      }
+    });
   }, []);
 
   const handleExpand = async (addon) => {
@@ -139,16 +147,6 @@ export default function Addons({
       day: "numeric",
       month: "short",
     }).format(date);
-  };
-
-  const calculateDay = (dateStr) => {
-    const baseDate = new Date("2024-11-22");
-    const selectedDate = new Date(dateStr);
-
-    const dayDifference =
-      Math.floor((selectedDate - baseDate) / (1000 * 60 * 60 * 24)) + 1;
-
-    return `Day ${dayDifference}`;
   };
 
   const handleDateChange = (addon_id, date, groupedDates) => {
@@ -260,66 +258,63 @@ export default function Addons({
   // Get available subcategories based on the selected addonFilter
   const availableSubCategories = subCategories[addonFilter] || [];
 
-  const canProceed = () => {
-    console.log('addonList', addonList);
-  
-    return addonList.every((addon) => {
-      // If qty > 0, check if slots exist and selectedDates is non-empty
-      if (addon.qty > 0) {
-        // If slots are available, ensure that selectedDates is not empty
-        if (addon.slots.length > 0 && addon.selectedDates.length === 0) {
-          return false; // Date must be selected if quantity > 0 and slots exist
-        }
-        return true; // Proceed if quantity > 0 and either slots are empty or date is selected
-      }
-  
-      // If qty === 0, allow proceeding without checking dates or slots
-      return true;
-    });
-  };
-
   const handleNextStepWithValidation = () => {
-    console.log('addonList', addonList);
-  
+    console.log("add", addonList);
     // Check if any addon has quantity > 0 but no date selected, skipping the check if slots is empty
     const hasMissingDate = addonList.some(
-      (addon) => addon.qty > 0 && addon.slots.length > 0 && addon.selectedDates.length === 0
+      (addon) =>
+        addon.qty > 0 &&
+        addon.slots.length > 0 &&
+        addon.selectedDates.length === 0
     );
-  
+
     // Check if any addon has date selected but quantity is 0, skipping the check if slots is empty
     const hasMissingQuantity = addonList.some(
-      (addon) => addon.qty === 0 && addon.slots.length > 0 && addon.selectedDates.length > 0
+      (addon) =>
+        addon.qty === 0 &&
+        addon.slots.length > 0 &&
+        addon.selectedDates.length > 0
     );
-  
-    // Check if time slot is required but not selected (i.e., time_slot is an empty string)
+
+    // Check if selected dates require a time slot, but none is selected
     const hasMissingTimeSlot = addonList.some((addon) =>
-      addon.selectedDates.some(
-        (date) => date.timeSlot !== null && date.timeSlot === "" // Check if time_slot exists but is empty
-      )
+      addon.selectedDates.some((selectedDate) => {
+        // Find matching slot for the selected date
+        const matchingSlot = addon.slots.find(
+          (slot) => slot.event_date.split(" ")[0] === selectedDate.date
+        );
+
+        // If the matching slot has time slots, check if a time slot is selected
+        return (
+          matchingSlot &&
+          matchingSlot.time_slot !== "" &&
+          selectedDate.timeSlot === null
+        );
+      })
     );
-  
+
     if (hasMissingDate) {
       // Show toast message if date is not selected for any addon with selected quantity
       toast.error("Please select a date for all addons you selected.");
       return; // Prevent proceeding to the next step
     }
-  
+
     if (hasMissingQuantity) {
       // Show toast message if quantity is 0 but date is selected
       toast.error("Please select a quantity for all addons you selected.");
       return; // Prevent proceeding to the next step
     }
-  
+
     if (hasMissingTimeSlot) {
       // Show toast message if a time slot is required but not selected
       toast.error("Please select a time slot for all selected dates.");
       return; // Prevent proceeding to the next step
     }
-  
+
     // If all conditions pass, proceed to the next step
     handleNextStep();
   };
-  
+
   return (
     <div className="addons flex flex-col min-h-full sm:px-6 sm:py-12 h-[100vh] sm:h-auto pb-0">
       <div className="flex flex-1 flex-col px-6 pt-12 sm:mx-auto sm:w-full sm:max-w-lg sm:px-6 sm:py-12 h-[100vh] overflow-y-auto">
@@ -536,6 +531,12 @@ export default function Addons({
                                       const allDayEvent = groupedDates[
                                         date
                                       ].some((slot) => slot.time_slot === "");
+                                      const selectedDate =
+                                        addon.selectedDates?.find(
+                                          (d) => d.date === date
+                                        );
+                                      const isSelected = !!selectedDate;
+
                                       return (
                                         <div key={date} className="mb-4">
                                           <div className="flex items-center">
@@ -543,21 +544,26 @@ export default function Addons({
                                               // Tab-like UI when `allDayEvent` is true
                                               <div
                                                 onClick={() => {
-                                                  handleDateChange(
-                                                    addon.id,
-                                                    date,
-                                                    groupedDates,
-                                                    true
-                                                  );
-                                                  setActiveDate(date); // Set active date to show time slots for tabs
+                                                  if (addon.qty > 0) {
+                                                    // Only allow date selection if quantity is greater than 0
+                                                    handleDateChange(
+                                                      addon.id,
+                                                      date,
+                                                      groupedDates,
+                                                      true
+                                                    );
+                                                    setActiveDate(date); // Set active date to show time slots for tabs
+                                                  }
                                                 }}
                                                 className={`cursor-pointer px-4 py-1 border ${
-                                                  addon.selectedDates?.some(
-                                                    (d) => d.date === date
-                                                  )
-                                                    ? "border-blue-600 bg-blue-100 text-white"
+                                                  isSelected
+                                                    ? "border-blue-600 bg-[#fff] text-primary-orange"
                                                     : "border-gray-300 text-l-orange"
-                                                } rounded-lg text-sm`}
+                                                } rounded-lg text-sm ${
+                                                  addon.qty === 0
+                                                    ? "cursor-not-allowed opacity-50"
+                                                    : ""
+                                                }`} // Disable styles when qty is 0
                                               >
                                                 {formatDate(date)}
                                               </div>
@@ -568,9 +574,7 @@ export default function Addons({
                                                   type="checkbox"
                                                   id={date}
                                                   name="date_selection"
-                                                  checked={addon.selectedDates?.some(
-                                                    (d) => d.date === date
-                                                  )}
+                                                  checked={isSelected}
                                                   onChange={(e) => {
                                                     handleDateChange(
                                                       addon.id,
@@ -580,6 +584,7 @@ export default function Addons({
                                                     );
                                                     setActiveDate(date); // Set active date to show time slots for checkboxes
                                                   }}
+                                                  disabled={addon.qty === 0}
                                                   className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                                 />
                                                 <label
@@ -602,44 +607,51 @@ export default function Addons({
                                             )}
                                           </div>
 
+                                          {/* Ensure time slots are displayed when activeDate matches the selected date */}
                                           {activeDate === date &&
+                                            selectedDate &&
                                             !allDayEvent && (
                                               <div className="mt-2">
                                                 {groupedDates[date].map(
-                                                  (slot, index) =>
-                                                    slot.time_slot && (
-                                                      <label
-                                                        key={index}
-                                                        className="flex items-center mb-2 cursor-pointer"
-                                                      >
-                                                        <input
-                                                          type="radio"
-                                                          name={`time_slot_${addon.id}_${date}`}
-                                                          value={slot.time_slot}
-                                                          data-timeslot-id={
-                                                            slot.id
-                                                          }
-                                                          checked={
-                                                            addon.selectedDates?.find(
-                                                              (d) =>
-                                                                d.date === date
-                                                            )?.timeSlot ===
-                                                            slot.time_slot
-                                                          }
-                                                          onChange={(e) =>
-                                                            handleSlotChange(
-                                                              addon.id,
-                                                              e,
-                                                              date
-                                                            )
-                                                          }
-                                                          className="h-4 w-4 border border-gray-300 rounded-full checked:bg-[#fbe899] checked:border-[#fbe899] focus:outline-none mr-3"
-                                                        />
-                                                        <span className="text-l-orange text-sm">
-                                                          {slot.time_slot}
-                                                        </span>
-                                                      </label>
-                                                    )
+                                                  (slot, index) => {
+                                                    const isTimeSlotSelected =
+                                                      selectedDate?.timeSlot ===
+                                                      slot.time_slot;
+
+                                                    return (
+                                                      slot.time_slot && (
+                                                        <label
+                                                          key={index}
+                                                          className="flex items-center mb-2 cursor-pointer"
+                                                        >
+                                                          <input
+                                                            type="radio"
+                                                            name={`time_slot_${addon.id}_${date}`}
+                                                            value={
+                                                              slot.time_slot
+                                                            }
+                                                            data-timeslot-id={
+                                                              slot.id
+                                                            }
+                                                            checked={
+                                                              isTimeSlotSelected
+                                                            }
+                                                            onChange={(e) =>
+                                                              handleSlotChange(
+                                                                addon.id,
+                                                                e,
+                                                                date
+                                                              )
+                                                            }
+                                                            className="h-4 w-4 border border-gray-300 rounded-full checked:bg-[#fbe899] checked:border-[#fbe899] focus:outline-none mr-3"
+                                                          />
+                                                          <span className="text-l-orange text-sm">
+                                                            {slot.time_slot}
+                                                          </span>
+                                                        </label>
+                                                      )
+                                                    );
+                                                  }
                                                 )}
                                               </div>
                                             )}
@@ -650,6 +662,7 @@ export default function Addons({
                                 </div>
                               </>
                             )}
+
                             {/* TIME SLOTS - END */}
 
                             {addon.img && (
