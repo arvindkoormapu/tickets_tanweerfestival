@@ -100,7 +100,7 @@ export default function Pay({
   const payOnline = () => {
     if (formData.hashExtended) {
       const form = document.createElement("form");
-      form.action = `${process.env.REACT_APP_IPG_URL}`;
+      form.action = process.env.REACT_APP_IPG_URL;
       form.method = "POST";
       form.target = "saleiframe";
 
