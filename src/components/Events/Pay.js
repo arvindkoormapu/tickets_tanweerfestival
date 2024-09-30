@@ -37,7 +37,7 @@ export default function Pay({
     language: "en_US",
     hashExtended: "",
     mobileMode: true,
-    storename: process.env.REACT_APP_STORE,
+    storename: `${process.env.REACT_APP_STORE}`,
     timezone: "Asia/Dubai",
     txndatetime: "",
     txntype: "sale",
@@ -85,7 +85,7 @@ export default function Pay({
 
       const messageSignature = CryptoJS.HmacSHA256(
         messageSignatureContent,
-        process.env.REACT_APP_SHARED_SECRET
+        `${process.env.REACT_APP_SHARED_SECRET}`
       );
       const messageSignatureBase64 =
         CryptoJS.enc.Base64.stringify(messageSignature);
