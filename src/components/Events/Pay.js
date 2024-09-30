@@ -43,7 +43,7 @@ export default function Pay({
     txntype: "sale",
     chargetotal: "",
     authenticateTransaction: true,
-    paymentMethod: "applePay",
+    paymentMethod: "",
     parentUri: `${process.env.REACT_APP_URL}`,
     oid: "",
     currency: "784",
@@ -120,6 +120,12 @@ export default function Pay({
     }
   };
 
+  useEffect(() => {
+    if (formData.paymentMethod) {
+      payOnline();
+    }
+  }, [formData.paymentMethod]);
+
   const handlePayment = () => {
     setSpinner(true);
     setHidePaymentMethod(true);
@@ -138,7 +144,6 @@ export default function Pay({
       }));
       setShowCard(false);
       setShowWallet(true);
-      payOnline(paymentMethod);
     }
   };
 
