@@ -132,10 +132,10 @@ export default function Pay({
       paymentMethod === "googlePay" ||
       paymentMethod === "samsungPay"
     ) {
-      // setFormData((prev) => ({
-      //   ...prev,
-      //   paymentMethod: paymentMethod,
-      // }));
+      setFormData((prev) => ({
+        ...prev,
+        paymentMethod: paymentMethod,
+      }));
       setShowCard(false);
       setShowWallet(true);
       payOnline(paymentMethod);
