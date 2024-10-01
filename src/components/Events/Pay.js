@@ -76,7 +76,7 @@ export default function Pay({
 
   // Recalculate hash when txndatetime, oid, or paymentMethod changes
   useEffect(() => {
-    if (formData.txndatetime && formData.oid) {
+    if (formData.txndatetime && formData.oid && formData.paymentMethod) {
       const messageSignatureContent = Object.keys(formData)
         .filter((key) => key !== "hashExtended")
         .sort()
@@ -95,7 +95,7 @@ export default function Pay({
         hashExtended: messageSignatureBase64,
       }));
     }
-  }, [formData.txndatetime, formData.oid]);
+  }, [formData.txndatetime, formData.oid, formData.chargetotal, formData.paymentMethod]);
 
   const payOnline = () => {
     if (formData.hashExtended) {
