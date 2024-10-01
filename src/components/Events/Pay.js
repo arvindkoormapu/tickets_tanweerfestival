@@ -96,7 +96,12 @@ export default function Pay({
         hashExtended: messageSignatureBase64,
       }));
     }
-  }, [formData.txndatetime, formData.oid, formData.chargetotal, formData.paymentMethod]);
+  }, [
+    formData.txndatetime,
+    formData.oid,
+    formData.chargetotal,
+    formData.paymentMethod,
+  ]);
 
   const payOnline = () => {
     if (formData.hashExtended) {
@@ -137,7 +142,7 @@ export default function Pay({
     } else if (
       paymentMethod === "applePay" ||
       paymentMethod === "googlePay" ||
-      paymentMethod === "samsungPay"
+      paymentMethod === "samsung_pay_wallet"
     ) {
       setFormData((prev) => ({
         ...prev,
@@ -149,117 +154,47 @@ export default function Pay({
   };
 
   // Working code MPGS - START
+  // Effect to load and configure the Checkout script
+  useEffect(() => {
+    const loadAndConfigureScript = () => {
+      // Remove existing script if any to force reload
+      const existingScript = document.querySelector(
+        'script[src="https://ap-gateway.mastercard.com/static/checkout/checkout.min.js"]'
+      );
+      if (existingScript) {
+        existingScript.remove();
+      }
 
-  // useEffect(() => {
-  //   const script = document.createElement("script");
-  //   script.src =
-  //     "https://ap-gateway.mastercard.com/static/checkout/checkout.min.js";
-  //   script.async = true;
-  //   script.onload = async (err) => {
-  //     setCheckout(window.Checkout);
-  //   };
-  //   script.onerror = (error) => {
-  //     console.log("script error: ", error);
-  //   };
-  //   document.head.appendChild(script);
-  // }, []);
-
-  // const configureCheckout = useCallback(
-  //   async (window, session) => {
-  //     if (window?.Checkout) {
-  //       try {
-  //         window?.Checkout?.configure({
-  //           session: {
-  //             id: session,
-  //           },
-  //         });
-  //       } catch (error) {
-  //         console.log("error: ", error);
-  //       }
-  //     }
-  //   },
-  //   [checkout]
-  // );
-
-  // const handleEmbeddedPage = useCallback((window) => {
-  //   if (window?.Checkout) {
-  //     window?.Checkout.showEmbeddedPage("#embed-target");
-  //     setTimeout(() => {
-  //       setSpinner(false);
-  //     }, 3000);
-  //   }
-  // }, []);
-
-  // const initiateCheckoutSession = async (window) => {
-  //   const url = `${process.env.REACT_APP_BASE_URL}/?action=mpgSession`;
-  //   const formData = new FormData();
-  //   formData.append(
-  //     "returnUrl",
-  //     `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`
-  //   );
-  //   formData.append("amount", purchaseData.total);
-  //   formData.append("id", purchaseData.purchase_number);
-
-  //   try {
-  //     const response = await fetch(url, {
-  //       method: "POST",
-  //       body: formData, 
-  //     });
-
-  //     const data = await response.json();
-  //     if (data && data.session && data.session.id) {
-  //       await configureCheckout(window, data.session.id);
-  //     } else {
-  //       console.log("Session ID not found in response");
-  //     }
-  //   } catch (error) {
-  //     console.log("Error: ", error);
-  //   }
-  // };
-
-  // const handlePayNowClick = async (window) => {
-  //   await initiateCheckoutSession(window);
-  //   handleEmbeddedPage(window);
-  // };
-
-  // Working code MPGS - END
-
-// Effect to load and configure the Checkout script
-useEffect(() => {
-  const loadAndConfigureScript = () => {
-    // Remove existing script if any to force reload
-    const existingScript = document.querySelector('script[src="https://ap-gateway.mastercard.com/static/checkout/checkout.min.js"]');
-    if (existingScript) {
-      existingScript.remove();
-    }
-
-    // Load the script fresh
-    const script = document.createElement('script');
-    script.src = "https://ap-gateway.mastercard.com/static/checkout/checkout.min.js";
-    script.async = true;
-    script.onload = () => {
-      console.log("Checkout script loaded successfully.");
-      setIsScriptLoaded(true);  // Indicate that script is ready
+      // Load the script fresh
+      const script = document.createElement("script");
+      script.src =
+        "https://ap-gateway.mastercard.com/static/checkout/checkout.min.js";
+      script.async = true;
+      script.onload = () => {
+        console.log("Checkout script loaded successfully.");
+        setIsScriptLoaded(true); // Indicate that script is ready
+      };
+      script.onerror = (error) => {
+        console.error("Failed to load the Checkout script", error);
+      };
+      document.head.appendChild(script);
     };
-    script.onerror = error => {
-      console.error("Failed to load the Checkout script", error);
+
+    loadAndConfigureScript();
+
+    // Cleanup function to remove script when component unmounts
+    return () => {
+      const script = document.querySelector(
+        'script[src="https://ap-gateway.mastercard.com/static/checkout/checkout.min.js"]'
+      );
+      if (script) {
+        script.remove();
+      }
+      setIsScriptLoaded(false);
     };
-    document.head.appendChild(script);
-  };
+  }, []);
 
-  loadAndConfigureScript();
-
-  // Cleanup function to remove script when component unmounts
-  return () => {
-    const script = document.querySelector('script[src="https://ap-gateway.mastercard.com/static/checkout/checkout.min.js"]');
-    if (script) {
-      script.remove();
-    }
-    setIsScriptLoaded(false);
-  };
-}, []);
-
-// Load new session ID when script is ready
+  // Load new session ID when script is ready
 
   const handlePayNowClick = async () => {
     const sessionID = await fetchSessionID();
@@ -268,55 +203,56 @@ useEffect(() => {
     }
   };
 
+  // Fetch session ID from the server
+  const fetchSessionID = async () => {
+    const url = `${process.env.REACT_APP_BASE_URL}/?action=mpgSession`;
+    const formData = new FormData();
+    formData.append(
+      "returnUrl",
+      `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`
+    );
+    formData.append("amount", purchaseData.total);
+    formData.append("id", purchaseData.purchase_number);
 
-// Fetch session ID from the server
-const fetchSessionID = async () => {
-  const url = `${process.env.REACT_APP_BASE_URL}/?action=mpgSession`;
-  const formData = new FormData();
-  formData.append("returnUrl", `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`);
-  formData.append("amount", purchaseData.total);
-  formData.append("id", purchaseData.purchase_number);
-
-  try {
-    const response = await fetch(url, { method: "POST", body: formData });
-    const data = await response.json();
-    if (data && data.session && data.session.id) {
-      return data.session.id;
-    } else {
-      console.error("Session ID not found in response");
+    try {
+      const response = await fetch(url, { method: "POST", body: formData });
+      const data = await response.json();
+      if (data && data.session && data.session.id) {
+        return data.session.id;
+      } else {
+        console.error("Session ID not found in response");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching session: ", error);
       return null;
     }
-  } catch (error) {
-    console.error("Error fetching session: ", error);
-    return null;
-  }
-};
+  };
 
-// Configure Checkout with the session ID
-const configureCheckout = (sessionID) => {
-  if (window.Checkout) {
-    window.Checkout.configure({
-      session: {
-        id: sessionID
-      }
-    });
-    handleEmbeddedPage();
-  } else {
-    console.error("Checkout not available or session ID is missing.");
-  }
-};
+  // Configure Checkout with the session ID
+  const configureCheckout = (sessionID) => {
+    if (window.Checkout) {
+      window.Checkout.configure({
+        session: {
+          id: sessionID,
+        },
+      });
+      handleEmbeddedPage();
+    } else {
+      console.error("Checkout not available or session ID is missing.");
+    }
+  };
 
-// Show the embedded payment page
-const handleEmbeddedPage = () => {
-  if (window.Checkout) {
-    window.Checkout.showEmbeddedPage("#embed-target");
-    setTimeout(() => {
-      setSpinner(false);
-    }, 3000);
-  }
-};
-
-
+  // Show the embedded payment page
+  const handleEmbeddedPage = () => {
+    if (window.Checkout) {
+      window.Checkout.showEmbeddedPage("#embed-target");
+      setTimeout(() => {
+        setSpinner(false);
+      }, 3000);
+    }
+  };
+  // Working code MPGS - END
 
   return (
     <div className="pay flex flex-col min-h-full   sm:px-6 sm:py-12   h-[100vh] sm:h-auto pb-0  ">
@@ -407,7 +343,7 @@ const handleEmbeddedPage = () => {
                     type="radio"
                     name="paymentMethod"
                     value="samsung"
-                    onChange={() => sePaymentMethod("samsungPay")}
+                    onChange={() => sePaymentMethod("samsung_pay_wallet")}
                     className="text-blue-600"
                   />
                   <span>Samsung Pay</span>

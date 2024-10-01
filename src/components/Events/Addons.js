@@ -407,7 +407,7 @@ export default function Addons({
                                   : "text-primary-orange"
                               }`}
                             >
-                              Tickets Selected : {addon.qty}
+                              Quantity Selected : {addon.qty}
                             </p>
                             <p
                               className={`w-[100%] text-sm text-left ${
@@ -416,7 +416,10 @@ export default function Addons({
                                   : "text-primary-orange"
                               }`}
                             >
-                              Price: AED {addon.price * addon.qty}
+                              Price: AED {" "}
+                              {addon.selectedDates && addon.selectedDates.length !== 0
+                                ? addon.price * addon.qty * addon.selectedDates.length
+                                : addon.price * addon.qty}
                             </p>
                             {/* )} */}
                           </div>
@@ -431,7 +434,7 @@ export default function Addons({
                                 }`}
                               >
                                 AED {addon.price}
-                              </p>{" "}
+                              </p>
                               <p
                                 // text-xs
                                 className={`text-[11px] hidden text-right  ${
@@ -462,7 +465,7 @@ export default function Addons({
                               <div
                                 className={`text-sm text-left text-[#fbe899] `}
                               >
-                                Quantity
+                                Select Quantity
                               </div>
                               <div className={`flex`}>
                                 <div
