@@ -62,26 +62,56 @@ export default function Addons({
     expandAddonFn();
   };
 
+  // const handleQuantity = (action, id) => {
+  //   if (loading) {
+  //     return;
+  //   }
+  //   const updateList = (list) => {
+  //     return list.map((addon) => {
+  //       if (id === addon.id)
+  //         if (
+  //           action === quantityActions.INCREMENT &&
+  //           addon.qty < Number(addon.available_inventory)
+  //         )
+  //           addon.qty += 1;
+  //         else if (action === quantityActions.DECREMENT && addon.qty > 0)
+  //           addon.qty -= 1;
+  //       return addon;
+  //     });
+  //   };
+  //   const orgList = updateList(addonList);
+  //   setAddonList(orgList);
+  // };
+
   const handleQuantity = (action, id) => {
     if (loading) {
       return;
     }
+  
     const updateList = (list) => {
       return list.map((addon) => {
-        if (id === addon.id)
+        if (id === addon.id) {
           if (
             action === quantityActions.INCREMENT &&
             addon.qty < Number(addon.available_inventory)
-          )
+          ) {
             addon.qty += 1;
-          else if (action === quantityActions.DECREMENT && addon.qty > 0)
+          } else if (action === quantityActions.DECREMENT && addon.qty > 0) {
             addon.qty -= 1;
+            // If qty becomes 0, clear selectedDates
+            if (addon.qty === 0) {
+              addon.selectedDates = [];
+            }
+          }
+        }
         return addon;
       });
     };
+  
     const orgList = updateList(addonList);
     setAddonList(orgList);
   };
+  
 
   const inventoryCheck = () => {
     return (
