@@ -137,7 +137,7 @@ export default function Ticket({
         setSpinner(false);
       }, 1000);
     };
-
+    sessionStorage.clear();
     getOrderDetails();
   }, []);
 
