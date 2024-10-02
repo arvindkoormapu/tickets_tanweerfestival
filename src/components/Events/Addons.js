@@ -62,56 +62,6 @@ export default function Addons({
     expandAddonFn();
   };
 
-  // const handleQuantity = (action, id) => {
-  //   if (loading) {
-  //     return;
-  //   }
-  //   const updateList = (list) => {
-  //     return list.map((addon) => {
-  //       if (id === addon.id)
-  //         if (
-  //           action === quantityActions.INCREMENT &&
-  //           addon.qty < Number(addon.available_inventory)
-  //         )
-  //           addon.qty += 1;
-  //         else if (action === quantityActions.DECREMENT && addon.qty > 0)
-  //           addon.qty -= 1;
-  //       return addon;
-  //     });
-  //   };
-  //   const orgList = updateList(addonList);
-  //   setAddonList(orgList);
-  // };
-
-  // const handleQuantity = (action, id) => {
-  //   if (loading) {
-  //     return;
-  //   }
-
-  //   const updateList = (list) => {
-  //     return list.map((addon) => {
-  //       if (id === addon.id) {
-  //         if (
-  //           action === quantityActions.INCREMENT &&
-  //           addon.qty < Number(addon.available_inventory)
-  //         ) {
-  //           addon.qty += 1;
-  //         } else if (action === quantityActions.DECREMENT && addon.qty > 0) {
-  //           addon.qty -= 1;
-  //           // If qty becomes 0, clear selectedDates
-  //           if (addon.qty === 0) {
-  //             addon.selectedDates = [];
-  //           }
-  //         }
-  //       }
-  //       return addon;
-  //     });
-  //   };
-
-  //   const orgList = updateList(addonList);
-  //   setAddonList(orgList);
-  // };
-
   const handleQuantity = (action, id, groupedDates, showToast) => {
     if (loading) {
       return;
@@ -119,42 +69,40 @@ export default function Addons({
   
     const updateList = (list) => {
       return list.map((addon) => {
-        if (addon.id === id) {
-          // Check if there are selected dates and time slots
-          if (addon.selectedDates.length > 0) {
-            const hasInventoryIssue = addon.selectedDates.some((selectedDate) => {
-              if (!groupedDates[selectedDate.date]) {
-                return false;
-              }
-  
-              // Find the selected time slot
-              const selectedSlot = groupedDates[selectedDate.date].find(
-                (slot) => slot.id === selectedDate.time_slot_id
-              );
-  
-              // Check if the qty exceeds available inventory
-              return selectedSlot && addon.qty + 1 > selectedSlot.available_inventory;
-            });
-  
-            // If there is an inventory issue, show toast and prevent increment
-            if (hasInventoryIssue && action === quantityActions.INCREMENT) {
-              toast.error(`Only (${addon.qty}) available inventory for this slot.`);
-              return addon; // Do nothing if inventory issue exists
-            }
-          }
-  
-          // Increment or decrement qty
-          if (action === quantityActions.INCREMENT) {
-            addon.qty += 1;
-          } else if (action === quantityActions.DECREMENT && addon.qty > 0) {
-            addon.qty -= 1;
-            if (addon.qty === 0) {
-              addon.selectedDates = []; // Clear selected dates if qty is 0
-            }
-          }
-  
-          return addon;
+        // Ensure qty is initialized if it's not defined
+        if (typeof addon.qty === 'undefined' || addon.qty === null) {
+          addon.qty = 0; // Initialize qty to 0
         }
+  
+        let maxAvailableInventory;
+  
+        // Check if slots are available
+        if (addon.slots && addon.slots.length > 0) {
+          // Calculate the maximum available inventory from the slots
+          maxAvailableInventory = Math.max(
+            ...addon.slots.map((slot) => Number(slot.available_inventory))
+          );
+        } else {
+          // If there are no slots, use the addon available_inventory
+          maxAvailableInventory = Number(addon.available_inventory);
+        }
+  
+        // Stop incrementing qty if it matches or exceeds the maximum available inventory
+        if (action === quantityActions.INCREMENT && addon.qty >= maxAvailableInventory) {
+          toast.error(`Maximum available inventory is ${maxAvailableInventory}.`);
+          return addon; // Prevent further actions if the qty matches or exceeds the max inventory
+        }
+  
+        // Allow user to adjust qty
+        if (action === quantityActions.INCREMENT) {
+          addon.qty += 1;
+        } else if (action === quantityActions.DECREMENT && addon.qty > 0) {
+          addon.qty -= 1;
+          if (addon.qty === 0) {
+            addon.selectedDates = []; // Clear selected dates if qty is 0
+          }
+        }
+  
         return addon;
       });
     };
@@ -165,7 +113,6 @@ export default function Addons({
   
   
   
-
   const inventoryCheck = () => {
     return (
       addonList.length > 0 &&

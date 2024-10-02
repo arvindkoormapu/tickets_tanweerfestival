@@ -17,6 +17,7 @@ export default function LoginRedirect() {
     const handleRegister = async () => {
       setLoading(true);
       const formData = new FormData();
+      console.log('location.state', location.state)
       formData.append("action", "googleLogin");
       formData.append("token", location.state);
       const data = await fetchClient(formData, "POST", "");
