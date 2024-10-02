@@ -314,7 +314,7 @@ export default function Pay({
                   <span>Pay with Card</span>
                 </label>
 
-                {isApplePayAvailable && (
+                {/* {isApplePayAvailable && (
                   <label className="flex items-center space-x-2">
                     <input
                       type="radio"
@@ -325,7 +325,7 @@ export default function Pay({
                     />
                     <span>Apple Pay</span>
                   </label>
-                )}
+                )} */}
 
                 <label className="flex items-center space-x-2">
                   <input
