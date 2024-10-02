@@ -54,6 +54,8 @@ export default function Pay({
       "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
   });
 
+  
+
   useEffect(() => {
     setIsApplePayAvailable(
       (typeof navigator !== "undefined" &&
