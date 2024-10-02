@@ -393,7 +393,10 @@ export default function Events() {
       packages: [
         {
           package_id: selectedTicket.id,
-          date: dateList.filter((dt) => dt.selected).map((date) => date.value),
+          // date: dateList.filter((dt) => dt.selected).map((date) => date.value),
+          date: dateList.filter((dt) => dt.selected).length > 0 
+  ? dateList.filter((dt) => dt.selected).map((date) => date.value) 
+  : dateList.map((date) => date.value),
           tickets: ticketList
             .find((ticket) => ticket.id === selectedTicket.id)
             .tickets.map((tkt) => {
