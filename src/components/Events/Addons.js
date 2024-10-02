@@ -83,26 +83,77 @@ export default function Addons({
   //   setAddonList(orgList);
   // };
 
-  const handleQuantity = (action, id) => {
+  // const handleQuantity = (action, id) => {
+  //   if (loading) {
+  //     return;
+  //   }
+
+  //   const updateList = (list) => {
+  //     return list.map((addon) => {
+  //       if (id === addon.id) {
+  //         if (
+  //           action === quantityActions.INCREMENT &&
+  //           addon.qty < Number(addon.available_inventory)
+  //         ) {
+  //           addon.qty += 1;
+  //         } else if (action === quantityActions.DECREMENT && addon.qty > 0) {
+  //           addon.qty -= 1;
+  //           // If qty becomes 0, clear selectedDates
+  //           if (addon.qty === 0) {
+  //             addon.selectedDates = [];
+  //           }
+  //         }
+  //       }
+  //       return addon;
+  //     });
+  //   };
+
+  //   const orgList = updateList(addonList);
+  //   setAddonList(orgList);
+  // };
+
+  const handleQuantity = (action, id, groupedDates, showToast) => {
     if (loading) {
       return;
     }
   
     const updateList = (list) => {
       return list.map((addon) => {
-        if (id === addon.id) {
-          if (
-            action === quantityActions.INCREMENT &&
-            addon.qty < Number(addon.available_inventory)
-          ) {
+        if (addon.id === id) {
+          // Check if there are selected dates and time slots
+          if (addon.selectedDates.length > 0) {
+            const hasInventoryIssue = addon.selectedDates.some((selectedDate) => {
+              if (!groupedDates[selectedDate.date]) {
+                return false;
+              }
+  
+              // Find the selected time slot
+              const selectedSlot = groupedDates[selectedDate.date].find(
+                (slot) => slot.id === selectedDate.time_slot_id
+              );
+  
+              // Check if the qty exceeds available inventory
+              return selectedSlot && addon.qty + 1 > selectedSlot.available_inventory;
+            });
+  
+            // If there is an inventory issue, show toast and prevent increment
+            if (hasInventoryIssue && action === quantityActions.INCREMENT) {
+              toast.error(`Only (${addon.qty}) available inventory for this slot.`);
+              return addon; // Do nothing if inventory issue exists
+            }
+          }
+  
+          // Increment or decrement qty
+          if (action === quantityActions.INCREMENT) {
             addon.qty += 1;
           } else if (action === quantityActions.DECREMENT && addon.qty > 0) {
             addon.qty -= 1;
-            // If qty becomes 0, clear selectedDates
             if (addon.qty === 0) {
-              addon.selectedDates = [];
+              addon.selectedDates = []; // Clear selected dates if qty is 0
             }
           }
+  
+          return addon;
         }
         return addon;
       });
@@ -111,6 +162,8 @@ export default function Addons({
     const orgList = updateList(addonList);
     setAddonList(orgList);
   };
+  
+  
   
 
   const inventoryCheck = () => {
@@ -232,27 +285,65 @@ export default function Addons({
   };
 
   // Handle Time Slot Selection
-  const handleSlotChange = (addon_id, e, date) => {
-    const timeSlot = e.target.value;
-    const timeSlotId = e.target.getAttribute("data-timeslot-id");
+  // const handleSlotChange = (addon_id, e, date) => {
+  //   const timeSlot = e.target.value;
+  //   const timeSlotId = e.target.getAttribute("data-timeslot-id");
 
+  //   setAddonList((prevAddonList) =>
+  //     prevAddonList.map((addon) => {
+  //       if (addon.id === addon_id) {
+  //         // Update or replace the time slot for the given date
+  //         const newSelectedDates = addon.selectedDates.map((sd) =>
+  //           sd.date === date ? { date, timeSlot, time_slot_id: timeSlotId } : sd
+  //         );
+
+  //         return {
+  //           ...addon,
+  //           selectedDates: newSelectedDates,
+  //         };
+  //       }
+  //       return addon;
+  //     })
+  //   );
+  // };
+
+  const handleSlotChange = (addonId, event, date, groupedDates) => {
+    const timeSlot = event.target.value;
+    const selectedSlotId = event.target.getAttribute("data-timeslot-id");
+  
     setAddonList((prevAddonList) =>
       prevAddonList.map((addon) => {
-        if (addon.id === addon_id) {
-          // Update or replace the time slot for the given date
-          const newSelectedDates = addon.selectedDates.map((sd) =>
-            sd.date === date ? { date, timeSlot, time_slot_id: timeSlotId } : sd
+        if (addon.id === addonId) {
+          const selectedSlot = groupedDates[date].find(
+            (slot) => slot.id === selectedSlotId
           );
-
-          return {
-            ...addon,
-            selectedDates: newSelectedDates,
-          };
+          // Check if the selected slot has enough available inventory for the selected qty
+          if (selectedSlot && addon.qty > selectedSlot.available_inventory) {
+            alert(
+              `Selected quantity (${addon.qty}) exceeds available inventory (${selectedSlot.available_inventory}) for this slot.`
+            );
+            return addon; // Do nothing if slot can't handle the quantity
+          }
+  
+          // Proceed with normal time slot selection logic if the slot is valid
+          const updatedSelectedDates = addon.selectedDates.map((d) => {
+            if (d.date === date) {
+              return {
+                ...d,
+                timeSlot: timeSlot, // Update time slot
+                time_slot_id: selectedSlot.id,
+              };
+            }
+            return d;
+          });
+  
+          return { ...addon, selectedDates: updatedSelectedDates };
         }
         return addon;
       })
     );
   };
+  
 
   const handleFilterChange = (filter) => {
     if (loading) {
@@ -343,6 +434,21 @@ export default function Addons({
     // If all conditions pass, proceed to the next step
     handleNextStep();
   };
+
+
+  // Function to check if the entire tab (date) should be disabled
+const getIsTabDisabled = (addon, date, groupedDates) => {
+  // Check if all time slots on this date have insufficient available inventory
+  return groupedDates[date].every(
+    (slot) => addon.qty > slot.available_inventory
+  );
+};
+
+// Function to check if a particular time slot should be disabled
+const getIsSlotDisabled = (addon, slot) => {
+  // Disable the slot if its available inventory is less than the selected quantity
+  return addon.qty > slot.available_inventory;
+};
 
   return (
     <div className="addons flex flex-col min-h-full sm:px-6 sm:py-12 h-[100vh] sm:h-auto pb-0">
@@ -446,9 +552,12 @@ export default function Addons({
                                   : "text-primary-orange"
                               }`}
                             >
-                              Price: AED {" "}
-                              {addon.selectedDates && addon.selectedDates.length !== 0
-                                ? addon.price * addon.qty * addon.selectedDates.length
+                              Price: AED{" "}
+                              {addon.selectedDates &&
+                              addon.selectedDates.length !== 0
+                                ? addon.price *
+                                  addon.qty *
+                                  addon.selectedDates.length
                                 : addon.price * addon.qty}
                             </p>
                             {/* )} */}
@@ -503,7 +612,8 @@ export default function Addons({
                                     e.stopPropagation();
                                     handleQuantity(
                                       quantityActions.DECREMENT,
-                                      addon.id
+                                      addon.id,
+                                      groupedDates
                                     );
                                   }}
                                   className="h-[30px] w-[30px] rounded-[2rem] text-center border border-[#FBE899] cursor-pointer flex flex-col items-center justify-center"
@@ -530,7 +640,8 @@ export default function Addons({
                                     e.stopPropagation();
                                     handleQuantity(
                                       quantityActions.INCREMENT,
-                                      addon.id
+                                      addon.id,
+                                      groupedDates
                                     );
                                   }}
                                   className="h-[30px] w-[30px] rounded-[2rem] text-center border border-[#FBE899] cursor-pointer flex flex-col items-center justify-center"
@@ -569,6 +680,14 @@ export default function Addons({
                                         );
                                       const isSelected = !!selectedDate;
 
+                                      // Disable the tab if available inventory is less than the selected qty
+                                      const isTabDisabled = groupedDates[
+                                        date
+                                      ].every(
+                                        (slot) =>
+                                          addon.qty > slot.available_inventory
+                                      );
+
                                       return (
                                         <div key={date} className="mb-4">
                                           <div className="flex items-center">
@@ -576,23 +695,18 @@ export default function Addons({
                                               // Tab-like UI when `allDayEvent` is true
                                               <div
                                                 onClick={() => {
-                                                  if (addon.qty > 0) {
-                                                    // Only allow date selection if quantity is greater than 0
-                                                    handleDateChange(
-                                                      addon.id,
-                                                      date,
-                                                      groupedDates,
-                                                      true
-                                                    );
+                                                  if (addon.qty > 0 && !getIsTabDisabled(addon, date, groupedDates)) {
+                                                    // Only allow date selection if quantity is greater than 0 and tab is not disabled
+                                                    handleDateChange(addon.id, date, groupedDates);
                                                     setActiveDate(date); // Set active date to show time slots for tabs
-                                                  }
+                                                  } 
                                                 }}
                                                 className={`cursor-pointer px-4 py-1 border ${
                                                   isSelected
                                                     ? "border-blue-600 bg-[#fff] text-primary-orange"
                                                     : "border-gray-300 text-l-orange"
                                                 } rounded-lg text-sm ${
-                                                  addon.qty === 0
+                                                  addon.qty === 0 || getIsTabDisabled(addon, date, groupedDates)
                                                     ? "cursor-not-allowed opacity-50"
                                                     : ""
                                                 }`} // Disable styles when qty is 0
@@ -649,12 +763,14 @@ export default function Addons({
                                                     const isTimeSlotSelected =
                                                       selectedDate?.timeSlot ===
                                                       slot.time_slot;
-
+                                                      const isSlotDisabled = getIsSlotDisabled(addon, slot);
                                                     return (
                                                       slot.time_slot && (
                                                         <label
                                                           key={index}
-                                                          className="flex items-center mb-2 cursor-pointer"
+                                                          className={`flex items-center mb-2 cursor-pointer ${
+                                                            isSlotDisabled ? "cursor-not-allowed opacity-50" : ""
+                                                          }`}
                                                         >
                                                           <input
                                                             type="radio"
@@ -672,8 +788,12 @@ export default function Addons({
                                                               handleSlotChange(
                                                                 addon.id,
                                                                 e,
-                                                                date
+                                                                date,
+                                                                groupedDates
                                                               )
+                                                            }
+                                                            disabled={
+                                                              isSlotDisabled
                                                             }
                                                             className="h-4 w-4 border border-gray-300 rounded-full checked:bg-[#fbe899] checked:border-[#fbe899] focus:outline-none mr-3"
                                                           />
@@ -694,7 +814,6 @@ export default function Addons({
                                 </div>
                               </>
                             )}
-
                             {/* TIME SLOTS - END */}
 
                             {addon.img && (

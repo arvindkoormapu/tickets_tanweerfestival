@@ -60,7 +60,7 @@ export default function Ticket({
   const [spinner, setSpinner] = useState(false);
   const [orderDetails, setOrderDetails] = useState([]);
   const [purchaseList, setPurchaseList] = useState();
-  const [calendarDate, setCalendarDate] = useState("2023-11-24");
+  const [calendarDate, setCalendarDate] = useState("2024-11-22");
   const [priceTotal, setPriceTotal] = useState(0);
 
   const params = useParams();
@@ -238,12 +238,12 @@ export default function Ticket({
                           />
                           <button
                             className="bg-blue-500 text-xs text-white font-bold mt-2 px-4 py-1 rounded hover:bg-blue-700 transition duration-200 border border-blue-500"
-                            // onClick={() =>
-                            //   handleDownloadPdf(
-                            //     qrcode.pdf_path,
-                            //     order.ticketData[0].ticket_name
-                            //   )
-                            // }
+                            onClick={() =>
+                              handleDownloadPdf(
+                                qrcode.pdf_path,
+                                order.ticketData[0].ticket_name
+                              )
+                            }
                           >
                             Download Ticket PDF
                           </button>
@@ -342,7 +342,7 @@ export default function Ticket({
                     <div className="flex flex-row items-center">
                       <div className="pr-5">
                         <QRCode
-                          size={100}
+                          size={120}
                           className="h-auto max-w-full rounded-[4px] p-2 bg-white"
                           value={elm.qrcodes.qrcode_image_path}
                           viewBox={`0 0 100 100`}
@@ -359,7 +359,19 @@ export default function Ticket({
                           topData={"Price"}
                           bottomData={"AED " + elm.price}
                         />
+                         <button
+                            className="bg-blue-500 text-xs text-white font-bold mt-2 px-4 py-1 rounded hover:bg-blue-700 transition duration-200 border border-blue-500"
+                            onClick={() =>
+                              handleDownloadPdf(
+                                elm.qrcodes.pdf_path,
+                                elm.name
+                              )
+                            }
+                          >
+                            Download Ticket PDF
+                          </button>
                       </div>
+                     
                     </div>
                   </div>
                 </div>
