@@ -420,7 +420,7 @@ export default function Events() {
                   qty: addon.qty,
                   price: addon.price, // Assuming you have the price here
                   time_slot_id: null, // Set to null if no selectedDates
-                  event_date: null, // Set to null if no selectedDates
+                  event_date: ['2024-11-22', '2024-11-23', '2024-11-24'], // Set to null if no selectedDates
                 };
               }
             }),

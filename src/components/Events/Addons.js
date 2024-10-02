@@ -69,40 +69,58 @@ export default function Addons({
   
     const updateList = (list) => {
       return list.map((addon) => {
-        // Ensure qty is initialized if it's not defined
-        if (typeof addon.qty === 'undefined' || addon.qty === null) {
-          addon.qty = 0; // Initialize qty to 0
-        }
+        if (addon.id === id) {
+          // Calculate the maximum available inventory for the addon
+          let maxAvailableInventory = 0;
   
-        let maxAvailableInventory;
-  
-        // Check if slots are available
-        if (addon.slots && addon.slots.length > 0) {
-          // Calculate the maximum available inventory from the slots
-          maxAvailableInventory = Math.max(
-            ...addon.slots.map((slot) => Number(slot.available_inventory))
-          );
-        } else {
-          // If there are no slots, use the addon available_inventory
-          maxAvailableInventory = Number(addon.available_inventory);
-        }
-  
-        // Stop incrementing qty if it matches or exceeds the maximum available inventory
-        if (action === quantityActions.INCREMENT && addon.qty >= maxAvailableInventory) {
-          toast.error(`Maximum available inventory is ${maxAvailableInventory}.`);
-          return addon; // Prevent further actions if the qty matches or exceeds the max inventory
-        }
-  
-        // Allow user to adjust qty
-        if (action === quantityActions.INCREMENT) {
-          addon.qty += 1;
-        } else if (action === quantityActions.DECREMENT && addon.qty > 0) {
-          addon.qty -= 1;
-          if (addon.qty === 0) {
-            addon.selectedDates = []; // Clear selected dates if qty is 0
+          // Check if slots are available
+          if (addon.slots && addon.slots.length > 0) {
+            // Calculate the maximum available inventory from the slots
+            maxAvailableInventory = Math.max(
+              ...addon.slots.map((slot) => Number(slot.available_inventory))
+            );
+          } else {
+            // If there are no slots, use the addon available_inventory
+            maxAvailableInventory = Number(addon.available_inventory);
           }
-        }
   
+          // Stop incrementing qty if it matches or exceeds the maximum available inventory
+          if (action === quantityActions.INCREMENT && addon.qty >= maxAvailableInventory) {
+            toast.error(`Maximum available inventory is ${maxAvailableInventory}.`);
+            return addon; // Prevent further actions if the qty matches the max inventory
+          }
+  
+          // Allow user to adjust qty
+          if (action === quantityActions.INCREMENT) {
+            addon.qty += 1;
+  
+            // Check if the selected time slot has enough inventory for the new qty
+            if (addon.selectedDates.length > 0) {
+              addon.selectedDates = addon.selectedDates.map((selectedDate) => {
+                const selectedSlot = groupedDates[selectedDate.date]?.find(
+                  (slot) => slot.id === selectedDate.time_slot_id
+                );
+  
+                // If the selected time slot's available inventory is less than the new qty, clear the slot selection
+                if (selectedSlot && addon.qty > selectedSlot.available_inventory) {
+                  return {
+                    ...selectedDate,
+                    timeSlot: null,
+                    time_slot_id: null,
+                  };
+                }
+                return selectedDate;
+              });
+            }
+          } else if (action === quantityActions.DECREMENT && addon.qty > 0) {
+            addon.qty -= 1;
+            if (addon.qty === 0) {
+              addon.selectedDates = []; // Clear selected dates if qty is 0
+            }
+          }
+  
+          return addon;
+        }
         return addon;
       });
     };
@@ -179,42 +197,110 @@ export default function Addons({
     }).format(date);
   };
 
+  // const handleDateChange = (addon_id, date, groupedDates) => {
+  //   setAddonList((prevAddonList) =>
+  //     prevAddonList.map((addon) => {
+  //       if (addon.id === addon_id) {
+  //         // Format the date for consistent comparison
+  //         const formattedDate = new Date(date).toISOString().split('T')[0]; // Assuming you are comparing ISO dates
+  
+  //         // Find if the date exists in selectedDates
+  //         const existingDateIndex = addon.selectedDates.findIndex(
+  //           (d) => new Date(d.date).toISOString().split('T')[0] === formattedDate
+  //         );
+  
+  //         console.log('addon.selectedDates', addon.selectedDates);
+  //         console.log('date', formattedDate);
+  //         console.log('existingDateIndex', existingDateIndex);
+  
+  //         if (existingDateIndex !== -1) {
+  //           // If date exists, remove it (toggle off)
+  //           const newSelectedDates = [...addon.selectedDates];
+  //           newSelectedDates.splice(existingDateIndex, 1);
+  //           console.log('newSelectedDates', newSelectedDates);
+  //           return { ...addon, selectedDates: newSelectedDates };
+  //         } else {
+  //           // If date doesn't exist, add it (toggle on)
+  //           const availableSlots = groupedDates[date].filter(
+  //             (slot) => slot.time_slot !== ""
+  //           );
+  
+  //           let timeSlotId = null;
+  //           let timeSlot = null;
+  
+  //           if (availableSlots.length > 0) {
+  //             timeSlotId = availableSlots.length === 1 ? availableSlots[0].id : null;
+  //             timeSlot = availableSlots.length === 1 ? availableSlots[0].time_slot : null;
+  //           }
+  
+  //           const newDate = {
+  //             date: formattedDate,
+  //             timeSlot,
+  //             time_slot_id: timeSlotId,
+  //           };
+  
+  //           const updatedSelectedDates = [...addon.selectedDates, newDate];
+  
+  //           return {
+  //             ...addon,
+  //             selectedDates: updatedSelectedDates,
+  //           };
+  //         }
+  //       }
+  //       return addon;
+  //     })
+  //   );
+  
+  //   // Update the active date if it's not a multi-select
+  //   setActiveDate(
+  //     groupedDates[date].some((slot) => slot.time_slot !== "") ? date : null
+  //   );
+  // };
+  
   const handleDateChange = (addon_id, date, groupedDates) => {
     setAddonList((prevAddonList) =>
       prevAddonList.map((addon) => {
         if (addon.id === addon_id) {
-          const isMultiSelect = groupedDates[date].some(
-            (slot) => slot.time_slot === ""
-          );
+          // Ensure consistent date format for comparison
+          const formattedDate = new Date(date).toISOString().split('T')[0];
+  
+          // Find if the date already exists in selectedDates (to toggle it off)
           const existingDateIndex = addon.selectedDates.findIndex(
-            (d) => d.date === date
+            (d) => new Date(d.date).toISOString().split('T')[0] === formattedDate
           );
-
+  
           if (existingDateIndex !== -1) {
-            // For multi-select, allow toggling off
+            // If the date exists, toggle it off by removing it
             const newSelectedDates = [...addon.selectedDates];
             newSelectedDates.splice(existingDateIndex, 1);
             return { ...addon, selectedDates: newSelectedDates };
           } else {
-            // Automatically select time slot if only one is available
-            const availableSlots = groupedDates[date].filter(
-              (slot) => slot.time_slot !== ""
-            );
-            const timeSlotId =
-              availableSlots.length === 1 ? availableSlots[0].id : null;
-            const timeSlot =
-              availableSlots.length === 1 ? availableSlots[0].time_slot : null;
-
+            let availableSlots = [];
+  
+            // Check if groupedDates[date] exists and has slots before filtering
+            if (groupedDates[date] && groupedDates[date].length > 0) {
+              availableSlots = groupedDates[date]; // Take all slots, even if time_slot is empty
+            }
+  
+            let timeSlotId = null;
+            let timeSlot = null;
+  
+            // Update timeSlotId and timeSlot even if time_slot is an empty string
+            if (availableSlots.length > 0) {
+              // Pick the first slot if there's only one available
+              timeSlotId = availableSlots.length === 1 ? availableSlots[0].id : null;
+              timeSlot = availableSlots.length === 1 ? availableSlots[0].time_slot : null;
+            }
+  
             const newDate = {
-              date,
-              timeSlot,
-              time_slot_id: timeSlotId,
+              date: formattedDate,
+              timeSlot, // Can be an empty string or null
+              time_slot_id: timeSlotId, // Can be null if no timeSlot available
             };
-
-            const updatedSelectedDates = isMultiSelect
-              ? [...addon.selectedDates, newDate]
-              : [newDate];
-
+            
+            // Append the new date to selectedDates (multi-select behavior)
+            const updatedSelectedDates = [...addon.selectedDates, newDate];
+  
             return {
               ...addon,
               selectedDates: updatedSelectedDates,
@@ -224,73 +310,32 @@ export default function Addons({
         return addon;
       })
     );
-
-    // Update the active date only if it's not a multi-select date
-    setActiveDate(
-      groupedDates[date].some((slot) => slot.time_slot !== "") ? date : null
-    );
-  };
-
-  // Handle Time Slot Selection
-  // const handleSlotChange = (addon_id, e, date) => {
-  //   const timeSlot = e.target.value;
-  //   const timeSlotId = e.target.getAttribute("data-timeslot-id");
-
-  //   setAddonList((prevAddonList) =>
-  //     prevAddonList.map((addon) => {
-  //       if (addon.id === addon_id) {
-  //         // Update or replace the time slot for the given date
-  //         const newSelectedDates = addon.selectedDates.map((sd) =>
-  //           sd.date === date ? { date, timeSlot, time_slot_id: timeSlotId } : sd
-  //         );
-
-  //         return {
-  //           ...addon,
-  //           selectedDates: newSelectedDates,
-  //         };
-  //       }
-  //       return addon;
-  //     })
-  //   );
-  // };
-
-  const handleSlotChange = (addonId, event, date, groupedDates) => {
-    const timeSlot = event.target.value;
-    const selectedSlotId = event.target.getAttribute("data-timeslot-id");
   
+    // Update the active date regardless of the time_slot (empty or not)
+    setActiveDate(groupedDates[date] ? date : null);
+  };
+  
+  // Handle Time Slot Selection
+  const handleSlotChange = (addon_id, e, date) => {
+    const timeSlot = e.target.value;
+    const timeSlotId = e.target.getAttribute("data-timeslot-id");
+
     setAddonList((prevAddonList) =>
       prevAddonList.map((addon) => {
-        if (addon.id === addonId) {
-          const selectedSlot = groupedDates[date].find(
-            (slot) => slot.id === selectedSlotId
+        if (addon.id === addon_id) {
+          // Update or replace the time slot for the given date
+          const newSelectedDates = addon.selectedDates.map((sd) =>
+            sd.date === date ? { date, timeSlot, time_slot_id: timeSlotId } : sd
           );
-          // Check if the selected slot has enough available inventory for the selected qty
-          if (selectedSlot && addon.qty > selectedSlot.available_inventory) {
-            alert(
-              `Selected quantity (${addon.qty}) exceeds available inventory (${selectedSlot.available_inventory}) for this slot.`
-            );
-            return addon; // Do nothing if slot can't handle the quantity
-          }
-  
-          // Proceed with normal time slot selection logic if the slot is valid
-          const updatedSelectedDates = addon.selectedDates.map((d) => {
-            if (d.date === date) {
-              return {
-                ...d,
-                timeSlot: timeSlot, // Update time slot
-                time_slot_id: selectedSlot.id,
-              };
-            }
-            return d;
-          });
-  
-          return { ...addon, selectedDates: updatedSelectedDates };
+          return {
+            ...addon,
+            selectedDates: newSelectedDates,
+          };
         }
         return addon;
       })
     );
   };
-  
 
   const handleFilterChange = (filter) => {
     if (loading) {
