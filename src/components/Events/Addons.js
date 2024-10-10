@@ -257,6 +257,64 @@ export default function Addons({
   //   );
   // };
   
+  // const handleDateChange = (addon_id, date, groupedDates) => {
+  //   setAddonList((prevAddonList) =>
+  //     prevAddonList.map((addon) => {
+  //       if (addon.id === addon_id) {
+  //         // Ensure consistent date format for comparison
+  //         const formattedDate = new Date(date).toISOString().split('T')[0];
+  
+  //         // Find if the date already exists in selectedDates (to toggle it off)
+  //         const existingDateIndex = addon.selectedDates.findIndex(
+  //           (d) => new Date(d.date).toISOString().split('T')[0] === formattedDate
+  //         );
+  
+  //         if (existingDateIndex !== -1) {
+  //           // If the date exists, toggle it off by removing it
+  //           const newSelectedDates = [...addon.selectedDates];
+  //           newSelectedDates.splice(existingDateIndex, 1);
+  //           return { ...addon, selectedDates: newSelectedDates };
+  //         } else {
+  //           let availableSlots = [];
+  
+  //           // Check if groupedDates[date] exists and has slots before filtering
+  //           if (groupedDates[date] && groupedDates[date].length > 0) {
+  //             availableSlots = groupedDates[date]; // Take all slots, even if time_slot is empty
+  //           }
+  
+  //           let timeSlotId = null;
+  //           let timeSlot = null;
+  
+  //           // Update timeSlotId and timeSlot even if time_slot is an empty string
+  //           if (availableSlots.length > 0) {
+  //             // Pick the first slot if there's only one available
+  //             timeSlotId = availableSlots.length === 1 ? availableSlots[0].id : null;
+  //             timeSlot = availableSlots.length === 1 ? availableSlots[0].time_slot : null;
+  //           }
+  
+  //           const newDate = {
+  //             date: formattedDate,
+  //             timeSlot, // Can be an empty string or null
+  //             time_slot_id: timeSlotId, // Can be null if no timeSlot available
+  //           };
+            
+  //           // Append the new date to selectedDates (multi-select behavior)
+  //           const updatedSelectedDates = [...addon.selectedDates, newDate];
+  
+  //           return {
+  //             ...addon,
+  //             selectedDates: updatedSelectedDates,
+  //           };
+  //         }
+  //       }
+  //       return addon;
+  //     })
+  //   );
+  
+  //   // Update the active date regardless of the time_slot (empty or not)
+  //   setActiveDate(groupedDates[date] ? date : null);
+  // };
+  
   const handleDateChange = (addon_id, date, groupedDates) => {
     setAddonList((prevAddonList) =>
       prevAddonList.map((addon) => {
@@ -264,46 +322,54 @@ export default function Addons({
           // Ensure consistent date format for comparison
           const formattedDate = new Date(date).toISOString().split('T')[0];
   
-          // Find if the date already exists in selectedDates (to toggle it off)
-          const existingDateIndex = addon.selectedDates.findIndex(
-            (d) => new Date(d.date).toISOString().split('T')[0] === formattedDate
-          );
+          // Get the available slots for the selected date
+          let availableSlots = [];
   
-          if (existingDateIndex !== -1) {
-            // If the date exists, toggle it off by removing it
-            const newSelectedDates = [...addon.selectedDates];
-            newSelectedDates.splice(existingDateIndex, 1);
-            return { ...addon, selectedDates: newSelectedDates };
+          if (groupedDates[date] && groupedDates[date].length > 0) {
+            availableSlots = groupedDates[date]; // Get all slots for the selected date
+          }
+  
+          let timeSlotId = null;
+          let timeSlot = null;
+  
+          // Set timeSlotId and timeSlot based on available slots
+          if (availableSlots.length > 0) {
+            timeSlotId = availableSlots.length === 1 ? availableSlots[0].id : null;
+            timeSlot = availableSlots.length === 1 ? availableSlots[0].time_slot : null;
+          }
+  
+          // Determine if this is an "all-day event" (multi-select allowed)
+          const allDayEvent = groupedDates[date].some((slot) => slot.time_slot === "");
+  
+          const newDate = {
+            date: formattedDate,
+            timeSlot, // Can be an empty string or null
+            time_slot_id: timeSlotId, // Can be null if no timeSlot available
+          };
+  
+          if (allDayEvent) {
+            // Multi-select behavior for all-day events
+            const selectedDateIndex = addon.selectedDates.findIndex(
+              (d) => new Date(d.date).toISOString().split('T')[0] === formattedDate
+            );
+  
+            if (selectedDateIndex !== -1) {
+              // If the date is already selected, remove it (toggle off)
+              const updatedSelectedDates = [...addon.selectedDates];
+              updatedSelectedDates.splice(selectedDateIndex, 1);
+              return { ...addon, selectedDates: updatedSelectedDates };
+            } else {
+              // Add the new date to selectedDates (multi-select behavior)
+              return {
+                ...addon,
+                selectedDates: [...addon.selectedDates, newDate],
+              };
+            }
           } else {
-            let availableSlots = [];
-  
-            // Check if groupedDates[date] exists and has slots before filtering
-            if (groupedDates[date] && groupedDates[date].length > 0) {
-              availableSlots = groupedDates[date]; // Take all slots, even if time_slot is empty
-            }
-  
-            let timeSlotId = null;
-            let timeSlot = null;
-  
-            // Update timeSlotId and timeSlot even if time_slot is an empty string
-            if (availableSlots.length > 0) {
-              // Pick the first slot if there's only one available
-              timeSlotId = availableSlots.length === 1 ? availableSlots[0].id : null;
-              timeSlot = availableSlots.length === 1 ? availableSlots[0].time_slot : null;
-            }
-  
-            const newDate = {
-              date: formattedDate,
-              timeSlot, // Can be an empty string or null
-              time_slot_id: timeSlotId, // Can be null if no timeSlot available
-            };
-            
-            // Append the new date to selectedDates (multi-select behavior)
-            const updatedSelectedDates = [...addon.selectedDates, newDate];
-  
+            // Single-select behavior for non-all-day events
             return {
               ...addon,
-              selectedDates: updatedSelectedDates,
+              selectedDates: [newDate], // Replace previous selections with the new one
             };
           }
         }
@@ -311,9 +377,11 @@ export default function Addons({
       })
     );
   
-    // Update the active date regardless of the time_slot (empty or not)
+    // Update the active date
     setActiveDate(groupedDates[date] ? date : null);
   };
+  
+
   
   // Handle Time Slot Selection
   const handleSlotChange = (addon_id, e, date) => {
@@ -671,14 +739,6 @@ const getIsSlotDisabled = (addon, slot) => {
                                           (d) => d.date === date
                                         );
                                       const isSelected = !!selectedDate;
-
-                                      // Disable the tab if available inventory is less than the selected qty
-                                      const isTabDisabled = groupedDates[
-                                        date
-                                      ].every(
-                                        (slot) =>
-                                          addon.qty > slot.available_inventory
-                                      );
 
                                       return (
                                         <div key={date} className="mb-4">

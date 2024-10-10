@@ -13,7 +13,7 @@ import LoginRedirect from "./pages/Login-Redirect";
 import TC from "./pages/TC";
 import Privacy from "./pages/Privacy";
 import OrderDetails from "./pages/OrderDetails";
-
+import useGtm from './utils/PageTracker';
 
 export default function App() {
   const routes = [
@@ -38,6 +38,7 @@ export default function App() {
 
   return (
     <Router>
+       <PageTracker />
       <ScrollToTop>
         <div className="flex-1 select-none max-w-[550px] m-auto 	">
           <Routes>
@@ -50,3 +51,8 @@ export default function App() {
     </Router>
   );
 }
+
+const PageTracker = () => {
+  useGtm(); 
+  return null;
+};

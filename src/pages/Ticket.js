@@ -121,6 +121,30 @@ export default function Ticket({
               },
             ],
           });
+
+          // const user = JSON.parse(localStorage.getItem("ajs_user_traits"));
+          // Push order data to the GTM data layer
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({
+            event: "purchase",
+            // email: user.email,
+            ecommerce: {
+              order_id: data.data[0].order_number,
+              total: data.data[0].total,
+              currency: "AED",
+              items: {
+                tickets: {
+                  name: data.data[0].ticketData[0].ticket_name,
+                  price: data.data[0].ticketData[0].price,
+                  quantity: data.data[0].ticketData[0].qty,
+                },
+                addons: data.data[0].addonData.map((product) => ({
+                  ticket_name: product.name,
+                  price: product.price,
+                })),
+              },
+            },
+          });
           setLoading(false);
         } else {
           const formData = new FormData();
@@ -359,19 +383,15 @@ export default function Ticket({
                           topData={"Price"}
                           bottomData={"AED " + elm.price}
                         />
-                         <button
-                            className="bg-blue-500 text-xs text-white font-bold mt-2 px-4 py-1 rounded hover:bg-blue-700 transition duration-200 border border-blue-500"
-                            onClick={() =>
-                              handleDownloadPdf(
-                                elm.qrcodes.pdf_path,
-                                elm.name
-                              )
-                            }
-                          >
-                            Download Ticket PDF
-                          </button>
+                        <button
+                          className="bg-blue-500 text-xs text-white font-bold mt-2 px-4 py-1 rounded hover:bg-blue-700 transition duration-200 border border-blue-500"
+                          onClick={() =>
+                            handleDownloadPdf(elm.qrcodes.pdf_path, elm.name)
+                          }
+                        >
+                          Download Ticket PDF
+                        </button>
                       </div>
-                     
                     </div>
                   </div>
                 </div>
@@ -392,7 +412,7 @@ export default function Ticket({
                   description={`${orderDetails[0].ticketData[0].ticket_name} - #${orderDetails[0].order_number} - Entry Ticket for ${orderDetails[0].ticketData[0].qty} People.`}
                   location="Mleiha, Sharjah, United Arab Emirates"
                   startDate={calendarDate}
-                  endDate={'2024-11-24'}
+                  endDate={"2024-11-24"}
                   timeZone="Asia/Dubai"
                   iCalFileName="TanweerFestival"
                   hideCheckmark={true}

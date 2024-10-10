@@ -394,9 +394,10 @@ export default function Events() {
         {
           package_id: selectedTicket.id,
           // date: dateList.filter((dt) => dt.selected).map((date) => date.value),
-          date: dateList.filter((dt) => dt.selected).length > 0 
-  ? dateList.filter((dt) => dt.selected).map((date) => date.value) 
-  : dateList.map((date) => date.value),
+          date:
+            dateList.filter((dt) => dt.selected).length > 0
+              ? dateList.filter((dt) => dt.selected).map((date) => date.value)
+              : dateList.map((date) => date.value),
           tickets: ticketList
             .find((ticket) => ticket.id === selectedTicket.id)
             .tickets.map((tkt) => {
@@ -423,7 +424,7 @@ export default function Events() {
                   qty: addon.qty,
                   price: addon.price, // Assuming you have the price here
                   time_slot_id: null, // Set to null if no selectedDates
-                  event_date: ['2024-11-22', '2024-11-23', '2024-11-24'], // Set to null if no selectedDates
+                  event_date: ["2024-11-22", "2024-11-23", "2024-11-24"], // Set to null if no selectedDates
                 };
               }
             }),
@@ -453,6 +454,29 @@ export default function Events() {
 
       setPurchaseData(data);
       setStep(4);
+      // const user = JSON.parse(localStorage.getItem("ajs_user_traits"));
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "addToCart",
+        // email: user.email,
+        ecommerce: {
+          currencyCode: "AED",
+          add: {
+            products: [
+              {
+                order_id: data.purchase_number,
+                value: data.total,
+                products: [
+                  {
+                    name: selectedTicket.package_name,
+                    price: payAmount,
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
     }
     setLoading(false);
   };
