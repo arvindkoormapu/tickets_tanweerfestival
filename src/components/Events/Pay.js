@@ -377,6 +377,7 @@ export default function Pay({
 
         <div style={{ height: "432px" }} className="mx-5 m-5">
           <iframe
+          allow="payment"
             id="saleiframe"
             name="saleiframe"
             style={{
