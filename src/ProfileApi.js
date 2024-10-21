@@ -7,6 +7,7 @@ export const profileDetails = async () => {
     window.analytics.identify(emailBase64, {
       name: data.data.name,
       email: data.data.email,
+      mobile: data.data.mobile
     });
   }
   return data ? data : "";

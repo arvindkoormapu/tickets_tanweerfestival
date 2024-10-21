@@ -331,68 +331,61 @@ export default function Addons({
   // Get available subcategories based on the selected addonFilter
   const availableSubCategories = subCategories[addonFilter] || [];
 
-  const [errorAddons, setErrorAddons] = useState([]);
-
   const handleNextStepWithValidation = () => {
-    let newErrorAddons = [];
-  
     // Check if any addon has quantity > 0 but no date selected, skipping the check if slots is empty
-    const hasMissingDate = addonList.some((addon) => {
-      if (addon.qty > 0 && addon.slots.length > 0 && addon.selectedDates.length === 0) {
-        newErrorAddons.push(addon.id);
-        return true;
-      }
-      return false;
-    });
-  
+    const hasMissingDate = addonList.some(
+      (addon) =>
+        addon.qty > 0 &&
+        addon.slots.length > 0 &&
+        addon.selectedDates.length === 0
+    );
+
     // Check if any addon has date selected but quantity is 0, skipping the check if slots is empty
-    const hasMissingQuantity = addonList.some((addon) => {
-      if (addon.qty === 0 && addon.slots.length > 0 && addon.selectedDates.length > 0) {
-        newErrorAddons.push(addon.id);
-        return true;
-      }
-      return false;
-    });
-  
+    const hasMissingQuantity = addonList.some(
+      (addon) =>
+        addon.qty === 0 &&
+        addon.slots.length > 0 &&
+        addon.selectedDates.length > 0
+    );
+
     // Check if selected dates require a time slot, but none is selected
-    const hasMissingTimeSlot = addonList.some((addon) => {
-      const hasError = addon.selectedDates.some((selectedDate) => {
+    const hasMissingTimeSlot = addonList.some((addon) =>
+      addon.selectedDates.some((selectedDate) => {
         // Find matching slot for the selected date
         const matchingSlot = addon.slots.find(
           (slot) => slot.event_date.split(" ")[0] === selectedDate.date
         );
-  
+
         // If the matching slot has time slots, check if a time slot is selected
-        if (matchingSlot && matchingSlot.time_slot !== "" && selectedDate.timeSlot === null) {
-          newErrorAddons.push(addon.id);
-          return true;
-        }
-        return false;
-      });
-      return hasError;
-    });
-  
+        return (
+          matchingSlot &&
+          matchingSlot.time_slot !== "" &&
+          selectedDate.timeSlot === null
+        );
+      })
+    );
+
     if (hasMissingDate) {
+      // Show toast message if date is not selected for any addon with selected quantity
       toast.error("Please select a date for all addons you selected.");
-    }
-  
-    if (hasMissingQuantity) {
-      toast.error("Please select a quantity for all addons you selected.");
-    }
-  
-    if (hasMissingTimeSlot) {
-      toast.error("Please select a time slot for all selected dates.");
-    }
-  
-    setErrorAddons(newErrorAddons); // Set the addons with errors
-  
-    if (newErrorAddons.length > 0) {
       return; // Prevent proceeding to the next step
     }
-  
+
+    if (hasMissingQuantity) {
+      // Show toast message if quantity is 0 but date is selected
+      toast.error("Please select a quantity for all addons you selected.");
+      return; // Prevent proceeding to the next step
+    }
+
+    if (hasMissingTimeSlot) {
+      // Show toast message if a time slot is required but not selected
+      toast.error("Please select a time slot for all selected dates.");
+      return; // Prevent proceeding to the next step
+    }
+
+    // If all conditions pass, proceed to the next step
     handleNextStep();
   };
-  
 
   // Function to check if the entire tab (date) should be disabled
   const getIsTabDisabled = (addon, date, groupedDates) => {
@@ -410,7 +403,7 @@ export default function Addons({
 
   return (
     <div className="addons flex flex-col min-h-full sm:px-6 lg:px-8 h-[100vh] sm:h-auto pb-0">
-      <div className="flex flex-row justify-between items-center border-b-[2px] border-[#731d14] p-6 sm:px-6 sm:py-6 mx-auto w-full sticky top-0 bg-[#fff] z-10">
+      <div className="flex flex-row justify-between items-center border-b-[2px] border-[#731d14] p-6 sm:px-0 sm:py-6 mx-auto w-full max-w-md sticky top-0 bg-[#fff] z-10">
         <span onClick={handlePreviousStep}>
           <BackButton />
         </span>
@@ -474,12 +467,10 @@ export default function Addons({
                         key={i}
                         id={`addonCard${addon.id}`}
                         className={`addon rounded-lg ${
-                          !loading ? "cursor-pointer" : ""
+                          !loading && "cursor-pointer"
                         } px-[28px] py-[15px] transition-all ease-in-out duration-500 ${
                           addon.selected ? "bg-secondary-orange" : "bg-[#FFF7E0]"
-                        } py-[1rem] mt-[1rem] ${
-                          errorAddons.includes(addon.id) ? "border-4 border-[#ff2d55]" : ""
-                        }`}
+                        }   `}
                       >
                         <div className="flex justify-between ">
                           <div className="flex flex-col justify-between flex-[0.8]">
@@ -844,11 +835,11 @@ export default function Addons({
           </div>
         </div>
       </div>
-      <div className="mx-auto w-full sticky bottom-0">
+      <div className="mx-auto w-full max-w-md sticky bottom-0">
         <div
           // onClick={canProceed() ? handleNextStep : null}
           onClick={!loading ? handleNextStepWithValidation : null}
-          className={`relative sm:px-6 overflow-hidden flex justify-between items-center text-white bg-primary-orange px-[1rem] py-[2rem] ${
+          className={`relative overflow-hidden flex justify-between items-center text-white bg-primary-orange px-[1rem] py-[2rem] ${
             !loading && "cursor-pointer"
           }`}
         >

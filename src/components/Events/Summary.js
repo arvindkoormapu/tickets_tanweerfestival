@@ -3,6 +3,7 @@ import Popup from "../Popup";
 import BackButton from "../BackButton";
 import CaretIcon from "../Icons/CaretIcon";
 import Loader from "../Loader";
+import Logo from "../../logo_dark.png";
 
 const noop = () => {
   alert("function called.");
@@ -80,84 +81,95 @@ export default function Summary({
   }, []);
 
   return (
-    <div className="addons flex flex-col min-h-full   sm:px-6 sm:py-12   h-[100vh] sm:h-auto pb-0  ">
-      <div className="flex flex-2 sm:flex-1 flex-col px-6 pt-12 sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6   h-min-[100vh] sm:h-auto pb-0">
+    <div className="addons flex flex-col min-h-full   sm:px-6 lg:px-8 h-[100vh] sm:h-auto pb-0">
+      <div className="flex flex-row justify-between items-center border-b-[2px] border-[#731d14] p-6 sm:px-6 sm:py-6 mx-auto w-full sticky top-0 bg-[#fff] z-10">
         <span onClick={handlePreviousStep}>
           <BackButton />
         </span>
-        <h2 className="mt-10 mb-[2rem] text-left w-full sm:w-full  text-4xl leading-9 tracking-tight text-primary-orange">
-          Your order summary
-        </h2>
+        <img
+          src={Logo}
+          alt="Visa and Mastercard Logos"
+          className={`h-[30px] w-[100%] object-contain`}
+        />
+        <div className="flex"></div>
       </div>
 
-      <div className="flex flex-1  flex-col px-6 pt-5 sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6   h-min-[100vh] sm:h-auto pb-0 justify-between">
-        <div className=" ">
-          {orderData.ticketInfo.map((ticket, i) => (
-            <div
-              key={i}
-              className={`summaryCard rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500   bg-[#FFF7E0] mt-5 `}
-            >
-              <p className="text-base font-semibold text-left text-primary-orange mb-3  ">
-                {selectedTicket.package_name}
-              </p>
-              {Object.keys(ticket).map((key) => (
-                <DataLine key={key} leftData={key} rightData={ticket[key]} />
-              ))}
-            </div>
-          ))}
-          {orderData.addonInfo.map((addon, i) => (
-            <div
-              key={i}
-              className={`summaryCard rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500    bg-[#FFF7E0] my-5   `}
-            >
-              <p className="text-base font-semibold text-left text-primary-orange mb-3">
-                Add-on{" "}
-              </p>
-              {Object.keys(addon).map((key) => (
-                <DataLine key={key} leftData={key} rightData={addon[key]} />
-              ))}
-            </div>
-          ))}
+      <div className="flex flex-1 flex-col px-6 sm:mx-auto sm:w-full h-min-[100vh] sm:h-auto pb-0 justify-between">
+        <div className="">
+          <div className="flex justify-between items-center">
+            <h2 className="text-[26px] mt-[1rem] mb-[1rem] text-left w-full text-4xl leading-9 tracking-tight text-primary-orange">
+              Your order summary
+            </h2>
+          </div>
 
-          {/* COUPON CODE  */}
-          <div className="relative w-full">
-            <input
-              id="coupon"
-              name="coupon"
-              placeholder="Coupon code"
-              type="text"
-              value={coupon}
-              onChange={(e) => setCoupon(e.target.value)}
-              className={`  focus:outline-primary-orange w-full h-14 mt-5 text-sm text-left text-[#707072]    px-5 rounded-lg border border-[#b7b7b7]`}
-            />{" "}
-            <label
-              onClick={applyCoupon}
-              className="absolute right-[2rem] top-[2.5rem] text-xs font-medium text-left text-[#111] transition-all duration-300
+          <div className="">
+            {orderData.ticketInfo.map((ticket, i) => (
+              <div
+                key={i}
+                className={`summaryCard rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500   bg-[#FFF7E0] mt-5 `}
+              >
+                <p className="text-base font-semibold text-left text-primary-orange mb-3  ">
+                  {selectedTicket.package_name}
+                </p>
+                {Object.keys(ticket).map((key) => (
+                  <DataLine key={key} leftData={key} rightData={ticket[key]} />
+                ))}
+              </div>
+            ))}
+            {orderData.addonInfo.map((addon, i) => (
+              <div
+                key={i}
+                className={`summaryCard rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500    bg-[#FFF7E0] my-5   `}
+              >
+                <p className="text-base font-semibold text-left text-primary-orange mb-3">
+                  Add-on{" "}
+                </p>
+                {Object.keys(addon).map((key) => (
+                  <DataLine key={key} leftData={key} rightData={addon[key]} />
+                ))}
+              </div>
+            ))}
+
+            {/* COUPON CODE  */}
+            <div className="relative w-full">
+              <input
+                id="coupon"
+                name="coupon"
+                placeholder="Coupon code"
+                type="text"
+                value={coupon}
+                onChange={(e) => setCoupon(e.target.value)}
+                className={`  focus:outline-primary-orange w-full h-14 mt-5 text-sm text-left text-[#707072]    px-5 rounded-lg border border-[#b7b7b7]`}
+              />{" "}
+              <label
+                onClick={applyCoupon}
+                className="absolute right-[2rem] top-[2.5rem] text-xs font-medium text-left text-[#111] transition-all duration-300
                 top-[2.5rem]
                cursor-pointer"
-            >
-              Apply
-            </label>
-            <span className="mb-[10vh]">
-              {couponApplied.show && (
-                <p
-                  className={`w-[100%] text-sm text-left ml-[1rem] mt-[.5rem] ${
-                    couponApplied.success ? "text-green" : "text-red"
-                  }`}
-                >
-                  {couponApplied.success
-                    ? `${deductedValue} AED OFF`
-                    : "Invalid / Expired Coupon"}
-                </p>
-              )}
-            </span>
+              >
+                Apply
+              </label>
+              <span className="mb-[10vh]">
+                {couponApplied.show && (
+                  <p
+                    className={`w-[100%] text-sm text-left ml-[1rem] mt-[.5rem] ${
+                      couponApplied.success ? "text-green" : "text-red"
+                    }`}
+                  >
+                    {couponApplied.success
+                      ? `${deductedValue} AED OFF`
+                      : "Invalid / Expired Coupon"}
+                  </p>
+                )}
+              </span>
+            </div>
           </div>
         </div>
       </div>
-      <div className="sm:mx-auto  w-full sm:w-full sm:max-w-md sticky sm:static bottom-0 sm:bottom-auto mt-6">
+      <div className="w-full mx-auto sticky bottom-0 mt-6">
         <div
           onClick={handlePay}
-          className={`relative overflow-hidden flex justify-between items-center text-screen-light bg-primary-orange px-[1rem] py-[2rem] ${
+          className={`relative sm:px-6 overflow-hidden flex justify-between items-center text-screen-light bg-primary-orange px-[1rem] py-[2rem] ${
             !loading && "cursor-pointer"
           }`}
         >

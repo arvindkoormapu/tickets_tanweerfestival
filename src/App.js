@@ -14,6 +14,7 @@ import TC from "./pages/TC";
 import Privacy from "./pages/Privacy";
 import OrderDetails from "./pages/OrderDetails";
 import useGtm from './utils/PageTracker';
+import StoreMobileNumber from './pages/StoreMobileNumber'
 
 export default function App() {
   const routes = [
@@ -29,7 +30,7 @@ export default function App() {
     { path: "/terms-conditions", page: TC },
     { path: "/privacy-policy", page: Privacy },
     { path: "/order-details", page: OrderDetails },
-
+    { path: "/complete-profile", page: StoreMobileNumber }
   ];
 
   useEffect(() => {

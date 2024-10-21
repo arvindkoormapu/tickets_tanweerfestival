@@ -9,6 +9,7 @@ import { fetchClient } from "../AxiosConfig";
 import moment from "../../node_modules/moment/moment";
 import { title } from "../constants/index";
 import { profileDetails } from "../ProfileApi";
+import Logo from "../logo_dark.png";
 
 const DataLine = ({
   leftData = "Loading...",
@@ -131,68 +132,75 @@ export default function Profile({
   };
 
   return (
-    <div className="addons flex flex-col min-h-full   sm:px-6 sm:py-12   h-[100vh] sm:h-auto pb-0  ">
-      <div className="flex flex-1 flex-col px-6 pt-12 sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6 sm:py-12 h-min-[100vh] sm:h-auto pb-0 justify-between">
-        <div className=" ">
-          <Link to="/">
-            <BackButton />
-          </Link>
-          <h2 className="my-10  text-left w-[70%] sm:w-full  text-4xl leading-9 tracking-tight text-primary-orange">
-            My profile
-          </h2>
+    <div className="addons flex flex-col min-h-full sm:px-6  lg:px-8 h-[100vh] sm:h-auto pb-0">
+      <div className="flex flex-row justify-between items-center border-b-[2px] border-[#731d14] p-6 sm:px-6 sm:py-6 mx-auto w-full sticky top-0 bg-[#fff] z-10">
+        <Link to="/">
+          <BackButton />
+        </Link>
+        <img
+          src={Logo}
+          alt="Visa and Mastercard Logos"
+          className={`h-[30px] w-[100%] object-contain`}
+        />
+        <div className="flex"></div>
+      </div>
+      <div className="flex flex-1 flex-col px-6 sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6  h-min-[100vh] sm:h-auto pb-0 justify-start">
+        <h2 className="text-[26px] mt-[1rem] mb-[1rem] text-left w-full text-4xl leading-9 tracking-tight text-primary-orange">
+          My profile
+        </h2>
+        <div className="my-6 flex flex-col gap-[30px]">
+          {orderHistory.map((orderHis, i) => (
+            <Link to={`/view-ticket/${orderHis.purchase_number}`}>
+              <div
+                key={i}
+                // id={orderHis.id}
+                className={`ticket rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500 ${"bg-d-orange"}   `}
+              >
+                <div className="flex justify-between ">
+                  <div className="flex flex-col justify-between flex-[0.9]">
+                    <p
+                      className={`text-base  mb-3 ${"font-medium text-white"}`}
+                    >
+                      {orderHis.ticketData[0].ticket_name}
+                    </p>
+                  </div>
 
-          <div className="my-6 flex flex-col gap-[30px]">
-            {orderHistory.map((orderHis, i) => (
-              <Link to={`/view-ticket/${orderHis.purchase_number}`}>
-                <div
-                  key={i}
-                  // id={orderHis.id}
-                  className={`ticket rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500 ${"bg-d-orange"}   `}
-                >
-                  <div className="flex justify-between ">
-                    <div className="flex flex-col justify-between flex-[0.9]">
-                      <p
-                        className={`text-base  mb-3 ${"font-medium text-white"}`}
-                      >
-                        {orderHis.ticketData[0].ticket_name}
-                      </p>
-                    </div>
-
-                    {orderHis.addonData.length > 0 && (
-                      <div className="flex flex-col justify-between items-end text-right  h-50">
-                        <span>
-                          <p
-                            className={`text-base font-medium text-right  ${"text-white"}`}
-                          >
-                            Add-ons: {orderHis.addonData.length}
-                          </p>{" "}
-                          {/* <p
+                  {orderHis.addonData.length > 0 && (
+                    <div className="flex flex-col justify-between items-end text-right  h-50">
+                      <span>
+                        <p
+                          className={`text-base font-medium text-right  ${"text-white"}`}
+                        >
+                          Add-ons: {orderHis.addonData.length}
+                        </p>{" "}
+                        {/* <p
                         // text-xs
                         className={`text-[11px] text-right  ${"opacity-50 text-white"}`}
                       >
                         {orderHis.items?.packages[0].tickets[0].qty} {"tickets"}
                       </p> */}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-                  <div className="flex">
-                    {orderHis.items?.packages[0].date.map((dt, idx) => (
-                      <p
-                        className={`text-sm opacity-50 text-left ${"text-white"}`}
-                      >
-                        {moment(dt, "YYYY-MM-DD").format("DD-MM-YYYY")}
-                        {orderHis.items?.packages[0].date.length !==
-                          idx + 1 && <span>,&nbsp;</span>}
-                      </p>
-                    ))}
-                  </div>
+                <div className="flex">
+                  {orderHis.items?.packages[0].date.map((dt, idx) => (
+                    <p
+                      className={`text-sm opacity-50 text-left ${"text-white"}`}
+                    >
+                      {moment(dt, "YYYY-MM-DD").format("DD-MM-YYYY")}
+                      {orderHis.items?.packages[0].date.length !== idx + 1 && (
+                        <span>,&nbsp;</span>
+                      )}
+                    </p>
+                  ))}
+                </div>
 
-                  {/* py-[1rem]  */}
-                  <div className={`mt-[1rem]`}>
-                    <div className="border border-screen-light opacity-70 mb-5" />{" "}
-                    {/* {Object.keys(orderHis.items.packages[0].addons).map(
+                {/* py-[1rem]  */}
+                <div className={`mt-[1rem]`}>
+                  <div className="border border-screen-light opacity-70 mb-5" />{" "}
+                  {/* {Object.keys(orderHis.items.packages[0].addons).map(
                     (addon) => (
                       <DataLine
                         key={addon.text}
@@ -202,44 +210,37 @@ export default function Profile({
                       />
                     )
                   )} */}
-                    {/* DEMO  */}
-                    <DataLine
-                      leftData={
-                        <Link
-                          to={`/view-ticket/${orderHis.purchase_number}`}
-                          className="flex gap-3"
-                        >
-                          details
-                          <img width="8px" src={caretRightWhite} />
-                        </Link>
-                      }
-                      rightData={"AED " + orderHis.total}
-                      whiteText
-                    />
-                  </div>
+                  {/* DEMO  */}
+                  <DataLine
+                    leftData={
+                      <Link
+                        to={`/view-ticket/${orderHis.purchase_number}`}
+                        className="flex gap-3"
+                      >
+                        details
+                        <img width="8px" src={caretRightWhite} />
+                      </Link>
+                    }
+                    rightData={"AED " + orderHis.total}
+                    whiteText
+                  />
                 </div>
-              </Link>
-            ))}
-          </div>
+              </div>
+            </Link>
+          ))}
+        </div>
 
-          <div className="my-10">
-            <DataLine leftData={"Full name"} rightData={profileData.name} />
-            <DataLine
-              leftData={"Email address"}
-              rightData={profileData.email}
-            />
-            <DataLine
-              leftData={"Phone number"}
-              rightData={profileData.mobile}
-            />
-          </div>
+        <div className="my-10">
+          <DataLine leftData={"Full name"} rightData={profileData.name} />
+          <DataLine leftData={"Email address"} rightData={profileData.email} />
+          <DataLine leftData={"Phone number"} rightData={profileData.mobile} />
         </div>
       </div>
       <div
-        className="sm:mx-auto  w-full sm:w-full sm:max-w-md sticky sm:static bottom-0 sm:bottom-auto"
+        className="mx-auto w-full sticky bottom-0"
         onClick={handleLogout}
       >
-        <div className="flex justify-between items-center text-screen-light bg-primary-orange px-[1rem] py-[2rem] cursor-pointer ">
+        <div className="flex sm:px-6 justify-between items-center text-screen-light bg-primary-orange px-[1rem] py-[2rem] cursor-pointer ">
           <div>Log out</div>
           <CaretIcon />
         </div>

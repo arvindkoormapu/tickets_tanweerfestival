@@ -14,6 +14,7 @@ import { useNavigate } from "../../../node_modules/react-router-dom/dist/index";
 import { Link } from "react-router-dom";
 import mastercardLogos from "../../mastercard.jpg";
 import visaLogos from "../../visa.png";
+import Logo from "../../logo_dark.png";
 
 export default function Tickets({
   tempTicketList,
@@ -202,22 +203,28 @@ export default function Tickets({
   };
 
   return (
-    <div className="tickets flex flex-col min-h-full   sm:px-6 sm:py-12 lg:px-8 h-[100vh] sm:h-auto pb-0  ">
-      <div className="flex flex-1 flex-col px-6 pt-12 sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6 sm:py-12  lg:px-8 h-min-[100vh] sm:h-auto pb-0 justify-between">
-        <div className=" ">
-          {" "}
-          {/* <BackButton onClick={handlePreviousStep} /> */}
+    <div className="tickets flex flex-col min-h-full   sm:px-6  lg:px-8 h-[100vh] sm:h-auto pb-0  ">
+      <div className="flex flex-row justify-between items-center border-b-[2px] border-[#731d14] p-6 sm:px-6 sm:py-6 mx-auto w-full sticky top-0 bg-[#fff] z-10">
+        {localStorage.getItem("uuid") && (
+          <img
+            src={profile}
+            className="object-contain w-[8%] cursor-pointer "
+            onClick={() => navigate("/profile")}
+          />
+        )}
+        <img
+          src={Logo}
+          alt="Visa and Mastercard Logos"
+          className={`h-[30px] w-[100%] object-contain`}
+        />
+        <div className="flex"></div>
+      </div>
+      <div className="flex flex-1 flex-col px-6 sm:mx-auto sm:w-full h-min-[100vh] sm:h-auto pb-0 justify-between">
+        <div className="">
           <div className="flex justify-between items-center">
-            <h2 className="mt-10 mb-[2rem] text-left w-full text-4xl leading-9 tracking-tight text-primary-orange">
+            <h2 className="text-[26px] mt-[1rem] mb-[1rem] text-left w-full text-4xl leading-9 tracking-tight text-primary-orange">
               Select your ticket
             </h2>
-            {localStorage.getItem("uuid") && (
-              <img
-                src={profile}
-                className="object-contain w-[8%] mt-2 cursor-pointer "
-                onClick={() => navigate("/profile")}
-              />
-            )}
           </div>
           <div className="flex w-full overflow-x-auto gap-[12px] scrollbar-thin">
             {filters.map((filter, i) => (
@@ -773,7 +780,7 @@ export default function Tickets({
           </div>
         </div>
       </div>
-      <div className="sm:mx-auto  w-full sm:w-full sm:max-w-md sticky sm:static bottom-0 sm:bottom-auto">
+      <div className="mx-auto w-full sticky bottom-0">
         {/* <div className="flex justify-between items-center text-white bg-black p-[1rem] text-[14px] border-b-[2px] border-white">
           <div>Total</div>
           <div>{payAmount} AED</div>
@@ -784,7 +791,7 @@ export default function Tickets({
               ? navigate("/signup")
               : selectedTicket.qty > 0 && handleNextStep()
           }
-          className={`flex justify-between items-center ${
+          className={`flex justify-between items-center sm:px-6 ${
             selectedTicket.qty > 0 || !localStorage.getItem("uuid")
               ? "bg-primary-orange"
               : "bg-primary-orange "

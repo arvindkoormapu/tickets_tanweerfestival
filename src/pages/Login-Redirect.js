@@ -25,7 +25,11 @@ export default function LoginRedirect() {
         if (data.data.token) {
           localStorage.setItem("uuid", data.data.token);
           await profileDetails();
-          navigate("/");
+          const hasMobile = JSON.parse(
+            localStorage.getItem("ajs_user_traits")
+          ).mobile;
+          if(!hasMobile) navigate("/complete-profile");
+          if(hasMobile) navigate("/");
         }
       }
       setLoading(false);

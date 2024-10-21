@@ -4,6 +4,7 @@ import Popup from "../Popup";
 import CounterDownTimer from "../CounterDownTimer";
 import moment from "moment-timezone";
 import CryptoJS from "crypto-js";
+import Logo from "../../logo_dark.png";
 
 export default function Pay({
   handlePay = () => {},
@@ -53,8 +54,6 @@ export default function Pay({
     transactionNotificationURL:
       "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
   });
-
-  
 
   useEffect(() => {
     setIsApplePayAvailable(
@@ -257,18 +256,26 @@ export default function Pay({
   // Working code MPGS - END
 
   return (
-    <div className="pay flex flex-col min-h-full   sm:px-6 sm:py-12   h-[100vh] sm:h-auto pb-0  ">
-      <div className="flex-1 flex-col sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6   h-min-[100vh] sm:h-auto pb-0 justify-between">
-        <div className="px-6 pt-12  sm:mx-auto sm:w-full xs:max-w-xs">
-          <div className="w-full flex justify-end">
+    <div className="pay flex flex-col min-h-full   sm:px-6 lg:px-8 h-[100vh] sm:h-auto pb-0">
+      <div className="flex flex-row justify-between items-center border-b-[2px] border-[#731d14] p-6 sm:px-6 sm:py-6 mx-auto w-full sticky top-0 bg-[#fff] z-10">
+        <div className="flex"></div>
+        <img
+          src={Logo}
+          alt="Visa and Mastercard Logos"
+          className={`h-[30px] w-[100%] object-contain`}
+        />
+        <div className="flex"></div>
+      </div>
+      <div className="flex flex-1 flex-col px-6 sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6  h-min-[100vh] sm:h-auto pb-0 justify-start">
+        <div className="flex flex-row justify-between items-center w-full">
+          <h2 className="text-[26px] mt-[1rem] mb-[1rem] text-left w-full text-4xl leading-9 tracking-tight text-primary-orange">
+            Select your method of payment
+          </h2>
+          <div className="w-[40px] flex justify-end">
             <button className="text-[20px] font-bold" onClick={handleClosePay}>
               &#x2715;
             </button>
           </div>
-
-          <h2 className="mt-10 mb-[2rem] text-left w-full sm:w-full  text-4xl leading-9 tracking-tight text-primary-orange">
-            Select your method of payment
-          </h2>
         </div>
         <CounterDownTimer timer={timer} percent={percent} />
         <div
@@ -377,7 +384,7 @@ export default function Pay({
 
         <div style={{ height: "432px" }} className="mx-5 m-5">
           <iframe
-          allow="payment"
+            allow="payment"
             id="saleiframe"
             name="saleiframe"
             style={{

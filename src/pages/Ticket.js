@@ -13,6 +13,7 @@ import ticketBottom from "../assets/ticket-bottom.png";
 import { title } from "../constants/index";
 import axios from "axios";
 import { useParams, useLocation } from "react-router-dom";
+import Logo from "../logo_dark.png";
 
 const noop = () => {
   alert("function called.");
@@ -213,11 +214,19 @@ export default function Ticket({
 
   return (
     <div className="ticket flex min-h-full">
+      <div className="flex flex-row justify-between items-center border-b-[2px] border-[#731d14] p-6 sm:px-0 sm:py-6 mx-auto w-full max-w-md sticky top-0 bg-[#fff] z-10">
+        <Link to="/profile">
+          <BackButton />
+        </Link>
+        <img
+          src={Logo}
+          alt="Visa and Mastercard Logos"
+          className={`h-[30px] w-[100%] object-contain`}
+        />
+        <div className="flex"></div>
+      </div>
       <div className="flex flex-1 flex-col  sm:px-3 sm:py-6 lg:px-8 h-[100vh] sm:h-auto pb-0 justify-between">
         <div className="px-6 pt-12  sm:mx-auto sm:w-full">
-          <Link to="/profile">
-            <BackButton />
-          </Link>
           {orderDetails.length > 0 && (
             <div className="flex flex-col justify-start items-start mt-10 w-auto">
               <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
