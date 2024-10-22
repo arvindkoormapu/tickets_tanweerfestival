@@ -94,11 +94,9 @@ export default function Signup() {
     <div className="signUp flex min-h-full">
       <div className="w-full flex flex-1 flex-col  sm:px-6 sm:py-12 lg:px-8 h-[100vh] sm:h-auto pb-0 justify-between">
         <div className="px-6 pt-12  sm:mx-auto sm:w-full sm:max-w-sm">
-          <div className="flex justify-start w-3/5 sm:w-[90%]">
-            <h2 className="mt-4 text-start text-[32px] leading-9 tracking-tight text-primary-orange">
-              Create your account
-            </h2>
-          </div>
+          <h2 className="mt-4 text-start text-[32px] leading-9 tracking-tight text-primary-orange">
+            Create your account
+          </h2>
 
           <div className="mt-10 ">
             <GoogleSignin />

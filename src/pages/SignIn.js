@@ -154,6 +154,7 @@ export default function SignIn() {
             here
           </p>
           <div className="flex w-full sm:w-auto">
+            <div></div>
             <button
               disabled={
                 loading ||
@@ -175,8 +176,8 @@ export default function SignIn() {
               {loading && <Loader />}
               <img
                 alt={`caretRightWhiteFormSignIn`}
-                // className="sm:invisible"
-                width="14px"
+                className="ml-4"
+                width="8px"
                 src={caretRightWhite}
               />
             </button>

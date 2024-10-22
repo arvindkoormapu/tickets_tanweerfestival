@@ -214,7 +214,7 @@ export default function Ticket({
 
   return (
     <div className="ticket flex min-h-full">
-      <div className="flex flex-row justify-between items-center border-b-[2px] border-[#731d14] p-6 sm:px-0 sm:py-6 mx-auto w-full max-w-md sticky top-0 bg-[#fff] z-10">
+      <div className="flex flex-row justify-between items-center shadow-[0_4px_4px_-1px_rgba(0,0,0,0.1)] p-6 sm:px-6 sm:py-6 mx-auto w-full sticky top-0 bg-[#fff] z-10">
         <Link to="/profile">
           <BackButton />
         </Link>
