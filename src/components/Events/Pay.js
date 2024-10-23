@@ -94,34 +94,15 @@ export default function Pay({
 
       // Handle merchant validation
       session.onvalidatemerchant = (event) => {
-        // Replace this with your serverless function or backend call
-        // fetch(`${process.env.REACT_APP_BASE_URL}validate-merchant`, {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify({ validationURL: event.validationURL }),
-        // })
-        //   .then((res) => {
-        //     console.log("merchant validation response", res);
-        //     return res.json();
-        //   })
-        //   .then((merchantSession) => {
-        //     session.completeMerchantValidation(merchantSession);
-        //   })
-        //   .catch((err) => console.error("Merchant validation failed", err));
-
         const formData = new FormData();
         formData.append("action", "validate-merchant");
         formData.append("validationURL", event.validationURL);
         fetchClient(formData, "POST", "")
           .then((res) => {
             console.log("merchant validation response", res);
-            return res;
+            session.completeMerchantValidation(res);
           })
-          .then((merchantSession) => {
-            session.completeMerchantValidation(merchantSession);
-          })
+
           .catch((err) => console.error("Merchant validation failed", err));
       };
 
@@ -140,7 +121,7 @@ export default function Pay({
               "Api-Key": process.env.REACT_APP_IPG_APPLE_PAY_KEY, // Your Fiserv API Key
             },
             body: JSON.stringify({
-              transactionAmount: { total: purchaseData.total, currency: "AED" },
+              transactionAmount: { total: purchaseData.total, currency: "AED" }, // Your total and currency
               walletPaymentMethod: {
                 walletType: "EncryptedApplePayWalletPaymentMethod",
                 encryptedApplePay: {
@@ -154,29 +135,38 @@ export default function Pay({
                 externalMerchantId: "",
                 paymentFacilitatorId: "",
                 saleOrganizationId: "",
-                name: "",
+                name: "SHARJAH INVESTMENT N DEV",
                 subMerchantData: {
-                  mcc: "",
-                  legalName: "",
-                  timezone: "",
-                  address: {},
-                  document: { type: "NATIONAL_IDENTITY", number: "" },
-                  merchantId: "811189806", // Fiserv Merchant ID
-                  merchantVerificationValue: "",
+                  mcc: "", // Your MCC code
+                  legalName: "SHARJAH INVESTMENT N DEV", // Your business name
+                  timezone: "", // Your timezone
+                  address: {
+                    line1: "",
+                    city: "",
+                    country: "",
+                    postalCode: "",
+                  }, // Your business address
+                  document: { type: "NATIONAL_IDENTITY", number: "" }, // Your document details
+                  merchantId: "898066000", // Fiserv Merchant ID
+                  merchantVerificationValue: "", // Your merchant verification value
                 },
               },
+              requestType: "WalletSaleTransaction",
+              storeId: "811189806", // Your store ID
+              parentUri:
+                "https://www.ipg-online.com/connect/gateway/processing",
             }),
           }
         )
           .then((res) => {
-            console.log("fiserv response", res);
+            console.log("Fiserv response", res);
             return res.json();
           })
           .then((data) => {
             if (data.success) {
               session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
               alert("Payment successful!");
-              navigate(`/view-ticket/${purchaseData.purchase_number}`);
+              navigate(`/view-ticket/${purchaseData.purchase_number}`); // Redirect to ticket view page
             } else {
               session.completePayment(window.ApplePaySession.STATUS_FAILURE);
               alert("Payment failed: " + data.error);
