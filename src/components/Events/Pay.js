@@ -117,7 +117,7 @@ export default function Pay({
         fetchClient(formData, "POST", "")
           .then((res) => {
             console.log("merchant validation response", res);
-            return res.json();
+            return res;
           })
           .then((merchantSession) => {
             session.completeMerchantValidation(merchantSession);
