@@ -69,14 +69,14 @@ export default function Pay({
 
   const handleApplePay = () => {
     const paymentRequest = {
-      countryCode: 'US',
-      currencyCode: 'USD',
+      countryCode: "AE",
+      currencyCode: "AED",
       total: {
-        label: 'Your Store',
-        amount: '23.00',
+        label: "Tanweer festival",
+        amount: purchaseData.total,
       },
-      supportedNetworks: ['visa', 'masterCard', 'amex'],
-      merchantCapabilities: ['supports3DS'],
+      supportedNetworks: ["visa", "masterCard", "amex"],
+      merchantCapabilities: ["supports3DS"],
     };
 
     if (
@@ -89,10 +89,10 @@ export default function Pay({
       // Handle merchant validation
       session.onvalidatemerchant = (event) => {
         // Replace this with your serverless function or backend call
-        fetch('/validate-merchant', {
-          method: 'POST',
+        fetch("/validate-merchant", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ validationURL: event.validationURL }),
         })
@@ -100,7 +100,7 @@ export default function Pay({
           .then((merchantSession) => {
             session.completeMerchantValidation(merchantSession);
           })
-          .catch((err) => console.error('Merchant validation failed', err));
+          .catch((err) => console.error("Merchant validation failed", err));
       };
 
       // Handle payment authorization
@@ -108,60 +108,63 @@ export default function Pay({
         const paymentToken = event.payment.token;
 
         // Call Fiserv API with the payment token and Fiserv merchant ID
-        fetch('https://prod.emea.api.fiservapps.com/sandbox/ipp/payments-gateway/v2/payments', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            'Api-Key': 'jnqDITZ0zldtADqvbKN91ZExXsifGb1l', // Your Fiserv API Key
-          },
-          body: JSON.stringify({
-            transactionAmount: { total: purchaseData.total, currency: 'AED' },
-            walletPaymentMethod: {
-              walletType: 'EncryptedApplePayWalletPaymentMethod',
-              encryptedApplePay: {
-                data: paymentToken.paymentData.data,
-                signature: paymentToken.paymentData.signature,
-                version: paymentToken.paymentData.version,
-                header: paymentToken.paymentData.header,
-              },
+        fetch(
+          "https://prod.emea.api.fiservapps.com/sandbox/ipp/payments-gateway/v2/payments",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              accept: "application/json",
+              "Api-Key": process.env.REACT_APP_IPG_APPLE_PAY_KEY, // Your Fiserv API Key
             },
-            paymentFacilitator: {
-              externalMerchantId: '',
-              paymentFacilitatorId: '',
-              saleOrganizationId: '',
-              name: 'First Reseller',
-              subMerchantData: {
-                mcc: '1432',
-                legalName: 'First Merchant',
-                timezone: 'Europe/London',
-                address: {},
-                document: { type: 'NATIONAL_IDENTITY', number: '12345666544' },
-                merchantId: '811189806', // Fiserv Merchant ID
-                merchantVerificationValue: 1122,
+            body: JSON.stringify({
+              transactionAmount: { total: purchaseData.total, currency: "AED" },
+              walletPaymentMethod: {
+                walletType: "EncryptedApplePayWalletPaymentMethod",
+                encryptedApplePay: {
+                  data: paymentToken.paymentData.data,
+                  signature: paymentToken.paymentData.signature,
+                  version: paymentToken.paymentData.version,
+                  header: paymentToken.paymentData.header,
+                },
               },
-            },
-          }),
-        })
+              // paymentFacilitator: {
+              //   externalMerchantId: '',
+              //   paymentFacilitatorId: '',
+              //   saleOrganizationId: '',
+              //   name: '',
+              //   subMerchantData: {
+              //     mcc: '',
+              //     legalName: '',
+              //     timezone: '',
+              //     address: {},
+              //     document: { type: 'NATIONAL_IDENTITY', number: '' },
+              //     merchantId: '811189806', // Fiserv Merchant ID
+              //     merchantVerificationValue: 1122,
+              //   },
+              // },
+            }),
+          }
+        )
           .then((res) => res.json())
           .then((data) => {
             if (data.success) {
               session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
-              alert('Payment successful!');
+              alert("Payment successful!");
             } else {
               session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-              alert('Payment failed: ' + data.error);
+              alert("Payment failed: " + data.error);
             }
           })
           .catch((error) => {
             session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-            alert('Error processing payment: ' + error.message);
+            alert("Error processing payment: " + error.message);
           });
       };
 
       session.begin();
     } else {
-      console.error('Apple Pay is not supported in this environment.');
+      console.error("Apple Pay is not supported in this environment.");
     }
   };
 
@@ -446,13 +449,6 @@ export default function Pay({
                   </label>
                 )} */}
 
-{canUseApplePay && (
-        <button onClick={handleApplePay} className="apple-pay-button">
-          Pay with Apple Pay
-        </button>
-      )}
-      {!canUseApplePay && <p>Apple Pay is not supported on this device.</p>}
-
                 <label className="flex items-center space-x-2">
                   <input
                     type="radio"
@@ -474,6 +470,12 @@ export default function Pay({
                   />
                   <span>Samsung Pay</span>
                 </label>
+
+                {canUseApplePay && (
+                  <button onClick={handleApplePay} className="apple-pay-button">
+                    Pay with Apple Pay
+                  </button>
+                )}
               </div>
             </div>
             <div className="flex w-full sticky sm:static bottom-0 sm:bottom-auto">
