@@ -100,7 +100,7 @@ export default function Pay({
         fetchClient(formData, "POST", "")
           .then((res) => {
             console.log("merchant validation response", res);
-            session.completeMerchantValidation(res);
+            session.completeMerchantValidation(res.data);
           })
 
           .catch((err) => console.error("Merchant validation failed", err));
