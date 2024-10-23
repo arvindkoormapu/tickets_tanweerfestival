@@ -6,7 +6,7 @@ import moment from "moment-timezone";
 import CryptoJS from "crypto-js";
 import Logo from "../../logo_dark.png";
 import ApplePay from "../../apple-pay.png";
-import { useNavigate } from "../../node_modules/react-router-dom/dist/index";
+import { useNavigate } from "../../../node_modules/react-router-dom/dist/index";
 
 export default function Pay({
   handlePay = () => {},
