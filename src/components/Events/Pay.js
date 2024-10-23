@@ -114,7 +114,7 @@ export default function Pay({
         const formData = new FormData();
         formData.append("action", "validate-merchant");
         formData.append("validationURL", event.validationURL);
-        fetchClient(formData, "POST", "validate-merchant")
+        fetchClient(formData, "POST", "")
           .then((res) => {
             console.log("merchant validation response", res);
             return res.json();
