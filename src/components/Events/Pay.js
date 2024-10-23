@@ -5,6 +5,7 @@ import CounterDownTimer from "../CounterDownTimer";
 import moment from "moment-timezone";
 import CryptoJS from "crypto-js";
 import Logo from "../../logo_dark.png";
+import ApplePay from "../../apple-pay.png";
 
 export default function Pay({
   handlePay = () => {},
@@ -64,6 +65,7 @@ export default function Pay({
       window.ApplePaySession.canMakePayments()
     ) {
       setCanUseApplePay(true);
+      sePaymentMethod("applePay");
     }
   }, []);
 
@@ -477,26 +479,39 @@ export default function Pay({
                       type="radio"
                       name="paymentMethod"
                       value="applePay"
-                      onChange={() => handleApplePay()}
+                      onChange={() => sePaymentMethod("applePay")}
                       className="text-blue-600"
+                      checked={paymentMethod === "applePay"}
                     />
                     <span>Apple Pay</span>
                   </label>
                 )}
               </div>
             </div>
-            <div className="flex w-full sticky sm:static bottom-0 sm:bottom-auto">
-              <button
-                // onClick={paymentProcess}
-                onClick={() => handlePayment()}
-                disabled={loading}
-                className={`flex sm:my-10 h-16 sm:rounded-lg w-full justify-center items-center ${
-                  !loading && "cursor-pointer"
-                }   overflow-hidden  px-[1rem] py-[2rem] text-base px-[28px] py-[16px] text-center bg-primary-orange font-medium text-white shadow-sm focus-visible:outline`}
+            {canUseApplePay ? (
+              <div
+                className="flex w-full sticky sm:static bottom-0 sm:bottom-auto bg-[#000] items-center justify-center h-[50px] border rounded-lg"
+                onClick={() => handleApplePay()}
               >
-                Continue
-              </button>
-            </div>
+                <img
+                  src={ApplePay}
+                  alt="Visa and Mastercard Logos"
+                  className={`h-[20px] w-[100%] object-contain`}
+                />
+              </div>
+            ) : (
+              <div className="flex w-full sticky sm:static bottom-0 sm:bottom-auto">
+                <button
+                  onClick={() => handlePayment()}
+                  disabled={loading}
+                  className={`flex sm:my-10 h-16 sm:rounded-lg w-full justify-center items-center ${
+                    !loading && "cursor-pointer"
+                  }   overflow-hidden  px-[1rem] py-[2rem] text-base px-[28px] py-[16px] text-center bg-primary-orange font-medium text-white shadow-sm focus-visible:outline`}
+                >
+                  Continue
+                </button>
+              </div>
+            )}
           </>
         )}
 
