@@ -7,6 +7,7 @@ import CryptoJS from "crypto-js";
 import Logo from "../../logo_dark.png";
 import ApplePay from "../../apple-pay.png";
 import { useNavigate } from "../../../node_modules/react-router-dom/dist/index";
+import { fetchClient } from "../../AxiosConfig";
 
 export default function Pay({
   handlePay = () => {},
@@ -94,13 +95,26 @@ export default function Pay({
       // Handle merchant validation
       session.onvalidatemerchant = (event) => {
         // Replace this with your serverless function or backend call
-        fetch(`${process.env.REACT_APP_BASE_URL}validate-merchant`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ validationURL: event.validationURL }),
-        })
+        // fetch(`${process.env.REACT_APP_BASE_URL}validate-merchant`, {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        //   body: JSON.stringify({ validationURL: event.validationURL }),
+        // })
+        //   .then((res) => {
+        //     console.log("merchant validation response", res);
+        //     return res.json();
+        //   })
+        //   .then((merchantSession) => {
+        //     session.completeMerchantValidation(merchantSession);
+        //   })
+        //   .catch((err) => console.error("Merchant validation failed", err));
+
+        const formData = new FormData();
+        formData.append("action", "validate-merchant");
+        formData.append("validationURL", event.validationURL);
+        fetchClient(formData, "POST", "validate-merchant")
           .then((res) => {
             console.log("merchant validation response", res);
             return res.json();
