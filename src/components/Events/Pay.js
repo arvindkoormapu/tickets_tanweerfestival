@@ -94,7 +94,7 @@ export default function Pay({
       // Handle merchant validation
       session.onvalidatemerchant = (event) => {
         // Replace this with your serverless function or backend call
-        fetch(`${process.env.REACT_APP_BASE_URL}/validate-merchant`, {
+        fetch(`${process.env.REACT_APP_BASE_URL}validate-merchant`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
