@@ -6,6 +6,7 @@ import moment from "moment-timezone";
 import CryptoJS from "crypto-js";
 import Logo from "../../logo_dark.png";
 import ApplePay from "../../apple-pay.png";
+import { useNavigate } from "../../node_modules/react-router-dom/dist/index";
 
 export default function Pay({
   handlePay = () => {},
@@ -26,6 +27,8 @@ export default function Pay({
   setCloseToStep0,
   handleClosePay,
 }) {
+  const navigate = useNavigate();
+
   const [canUseApplePay, setCanUseApplePay] = useState(false);
   const [paymentMethod, sePaymentMethod] = useState(null);
   const [checkout, setCheckout] = useState(null);
@@ -130,21 +133,21 @@ export default function Pay({
                   header: paymentToken.paymentData.header,
                 },
               },
-              // paymentFacilitator: {
-              //   externalMerchantId: '',
-              //   paymentFacilitatorId: '',
-              //   saleOrganizationId: '',
-              //   name: '',
-              //   subMerchantData: {
-              //     mcc: '',
-              //     legalName: '',
-              //     timezone: '',
-              //     address: {},
-              //     document: { type: 'NATIONAL_IDENTITY', number: '' },
-              //     merchantId: '811189806', // Fiserv Merchant ID
-              //     merchantVerificationValue: 1122,
-              //   },
-              // },
+              paymentFacilitator: {
+                externalMerchantId: "",
+                paymentFacilitatorId: "",
+                saleOrganizationId: "",
+                name: "",
+                subMerchantData: {
+                  mcc: "",
+                  legalName: "",
+                  timezone: "",
+                  address: {},
+                  document: { type: "NATIONAL_IDENTITY", number: "" },
+                  merchantId: "811189806", // Fiserv Merchant ID
+                  merchantVerificationValue: "",
+                },
+              },
             }),
           }
         )
@@ -153,6 +156,7 @@ export default function Pay({
             if (data.success) {
               session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
               alert("Payment successful!");
+              navigate(`/view-ticket/${purchaseData.purchase_number}`);
             } else {
               session.completePayment(window.ApplePaySession.STATUS_FAILURE);
               alert("Payment failed: " + data.error);
@@ -488,7 +492,7 @@ export default function Pay({
                 )}
               </div>
             </div>
-            {(canUseApplePay && paymentMethod === "applePay") ? (
+            {canUseApplePay && paymentMethod === "applePay" ? (
               <div
                 className="flex w-full sticky sm:static bottom-0 sm:bottom-auto bg-[#000] items-center justify-center h-[50px] border rounded-lg"
                 onClick={() => handleApplePay()}
