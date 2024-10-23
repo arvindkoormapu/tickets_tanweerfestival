@@ -461,6 +461,20 @@ export default function Pay({
                   </label>
                 )} */}
 
+                {canUseApplePay && (
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="applePay"
+                      onChange={() => sePaymentMethod("applePay")}
+                      className="text-blue-600"
+                      checked={paymentMethod === "applePay"}
+                    />
+                    <span>Apple Pay</span>
+                  </label>
+                )}
+
                 <label className="flex items-center space-x-2">
                   <input
                     type="radio"
@@ -482,25 +496,11 @@ export default function Pay({
                   />
                   <span>Samsung Pay</span>
                 </label>
-
-                {canUseApplePay && (
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="applePay"
-                      onChange={() => sePaymentMethod("applePay")}
-                      className="text-blue-600"
-                      checked={paymentMethod === "applePay"}
-                    />
-                    <span>Apple Pay</span>
-                  </label>
-                )}
               </div>
             </div>
             {canUseApplePay && paymentMethod === "applePay" ? (
               <div
-                className="flex w-full sticky sm:static bottom-0 sm:bottom-auto bg-[#000] items-center justify-center h-[50px] border rounded-lg"
+                className="flex w-full sticky sm:static bottom-0 sm:bottom-auto bg-[#000] items-center justify-center h-[50px] border rounded-lg cursor-pointer"
                 onClick={() => handleApplePay()}
               >
                 <img
