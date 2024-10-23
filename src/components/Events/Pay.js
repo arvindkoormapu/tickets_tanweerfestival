@@ -101,7 +101,10 @@ export default function Pay({
           },
           body: JSON.stringify({ validationURL: event.validationURL }),
         })
-          .then((res) => res.json())
+          .then((res) => {
+            console.log("merchant validation response", res);
+            return res.json();
+          })
           .then((merchantSession) => {
             session.completeMerchantValidation(merchantSession);
           })
@@ -151,7 +154,10 @@ export default function Pay({
             }),
           }
         )
-          .then((res) => res.json())
+          .then((res) => {
+            console.log("fiserv response", res);
+            return res.json();
+          })
           .then((data) => {
             if (data.success) {
               session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
