@@ -488,7 +488,7 @@ export default function Pay({
                 )}
               </div>
             </div>
-            {canUseApplePay ? (
+            {(canUseApplePay && paymentMethod === "applePay") ? (
               <div
                 className="flex w-full sticky sm:static bottom-0 sm:bottom-auto bg-[#000] items-center justify-center h-[50px] border rounded-lg"
                 onClick={() => handleApplePay()}
