@@ -472,9 +472,16 @@ export default function Pay({
                 </label>
 
                 {canUseApplePay && (
-                  <button onClick={handleApplePay} className="apple-pay-button">
-                    Pay with Apple Pay
-                  </button>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="samsung"
+                      onChange={() => handleApplePay()}
+                      className="text-blue-600"
+                    />
+                    <span>Apple Pay</span>
+                  </label>
                 )}
               </div>
             </div>
