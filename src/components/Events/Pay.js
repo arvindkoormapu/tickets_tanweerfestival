@@ -118,10 +118,10 @@ export default function Pay({
             headers: {
               "Content-Type": "application/json",
               accept: "application/json",
-              "Api-Key": process.env.REACT_APP_IPG_APPLE_PAY_KEY, // Your Fiserv API Key
+              "Api-Key": process.env.REACT_APP_IPG_APPLE_PAY_KEY, // Fiserv API Key
             },
             body: JSON.stringify({
-              transactionAmount: { total: purchaseData.total, currency: "AED" }, // Your total and currency
+              transactionAmount: { total: purchaseData.total, currency: "AED" }, // total and currency
               walletPaymentMethod: {
                 walletType: "EncryptedApplePayWalletPaymentMethod",
                 encryptedApplePay: {
@@ -137,24 +137,23 @@ export default function Pay({
                 saleOrganizationId: "",
                 name: "SHARJAH INVESTMENT N DEV",
                 subMerchantData: {
-                  mcc: "", // Your MCC code
-                  legalName: "SHARJAH INVESTMENT N DEV", // Your business name
-                  timezone: "", // Your timezone
+                  mcc: "", 
+                  legalName: "SHARJAH INVESTMENT N DEV", // business name
+                  timezone: "", 
                   address: {
                     line1: "",
                     city: "",
                     country: "",
                     postalCode: "",
-                  }, // Your business address
-                  document: { type: "NATIONAL_IDENTITY", number: "" }, // Your document details
+                  }, // business address
+                  document: { type: "NATIONAL_IDENTITY", number: "" }, 
                   merchantId: "898066000", // Fiserv Merchant ID
-                  merchantVerificationValue: "", // Your merchant verification value
+                  merchantVerificationValue: "", 
                 },
               },
               requestType: "WalletSaleTransaction",
-              storeId: "811189806", // Your store ID
-              parentUri:
-                "https://www.ipg-online.com/connect/gateway/processing",
+              storeId: "811189806", // store ID
+              parentUri: `${process.env.REACT_APP_URL}`,
             }),
           }
         )
@@ -325,7 +324,6 @@ export default function Pay({
   }, []);
 
   // Load new session ID when script is ready
-
   const handlePayNowClick = async () => {
     const sessionID = await fetchSessionID();
     if (sessionID) {
