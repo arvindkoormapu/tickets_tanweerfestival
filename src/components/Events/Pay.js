@@ -112,7 +112,7 @@ export default function Pay({
 
         // Call Fiserv API with the payment token and Fiserv merchant ID
         fetch(
-          "https://prod.emea.api.fiservapps.com/sandbox/ipp/payments-gateway/v2/payments",
+          "https://prod.emea.api.fiservapps.com/ipp/payments-gateway/v2/payments",
           {
             method: "POST",
             headers: {

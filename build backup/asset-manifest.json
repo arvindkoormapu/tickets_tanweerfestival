@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/static/css/main.3a33c25d.css",
+    "main.js": "/static/js/main.ddd5c622.js",
+    "static/js/787.21e91ba9.chunk.js": "/static/js/787.21e91ba9.chunk.js",
+    "static/media/AktivGrotesk-Regular.woff": "/static/media/AktivGrotesk-Regular.8fe0c9a51e1a9397a987.woff",
+    "static/media/AktivGrotesk-Regular.woff2": "/static/media/AktivGrotesk-Regular.2165e97d671964ae889e.woff2",
+    "static/media/mastercard.jpg": "/static/media/mastercard.d8bc7b15dd73862a06eb.jpg",
+    "index.html": "/index.html",
+    "static/media/caret.svg": "/static/media/caret.3333a0a55782aa13069a93afc171eccd.svg",
+    "static/media/carel-down-white.svg": "/static/media/carel-down-white.3d86a04e5b13f3f6d770ce117aa7606a.svg",
+    "static/media/caret-up-black.svg": "/static/media/caret-up-black.f87554ddc5a9a82003c4576e47e630b9.svg",
+    "static/media/caretWhite.svg": "/static/media/caretWhite.16fd9e71dca8209668342a76ac58fff3.svg",
+    "static/media/caret-right-white.svg": "/static/media/caret-right-white.7d5ed8a1d5eae1f0052bfaec240128e6.svg",
+    "main.3a33c25d.css.map": "/static/css/main.3a33c25d.css.map",
+    "main.ddd5c622.js.map": "/static/js/main.ddd5c622.js.map",
+    "787.21e91ba9.chunk.js.map": "/static/js/787.21e91ba9.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3a33c25d.css",
+    "static/js/main.ddd5c622.js"
+  ]
+}
