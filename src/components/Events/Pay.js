@@ -102,79 +102,99 @@ export default function Pay({
             console.log("merchant validation response", res);
             session.completeMerchantValidation(res.data);
           })
-
           .catch((err) => console.error("Merchant validation failed", err));
       };
 
       // Handle payment authorization
       session.onpaymentauthorized = (event) => {
         const paymentToken = event.payment.token;
+        console.log("paymentToken", paymentToken);
 
-        // Call Fiserv API with the payment token and Fiserv merchant ID
-        fetch(
-          "https://prod.emea.api.fiservapps.com/ipp/payments-gateway/v2/payments",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              accept: "application/json",
-              "Api-Key": process.env.REACT_APP_IPG_APPLE_PAY_KEY, // Fiserv API Key
-            },
-            body: JSON.stringify({
-              transactionAmount: { total: purchaseData.total, currency: "AED" }, // total and currency
-              walletPaymentMethod: {
-                walletType: "EncryptedApplePayWalletPaymentMethod",
-                encryptedApplePay: {
-                  data: paymentToken.paymentData.data,
-                  signature: paymentToken.paymentData.signature,
-                  version: paymentToken.paymentData.version,
-                  header: paymentToken.paymentData.header,
-                },
-              },
-              paymentFacilitator: {
-                externalMerchantId: "",
-                paymentFacilitatorId: "",
-                saleOrganizationId: "",
-                name: "SHARJAH INVESTMENT N DEV",
-                subMerchantData: {
-                  mcc: "", 
-                  legalName: "SHARJAH INVESTMENT N DEV", // business name
-                  timezone: "", 
-                  address: {
-                    line1: "",
-                    city: "",
-                    country: "",
-                    postalCode: "",
-                  }, // business address
-                  document: { type: "NATIONAL_IDENTITY", number: "" }, 
-                  merchantId: "898066000", // Fiserv Merchant ID
-                  merchantVerificationValue: "", 
-                },
-              },
-              requestType: "WalletSaleTransaction",
-              storeId: "811189806", // store ID
-              parentUri: `${process.env.REACT_APP_URL}`,
-            }),
-          }
-        )
-          .then((res) => {
-            console.log("Fiserv response", res);
-            return res.json();
-          })
-          .then((data) => {
-            if (data.success) {
-              session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
-              alert("Payment successful!");
-              navigate(`/view-ticket/${purchaseData.purchase_number}`); // Redirect to ticket view page
-            } else {
-              session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-              alert("Payment failed: " + data.error);
-            }
-          })
-          .catch((error) => {
+        const purchase = {
+          total: purchaseData.total, // Example purchase data
+          currency: "AED"
+        };
+      
+        // Create a FormData object
+        const formData = new FormData();
+        formData.append("action", "process-applepay-payment");
+        formData.append('paymentToken', JSON.stringify(paymentToken));
+        formData.append('purchaseData', JSON.stringify(purchase));
+      
+        // Send the form data to the PHP backend
+        fetchClient(formData, "POST", "")
+        .then((res) => {
+          if (res.success) {
+            session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
+            alert("Payment successful!");
+            navigate(`/view-ticket/${purchaseData.purchase_number}`); // Redirect to ticket view page
+          } else {
             session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-            alert("Error processing payment: " + error.message);
-          });
+            alert("Payment failed:");
+          }
+        })
+        .catch((error) => {
+          session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+          alert("Error processing payment: " + error.message);
+        });
+        // Call Fiserv API with the payment token and Fiserv merchant ID
+        // fetch(
+        //   "https://prod.emea.api.fiservapps.com/ipp/payments-gateway/v2/payments",
+        //   {
+        //     method: "POST",
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //       accept: "application/json",
+        //       "Api-Key": "jnqDITZ0zldtADqvbKN91ZExXsifGb1l",
+        //     },
+        //     body: JSON.stringify({
+        //       transactionAmount: { 
+        //         total: purchaseData.total, // Total amount from your purchase data
+        //         currency: "AED" // Currency for the transaction
+        //       },
+              
+        //       walletPaymentMethod: {
+        //         walletType: "EncryptedApplePayWalletPaymentMethod",
+        //         encryptedApplePay: {
+        //           data: paymentToken.paymentData.data, // Apple Pay encrypted data
+        //           signature: paymentToken.paymentData.signature, // Apple Pay signature
+        //           version: paymentToken.paymentData.version, // Apple Pay version
+        //           applicationData: "MzMxRjdENDktQkRCMi00RkY0LTlDQUItQzEzREU1NzE2QjA3", // Static application data (you may need to generate this)
+        //           merchantId: "merchant.com.tanweerfestival", // Your Merchant ID
+                  
+        //           // Matching the "header" fields required by Fiserv
+        //           header: {
+        //             applicationDataHash: paymentToken.paymentData.header.applicationDataHash, // Hash (if available)
+        //             ephemeralPublicKey: paymentToken.paymentData.header.ephemeralPublicKey, // Ephemeral public key
+        //             publicKeyHash: paymentToken.paymentData.header.publicKeyHash, // Public key hash
+        //             transactionId: paymentToken.paymentData.header.transactionId // Transaction ID
+        //           }
+        //         }
+        //       },
+        //       requestType: "WalletSaleTransaction", // Transaction type for Fiserv
+        //       storeId: "811189806", // Store ID (use your Fiserv Store ID)
+        //       parentUri: "https://tickets-tanweerfestival.vercel.app/"
+        //     }),
+        //   }
+        // )
+        //   .then((res) => {
+        //     console.log("Fiserv response", res);
+        //     return res.json();
+        //   })
+        //   .then((data) => {
+        //     if (data.success) {
+        //       session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
+        //       alert("Payment successful!");
+        //       navigate(`/view-ticket/${purchaseData.purchase_number}`); // Redirect to ticket view page
+        //     } else {
+        //       session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+        //       alert("Payment failed: " + data.error);
+        //     }
+        //   })
+        //   .catch((error) => {
+        //     session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+        //     alert("Error processing payment: " + error.message);
+        //   });
       };
 
       session.begin();
