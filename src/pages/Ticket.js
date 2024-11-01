@@ -243,7 +243,7 @@ export default function Ticket({
           <div className="sm:mx-auto sm:w-full">
             <div className="flex flex-col justify-start items-start mt-10 w-auto">
               <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
-              Purchase number &nbsp; #{orderDetails[0].order_number}
+              Purchase &nbsp; #{orderDetails[0].order_number}
               </h2>
               <h5 className="text-start text-[16px] leading-9 tracking-tight text-primary-orange">
                 Date: &nbsp; {orderDetails[0].items.packages[0].date.join(", ")}
@@ -317,7 +317,7 @@ export default function Ticket({
                 {purchaseList && (
                   <>
                     <h2 className="text-center text-[23px] leading-9 tracking-tight text-gray-900">
-                    Purchase number &nbsp; #{purchaseList.purchase_number}
+                    Purchase &nbsp; #{purchaseList.purchase_number}
                     </h2>
                     <h2 className="text-center mt-4 text-[28px] leading-9 tracking-tight text-gray-900">
                       Sorry, your Payment has failed
@@ -433,7 +433,7 @@ export default function Ticket({
           <div className="sm:mx-auto sm:w-full mb-10">
             <div className="flex flex-col justify-start items-start mt-10 w-auto">
               <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
-                Purchase number &nbsp; #{purchaseAddonsDetails[0].purchase_number}
+                Purchase &nbsp; #{purchaseAddonsDetails[0].purchase_number}
               </h2>
             </div>
             {purchaseAddonsDetails.length > 0 && (
