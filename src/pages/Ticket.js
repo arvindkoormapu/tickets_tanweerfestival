@@ -87,8 +87,11 @@ export default function Ticket({
         formData.append("action", "orderHistory");
         formData.append("purchase_number", params.purchase_number);
         const data = await fetchClient(formData, "POST", "");
-        console.log('data', data.data)
-        if (data.data && 'tickets' in data.data || 'purchaseAddons' in data.data) {
+        console.log("data", data.data);
+        if (
+          (data.data && "tickets" in data.data) ||
+          "purchaseAddons" in data.data
+        ) {
           if (data.data.tickets) {
             setOrderDetails(data.data.tickets);
 
@@ -426,7 +429,7 @@ export default function Ticket({
         ) : null}
 
         {/* Purchase Addons - START */}
-        {purchaseAddonsDetails.length && (
+        {purchaseAddonsDetails.length ? (
           <div className="sm:mx-auto sm:w-full mb-10">
             {purchaseAddonsDetails.length > 0 && (
               <>
@@ -474,7 +477,7 @@ export default function Ticket({
               </>
             )}
           </div>
-        )}
+        ) : null}
         {/* Purchase Addons - END */}
       </div>
 
