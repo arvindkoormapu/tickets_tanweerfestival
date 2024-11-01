@@ -233,29 +233,26 @@ export default function Ticket({
         <div className="flex"></div>
       </div>
       <div className="flex flex-1 flex-col px-6 sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6  h-min-[100vh] sm:h-auto pb-0 justify-start">
-        {orderDetails.length && (
+        {orderDetails.length ? (
           <div className="sm:mx-auto sm:w-full">
-            {orderDetails.length > 0 && (
-              <div className="flex flex-col justify-start items-start mt-10 w-auto">
-                <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
-                  Ticket &nbsp; #{orderDetails[0].order_number}
-                </h2>
-                <h5 className="text-start text-[16px] leading-9 tracking-tight text-primary-orange">
-                  Date: &nbsp;{" "}
-                  {orderDetails[0].items.packages[0].date.join(", ")}
-                </h5>
-                <div className="flex flex-row justify-between items-start mt-0 w-full">
-                  {/* <h5 className="text-start text-[16px] leading-9 tracking-tight text-primary-orange">
+            <div className="flex flex-col justify-start items-start mt-10 w-auto">
+              <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
+                Ticket &nbsp; #{orderDetails[0].order_number}
+              </h2>
+              <h5 className="text-start text-[16px] leading-9 tracking-tight text-primary-orange">
+                Date: &nbsp; {orderDetails[0].items.packages[0].date.join(", ")}
+              </h5>
+              <div className="flex flex-row justify-between items-start mt-0 w-full">
+                {/* <h5 className="text-start text-[16px] leading-9 tracking-tight text-primary-orange">
                   {orderDetails[0].ticketData[0].ticket_name}
                 </h5> */}
-                  <h5 className="text-start text-[16px] leading-9 tracking-tight text-primary-orange">
-                    Total: &nbsp; AED {orderDetails[0].total}
-                  </h5>
-                </div>
+                <h5 className="text-start text-[16px] leading-9 tracking-tight text-primary-orange">
+                  Total: &nbsp; AED {orderDetails[0].total}
+                </h5>
               </div>
-            )}
+            </div>
             {/* TICKET IMAGE PART */}
-            {orderDetails.length > 0 || loading ? (
+            {loading ? (
               <>
                 <div className="ticketInfo w-full top-0 bg-d-orange p-5">
                   {orderDetails.map((order) =>
@@ -372,58 +369,51 @@ export default function Ticket({
                 )}
               </div>
             )}
-            {orderDetails.length > 0 &&
-              orderDetails[0].addonData.length > 0 && (
-                <>
-                  <div className="flex justify-start items-center mt-10 gap-4 w-auto">
-                    <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
-                      Addon
-                    </h2>
-                  </div>
-                  {orderDetails[0].addonData.map((elm, i) => (
-                    <div className="mt-4">
-                      <div className="ticketInfo w-full top-0 bg-d-orange p-5">
-                        <div className="flex flex-row items-center">
-                          <div className="pr-5">
-                            <QRCode
-                              size={120}
-                              className="h-auto max-w-full rounded-[4px] p-2 bg-white"
-                              value={elm.qrcodes.qrcode_image_path}
-                              viewBox={`0 0 100 100`}
-                            />
-                          </div>
-                          <div className="w-full flex flex-col items-start justify-between">
-                            <DataCol topData={"Ticket"} bottomData={elm.name} />
-                            <DataCol
-                              topData={"Date"}
-                              bottomData={formatSlots(elm.slots)}
-                            />
-                            <DataCol
-                              topData={"Quantity"}
-                              bottomData={elm.qty}
-                            />
-                            <DataCol
-                              topData={"Price"}
-                              bottomData={"AED " + elm.price}
-                            />
-                            <button
-                              className="bg-blue-500 text-xs text-white font-bold mt-2 px-4 py-1 rounded hover:bg-blue-700 transition duration-200 border border-blue-500"
-                              onClick={() =>
-                                handleDownloadPdf(
-                                  elm.qrcodes.pdf_path,
-                                  elm.name
-                                )
-                              }
-                            >
-                              Download Ticket PDF
-                            </button>
-                          </div>
+            {orderDetails[0].addonData.length > 0 && (
+              <>
+                <div className="flex justify-start items-center mt-10 gap-4 w-auto">
+                  <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
+                    Addon
+                  </h2>
+                </div>
+                {orderDetails[0].addonData.map((elm, i) => (
+                  <div className="mt-4">
+                    <div className="ticketInfo w-full top-0 bg-d-orange p-5">
+                      <div className="flex flex-row items-center">
+                        <div className="pr-5">
+                          <QRCode
+                            size={120}
+                            className="h-auto max-w-full rounded-[4px] p-2 bg-white"
+                            value={elm.qrcodes.qrcode_image_path}
+                            viewBox={`0 0 100 100`}
+                          />
+                        </div>
+                        <div className="w-full flex flex-col items-start justify-between">
+                          <DataCol topData={"Ticket"} bottomData={elm.name} />
+                          <DataCol
+                            topData={"Date"}
+                            bottomData={formatSlots(elm.slots)}
+                          />
+                          <DataCol topData={"Quantity"} bottomData={elm.qty} />
+                          <DataCol
+                            topData={"Price"}
+                            bottomData={"AED " + elm.price}
+                          />
+                          <button
+                            className="bg-blue-500 text-xs text-white font-bold mt-2 px-4 py-1 rounded hover:bg-blue-700 transition duration-200 border border-blue-500"
+                            onClick={() =>
+                              handleDownloadPdf(elm.qrcodes.pdf_path, elm.name)
+                            }
+                          >
+                            Download Ticket PDF
+                          </button>
                         </div>
                       </div>
                     </div>
-                  ))}
-                </>
-              )}
+                  </div>
+                ))}
+              </>
+            )}
 
             <button
               onClick={() => navigate(`/addons`)}
@@ -435,62 +425,56 @@ export default function Ticket({
               Purchase Addons
             </button>
           </div>
-        )}
+        ) : null}
 
         {/* Purchase Addons - START */}
         {purchaseAddonsDetails.length && (
-          <div className="sm:mx-auto sm:w-full">
+          <div className="sm:mx-auto sm:w-full mb-10">
             {purchaseAddonsDetails.length > 0 && (
-                <>
-                  <div className="flex justify-start items-center mt-10 gap-4 w-auto">
-                    <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
-                      Addon
-                    </h2>
-                  </div>
-                  {purchaseAddonsDetails.map((elm, i) => (
-                    <div className="mt-4">
-                      <div className="ticketInfo w-full top-0 bg-d-orange p-5">
-                        <div className="flex flex-row items-center">
-                          <div className="pr-5">
-                            <QRCode
-                              size={120}
-                              className="h-auto max-w-full rounded-[4px] p-2 bg-white"
-                              value={elm.qrcodes.qrcode_image_path}
-                              viewBox={`0 0 100 100`}
-                            />
-                          </div>
-                          <div className="w-full flex flex-col items-start justify-between">
-                            <DataCol topData={"Ticket"} bottomData={elm.name} />
-                            <DataCol
-                              topData={"Date"}
-                              bottomData={formatSlots(elm.slots)}
-                            />
-                            <DataCol
-                              topData={"Quantity"}
-                              bottomData={elm.qty}
-                            />
-                            <DataCol
-                              topData={"Price"}
-                              bottomData={"AED " + elm.price}
-                            />
-                            <button
-                              className="bg-blue-500 text-xs text-white font-bold mt-2 px-4 py-1 rounded hover:bg-blue-700 transition duration-200 border border-blue-500"
-                              onClick={() =>
-                                handleDownloadPdf(
-                                  elm.qrcodes.pdf_path,
-                                  elm.name
-                                )
-                              }
-                            >
-                              Download Ticket PDF
-                            </button>
-                          </div>
+              <>
+                <div className="flex justify-start items-center mt-10 gap-4 w-auto">
+                  <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
+                    Addon
+                  </h2>
+                </div>
+                {purchaseAddonsDetails.map((elm, i) => (
+                  <div className="mt-4">
+                    <div className="ticketInfo w-full top-0 bg-d-orange p-5">
+                      <div className="flex flex-row items-center">
+                        <div className="pr-5">
+                          <QRCode
+                            size={120}
+                            className="h-auto max-w-full rounded-[4px] p-2 bg-white"
+                            value={elm.qrcodes.qrcode_image_path}
+                            viewBox={`0 0 100 100`}
+                          />
+                        </div>
+                        <div className="w-full flex flex-col items-start justify-between">
+                          <DataCol topData={"Ticket"} bottomData={elm.name} />
+                          <DataCol
+                            topData={"Date"}
+                            bottomData={formatSlots(elm.slots)}
+                          />
+                          <DataCol topData={"Quantity"} bottomData={elm.qty} />
+                          <DataCol
+                            topData={"Price"}
+                            bottomData={"AED " + elm.price}
+                          />
+                          <button
+                            className="bg-blue-500 text-xs text-white font-bold mt-2 px-4 py-1 rounded hover:bg-blue-700 transition duration-200 border border-blue-500"
+                            onClick={() =>
+                              handleDownloadPdf(elm.qrcodes.pdf_path, elm.name)
+                            }
+                          >
+                            Download Ticket PDF
+                          </button>
                         </div>
                       </div>
                     </div>
-                  ))}
-                </>
-              )}
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         )}
         {/* Purchase Addons - END */}

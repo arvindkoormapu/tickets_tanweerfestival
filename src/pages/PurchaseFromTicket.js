@@ -6,6 +6,7 @@ import { fetchClient } from "../AxiosConfig";
 import { useNavigate } from "../../node_modules/react-router-dom/dist/index";
 import Popup from "../components/Popup";
 import moment from "moment";
+import axios from "axios";
 
 export default function PurchaseFromTicket() {
   const Ref = useRef(null);
@@ -102,6 +103,35 @@ export default function PurchaseFromTicket() {
       setTimer("15:00");
     }
   },[step])
+
+  const transformData = (data) => {
+    const filters = ["All", ...data.map((item) => item.Tag)];
+    const subCategories = data.reduce((acc, item) => {
+      acc[item.Tag] = item.subTags;
+      return acc;
+    }, {});
+
+    return { filters, subCategories };
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await axios.get(
+          `${process.env.REACT_APP_BASE_URL}/?action=tagsList`
+        );
+        if (data) {
+          const { filters, subCategories } = transformData(data.data);
+          setFilters(filters);
+          setSubCategories(subCategories);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handlePreviousStep = () => {
     if (step === 0) navigate(-1);
