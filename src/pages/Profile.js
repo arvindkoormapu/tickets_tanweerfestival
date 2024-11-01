@@ -95,7 +95,7 @@ export default function Profile({
 }) {
   const [profileData, setProfileData] = useState([]);
   const [orderHistory, setOrderHistory] = useState([]);
-  const [addonsHistory, setAddonsHistory] = useState([])
+  const [addonsHistory, setAddonsHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -116,10 +116,16 @@ export default function Profile({
       const formData = new FormData();
       formData.append("action", "orderHistory");
       const data = await fetchClient(formData, "POST", "");
-      if (data) {
-        console.log(data.data[0]);
-        setOrderHistory(data.data.tickets);
-        setAddonsHistory(data.data.purchaseAddons);
+      if (
+        (data.data && "tickets" in data.data) ||
+        "purchaseAddons" in data.data
+      ) {
+        if (data.data.tickets) {
+          setOrderHistory(data.data.tickets);
+        }
+        if (data.data.purchaseAddons) {
+          setAddonsHistory(data.data.purchaseAddons);
+        }
       }
       setLoading(false);
     };
@@ -150,59 +156,59 @@ export default function Profile({
         <h2 className="text-[26px] mt-[1rem] mb-[1rem] text-left w-full text-4xl leading-9 tracking-tight text-primary-orange">
           My profile
         </h2>
-        <div className="my-6 flex flex-col gap-[30px]">
-          {orderHistory.map((orderHis, i) => (
-            <Link to={`/view-ticket/${orderHis.purchase_number}`}>
-              <div
-                key={i}
-                // id={orderHis.id}
-                className={`ticket rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500 ${"bg-d-orange"}   `}
-              >
-                <div className="flex justify-between ">
-                  <div className="flex flex-col justify-between flex-[0.9]">
-                    <p
-                      className={`text-base  mb-3 ${"font-medium text-white"}`}
-                    >
-                      {orderHis.ticketData[0].ticket_name}
-                    </p>
-                  </div>
+        {orderHistory.length ? (
+          <div className="my-6 flex flex-col gap-[30px]">
+            {orderHistory.map((orderHis, i) => (
+              <Link to={`/view-ticket/${orderHis.purchase_number}`}>
+                <div
+                  key={i}
+                  // id={orderHis.id}
+                  className={`ticket rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500 ${"bg-d-orange"}   `}
+                >
+                  <div className="flex justify-between ">
+                    <div className="flex flex-col justify-between flex-[0.9]">
+                      <p
+                        className={`text-base  mb-3 ${"font-medium text-white"}`}
+                      >
+                        {orderHis.ticketData[0].ticket_name}
+                      </p>
+                    </div>
 
-                  {orderHis.addonData.length > 0 && (
-                    <div className="flex flex-col justify-between items-end text-right  h-50">
-                      <span>
-                        <p
-                          className={`text-base font-medium text-right  ${"text-white"}`}
-                        >
-                          Add-ons: {orderHis.addonData.length}
-                        </p>{" "}
-                        {/* <p
+                    {orderHis.addonData.length > 0 && (
+                      <div className="flex flex-col justify-between items-end text-right  h-50">
+                        <span>
+                          <p
+                            className={`text-base font-medium text-right  ${"text-white"}`}
+                          >
+                            Add-ons: {orderHis.addonData.length}
+                          </p>{" "}
+                          {/* <p
                         // text-xs
                         className={`text-[11px] text-right  ${"opacity-50 text-white"}`}
                       >
                         {orderHis.items?.packages[0].tickets[0].qty} {"tickets"}
                       </p> */}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
-                <div className="flex">
-                  {orderHis.items?.packages[0].date.map((dt, idx) => (
-                    <p
-                      className={`text-sm opacity-50 text-left ${"text-white"}`}
-                    >
-                      {moment(dt, "YYYY-MM-DD").format("DD-MM-YYYY")}
-                      {orderHis.items?.packages[0].date.length !== idx + 1 && (
-                        <span>,&nbsp;</span>
-                      )}
-                    </p>
-                  ))}
-                </div>
+                  <div className="flex">
+                    {orderHis.items?.packages[0].date.map((dt, idx) => (
+                      <p
+                        className={`text-sm opacity-50 text-left ${"text-white"}`}
+                      >
+                        {moment(dt, "YYYY-MM-DD").format("DD-MM-YYYY")}
+                        {orderHis.items?.packages[0].date.length !==
+                          idx + 1 && <span>,&nbsp;</span>}
+                      </p>
+                    ))}
+                  </div>
 
-                {/* py-[1rem]  */}
-                <div className={`mt-[1rem]`}>
-                  <div className="border border-screen-light opacity-70 mb-5" />{" "}
-                  {/* {Object.keys(orderHis.items.packages[0].addons).map(
+                  {/* py-[1rem]  */}
+                  <div className={`mt-[1rem]`}>
+                    <div className="border border-screen-light opacity-70 mb-5" />{" "}
+                    {/* {Object.keys(orderHis.items.packages[0].addons).map(
                     (addon) => (
                       <DataLine
                         key={addon.text}
@@ -212,44 +218,47 @@ export default function Profile({
                       />
                     )
                   )} */}
-                  {/* DEMO  */}
-                  <DataLine
-                    leftData={
-                      <Link
-                        to={`/view-ticket/${orderHis.purchase_number}`}
-                        className="flex gap-3"
-                      >
-                        details
-                        <img width="8px" src={caretRightWhite} />
-                      </Link>
-                    }
-                    rightData={"AED " + orderHis.total}
-                    whiteText
-                  />
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-        <div className="my-6 flex flex-col gap-[30px]">
-          {addonsHistory.map((item, i) => (
-            <Link to={`/view-ticket/${item.purchase_number}`}>
-              <div
-                key={i}
-                // id={orderHis.id}
-                className={`ticket rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500 ${"bg-d-orange"}   `}
-              >
-                <div className="flex justify-between ">
-                  <div className="flex flex-col justify-between flex-[0.9]">
-                    <p
-                      className={`text-base  mb-3 ${"font-medium text-white"}`}
-                    >
-                      {item.name}
-                    </p>
+                    {/* DEMO  */}
+                    <DataLine
+                      leftData={
+                        <Link
+                          to={`/view-ticket/${orderHis.purchase_number}`}
+                          className="flex gap-3"
+                        >
+                          details
+                          <img width="8px" src={caretRightWhite} />
+                        </Link>
+                      }
+                      rightData={"AED " + orderHis.total}
+                      whiteText
+                    />
                   </div>
                 </div>
+              </Link>
+            ))}
+          </div>
+        ) : null}
 
-                {/* <div className="flex">
+        {addonsHistory.length ? (
+          <div className="my-6 flex flex-col gap-[30px]">
+            {addonsHistory.map((item, i) => (
+              <Link to={`/view-ticket/${item.purchase_number}`}>
+                <div
+                  key={i}
+                  // id={orderHis.id}
+                  className={`ticket rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500 ${"bg-d-orange"}   `}
+                >
+                  <div className="flex justify-between ">
+                    <div className="flex flex-col justify-between flex-[0.9]">
+                      <p
+                        className={`text-base  mb-3 ${"font-medium text-white"}`}
+                      >
+                        {item.name}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* <div className="flex">
                   {orderHis.items?.packages[0].date.map((dt, idx) => (
                     <p
                       className={`text-sm opacity-50 text-left ${"text-white"}`}
@@ -262,10 +271,10 @@ export default function Profile({
                   ))}
                 </div> */}
 
-                {/* py-[1rem]  */}
-                <div className={`mt-[1rem]`}>
-                  <div className="border border-screen-light opacity-70 mb-5" />{" "}
-                  {/* {Object.keys(orderHis.items.packages[0].addons).map(
+                  {/* py-[1rem]  */}
+                  <div className={`mt-[1rem]`}>
+                    <div className="border border-screen-light opacity-70 mb-5" />{" "}
+                    {/* {Object.keys(orderHis.items.packages[0].addons).map(
                     (addon) => (
                       <DataLine
                         key={addon.text}
@@ -275,25 +284,26 @@ export default function Profile({
                       />
                     )
                   )} */}
-                  {/* DEMO  */}
-                  <DataLine
-                    leftData={
-                      <Link
-                        to={`/view-ticket/${item.purchase_number}`}
-                        className="flex gap-3"
-                      >
-                        details
-                        <img width="8px" src={caretRightWhite} />
-                      </Link>
-                    }
-                    rightData={"AED " + item.price}
-                    whiteText
-                  />
+                    {/* DEMO  */}
+                    <DataLine
+                      leftData={
+                        <Link
+                          to={`/view-ticket/${item.purchase_number}`}
+                          className="flex gap-3"
+                        >
+                          details
+                          <img width="8px" src={caretRightWhite} />
+                        </Link>
+                      }
+                      rightData={"AED " + item.price}
+                      whiteText
+                    />
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        ) : null}
 
         <div className="my-10">
           <DataLine leftData={"Full name"} rightData={profileData.name} />
@@ -301,10 +311,7 @@ export default function Profile({
           <DataLine leftData={"Phone number"} rightData={profileData.mobile} />
         </div>
       </div>
-      <div
-        className="mx-auto w-full sticky bottom-0"
-        onClick={handleLogout}
-      >
+      <div className="mx-auto w-full sticky bottom-0" onClick={handleLogout}>
         <div className="flex sm:px-6 justify-between items-center text-screen-light bg-primary-orange px-[1rem] py-[2rem] cursor-pointer ">
           <div>Log out</div>
           <CaretIcon />
