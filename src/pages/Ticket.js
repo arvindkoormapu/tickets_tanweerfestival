@@ -243,7 +243,7 @@ export default function Ticket({
           <div className="sm:mx-auto sm:w-full">
             <div className="flex flex-col justify-start items-start mt-10 w-auto">
               <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
-                Ticket &nbsp; #{orderDetails[0].order_number}
+              Purchase number &nbsp; #{orderDetails[0].order_number}
               </h2>
               <h5 className="text-start text-[16px] leading-9 tracking-tight text-primary-orange">
                 Date: &nbsp; {orderDetails[0].items.packages[0].date.join(", ")}
@@ -317,7 +317,7 @@ export default function Ticket({
                 {purchaseList && (
                   <>
                     <h2 className="text-center text-[23px] leading-9 tracking-tight text-gray-900">
-                      Ticket &nbsp; #{purchaseList.purchase_number}
+                    Purchase number &nbsp; #{purchaseList.purchase_number}
                     </h2>
                     <h2 className="text-center mt-4 text-[28px] leading-9 tracking-tight text-gray-900">
                       Sorry, your Payment has failed
@@ -374,7 +374,7 @@ export default function Ticket({
               <>
                 <div className="flex justify-start items-center mt-10 gap-4 w-auto">
                   <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
-                    Addon
+                    Add-ons
                   </h2>
                 </div>
                 {orderDetails[0].addonData.map((elm, i) => (
@@ -423,7 +423,7 @@ export default function Ticket({
                 !loading && "cursor-pointer"
               }   overflow-hidden  px-[1rem] py-[2rem] text-base px-[28px] py-[16px] text-center bg-primary-orange font-medium text-white shadow-sm focus-visible:outline`}
             >
-              Purchase Addons
+              Purchase Add-ons here
             </button>
           </div>
         ) : null}
@@ -431,11 +431,16 @@ export default function Ticket({
         {/* Purchase Addons - START */}
         {purchaseAddonsDetails.length ? (
           <div className="sm:mx-auto sm:w-full mb-10">
+            <div className="flex flex-col justify-start items-start mt-10 w-auto">
+              <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
+                Purchase number &nbsp; #{purchaseAddonsDetails[0].purchase_number}
+              </h2>
+            </div>
             {purchaseAddonsDetails.length > 0 && (
               <>
                 <div className="flex justify-start items-center mt-10 gap-4 w-auto">
                   <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
-                    Addon
+                    Add-ons
                   </h2>
                 </div>
                 {purchaseAddonsDetails.map((elm, i) => (
@@ -476,6 +481,15 @@ export default function Ticket({
                 ))}
               </>
             )}
+
+            <Link to="/" className="font-semibold leading-6 text-screen-light">
+              <button
+                className={`flex w-full justify-between  mt-10 items-center  bg-primary-orange  px-[1rem] py-[2rem] text-[16px] px-[28px] py-[16px] text-sm font-medium text-white shadow-sm focus-visible:outline`}
+              >
+                <div>Purchase Add-ons here</div>
+                <CaretIcon width={"14px"} />
+              </button>
+            </Link>
           </div>
         ) : null}
         {/* Purchase Addons - END */}
