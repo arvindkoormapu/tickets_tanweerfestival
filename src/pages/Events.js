@@ -535,10 +535,30 @@ export default function Events() {
               return { ticket_id: tkt.id, qty: selectedTicket.qty };
             }),
           addons: addonList
-            .filter((addon) => addon.qty > 0)
-            .map((add) => {
-              return { id: add.id, qty: add.qty };
-            }),
+            .filter((addon) => addon.qty > 0) // Filter addons with quantity greater than 0
+            .flatMap((addon) => {
+              // Check if selectedDates exists and is non-empty
+              if (addon.selectedDates && addon.selectedDates.length > 0) {
+                return addon.selectedDates.map((selectedDate) => {
+                  return {
+                    id: addon.id,
+                    qty: addon.qty,
+                    price: addon.price, // Assuming you have the price here
+                    time_slot_id: selectedDate.time_slot_id, // Use the time_slot_id from selectedDates
+                    event_date: selectedDate.date, // Use the date from selectedDates
+                  };
+                });
+              } else {
+                // If no selectedDates, return addon with null for time_slot_id and event_date
+                return {
+                  id: addon.id,
+                  qty: addon.qty,
+                  price: addon.price, // Assuming you have the price here
+                  time_slot_id: null, // Set to null if no selectedDates
+                  event_date: ["2024-11-22", "2024-11-23", "2024-11-24"], // Set to null if no selectedDates
+                };
+              }
+            })
         },
       ],
       coupon: coupon,

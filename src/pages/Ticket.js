@@ -87,73 +87,76 @@ export default function Ticket({
         formData.append("action", "orderHistory");
         formData.append("purchase_number", params.purchase_number);
         const data = await fetchClient(formData, "POST", "");
-        if (data.data.tickets) {
-          setOrderDetails(data.data.tickets);
+        console.log('data', data.data)
+        if (data.data && 'tickets' in data.data || 'purchaseAddons' in data.data) {
+          if (data.data.tickets) {
+            setOrderDetails(data.data.tickets);
 
-          // Calculate the number of days
-          const numberOfDays =
-            data.data.tickets[0]?.items?.packages[0].date.length || 1;
+            // Calculate the number of days
+            const numberOfDays =
+              data.data.tickets[0]?.items?.packages[0].date.length || 1;
 
-          // Calculate the number of tickets
-          // const numberOfTickets = parseInt(data.data[0]?.ticketData[0].qty) || 1;
+            // Calculate the number of tickets
+            // const numberOfTickets = parseInt(data.data[0]?.ticketData[0].qty) || 1;
 
-          // Calculate the price total
-          const priceTotal =
-            data.data.tickets[0]?.ticketData[0].price * numberOfDays;
+            // Calculate the price total
+            const priceTotal =
+              data.data.tickets[0]?.ticketData[0].price * numberOfDays;
 
-          console.log(numberOfDays);
-          //  console.log(numberOfTickets);
-          console.log(priceTotal);
+            console.log(numberOfDays);
+            //  console.log(numberOfTickets);
+            console.log(priceTotal);
 
-          setPriceTotal(priceTotal);
+            setPriceTotal(priceTotal);
 
-          if (data.data.tickets[0].items.packages[0].date.length) {
-            const dates = data.data.tickets[0].items.packages[0].date.map(
-              (dt) => moment(dt)
-            );
-            const minDate = moment.min(dates).format("YYYY-MM-DD");
-            setCalendarDate(minDate);
-          }
-          window.analytics.track("Order Completed", {
-            total: data.data.tickets[0].total,
-            checkout_id: data.data.tickets[0].purchase_number,
-            order_id: data.data.tickets[0].order_number,
-            currency: "AED",
-            products: [
-              {
-                name: data.data.tickets[0].ticketData[0].ticket_name,
-                price: data.data.tickets[0].ticketData[0].price,
-              },
-            ],
-          });
-
-          // const user = JSON.parse(localStorage.getItem("ajs_user_traits"));
-          // Push order data to the GTM data layer
-          window.dataLayer = window.dataLayer || [];
-          window.dataLayer.push({
-            event: "purchase",
-            // email: user.email,
-            ecommerce: {
-              order_id: data.data.tickets[0].order_number,
+            if (data.data.tickets[0].items.packages[0].date.length) {
+              const dates = data.data.tickets[0].items.packages[0].date.map(
+                (dt) => moment(dt)
+              );
+              const minDate = moment.min(dates).format("YYYY-MM-DD");
+              setCalendarDate(minDate);
+            }
+            window.analytics.track("Order Completed", {
               total: data.data.tickets[0].total,
+              checkout_id: data.data.tickets[0].purchase_number,
+              order_id: data.data.tickets[0].order_number,
               currency: "AED",
-              items: {
-                tickets: {
+              products: [
+                {
                   name: data.data.tickets[0].ticketData[0].ticket_name,
                   price: data.data.tickets[0].ticketData[0].price,
-                  quantity: data.data.tickets[0].ticketData[0].qty,
                 },
-                addons: data.data.tickets[0].addonData.map((product) => ({
-                  ticket_name: product.name,
-                  price: product.price,
-                })),
+              ],
+            });
+
+            // const user = JSON.parse(localStorage.getItem("ajs_user_traits"));
+            // Push order data to the GTM data layer
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+              event: "purchase",
+              // email: user.email,
+              ecommerce: {
+                order_id: data.data.tickets[0].order_number,
+                total: data.data.tickets[0].total,
+                currency: "AED",
+                items: {
+                  tickets: {
+                    name: data.data.tickets[0].ticketData[0].ticket_name,
+                    price: data.data.tickets[0].ticketData[0].price,
+                    quantity: data.data.tickets[0].ticketData[0].qty,
+                  },
+                  addons: data.data.tickets[0].addonData.map((product) => ({
+                    ticket_name: product.name,
+                    price: product.price,
+                  })),
+                },
               },
-            },
-          });
-          setLoading(false);
-        }
-        if (data.data.purchaseAddons) {
-          setPurchaseAddonsDetails(data.data.purchaseAddons);
+            });
+            setLoading(false);
+          }
+          if (data.data.purchaseAddons) {
+            setPurchaseAddonsDetails(data.data.purchaseAddons);
+          }
         } else {
           const formData = new FormData();
           formData.append("action", "purchaseListing");
@@ -252,7 +255,7 @@ export default function Ticket({
               </div>
             </div>
             {/* TICKET IMAGE PART */}
-            {loading ? (
+            {!loading ? (
               <>
                 <div className="ticketInfo w-full top-0 bg-d-orange p-5">
                   {orderDetails.map((order) =>
@@ -308,7 +311,7 @@ export default function Ticket({
               </>
             ) : (
               <div className="my-12">
-                {purchaseList ? (
+                {purchaseList && (
                   <>
                     <h2 className="text-center text-[23px] leading-9 tracking-tight text-gray-900">
                       Ticket &nbsp; #{purchaseList.purchase_number}
@@ -361,11 +364,6 @@ export default function Ticket({
                       ))}
                     </table>
                   </>
-                ) : (
-                  <h2 className="text-center mt-4 text-[28px] leading-9 tracking-tight text-gray-900">
-                    Sorry, but the ticket belongs to a different user or you do
-                    not have permission to access it.
-                  </h2>
                 )}
               </div>
             )}
