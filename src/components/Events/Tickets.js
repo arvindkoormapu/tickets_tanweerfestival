@@ -17,6 +17,7 @@ import visaLogos from "../../visa.png";
 import Logo from "../../logo_dark.png";
 
 export default function Tickets({
+  hideFilter,
   tempTicketList,
   ticketList,
   setTicketList,
@@ -226,23 +227,25 @@ export default function Tickets({
               Select your ticket
             </h2>
           </div>
-          <div className="flex w-full overflow-x-auto gap-[12px] scrollbar-thin">
-            {filters.map((filter, i) => (
-              <div
-                key={i}
-                className={`whitespace-nowrap rounded-[200px] px-[1rem] py-[0.2rem] border ${
-                  (!loading || !packageLoading) && "cursor-pointer"
-                } ${
-                  selectedFilter === filter
-                    ? "text-white bg-secondary-orange border-orange"
-                    : "text-secondary-orange border-secondary-orange"
-                } text-sm font-medium text-left `}
-                onClick={() => handleFilterChange(filter)}
-              >
-                {filter}
-              </div>
-            ))}
-          </div>
+          {!hideFilter && (
+            <div className="flex w-full overflow-x-auto gap-[12px] scrollbar-thin">
+              {filters.map((filter, i) => (
+                <div
+                  key={i}
+                  className={`whitespace-nowrap rounded-[200px] px-[1rem] py-[0.2rem] border ${
+                    (!loading || !packageLoading) && "cursor-pointer"
+                  } ${
+                    selectedFilter === filter
+                      ? "text-white bg-secondary-orange border-orange"
+                      : "text-secondary-orange border-secondary-orange"
+                  } text-sm font-medium text-left `}
+                  onClick={() => handleFilterChange(filter)}
+                >
+                  {filter}
+                </div>
+              ))}
+            </div>
+          )}
           <div className="my-6 flex flex-col gap-[30px]">
             <>
               {packageLoading ? (

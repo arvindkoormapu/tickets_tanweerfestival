@@ -95,6 +95,7 @@ export default function Profile({
 }) {
   const [profileData, setProfileData] = useState([]);
   const [orderHistory, setOrderHistory] = useState([]);
+  const [addonsHistory, setAddonsHistory] = useState([])
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -116,8 +117,9 @@ export default function Profile({
       formData.append("action", "orderHistory");
       const data = await fetchClient(formData, "POST", "");
       if (data) {
-        console.log(data.data);
-        setOrderHistory(data.data);
+        console.log(data.data[0]);
+        setOrderHistory(data.data.tickets);
+        setAddonsHistory(data.data.purchaseAddons);
       }
       setLoading(false);
     };
@@ -222,6 +224,69 @@ export default function Profile({
                       </Link>
                     }
                     rightData={"AED " + orderHis.total}
+                    whiteText
+                  />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div className="my-6 flex flex-col gap-[30px]">
+          {addonsHistory.map((item, i) => (
+            <Link to={`/view-ticket/${item.purchase_number}`}>
+              <div
+                key={i}
+                // id={orderHis.id}
+                className={`ticket rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500 ${"bg-d-orange"}   `}
+              >
+                <div className="flex justify-between ">
+                  <div className="flex flex-col justify-between flex-[0.9]">
+                    <p
+                      className={`text-base  mb-3 ${"font-medium text-white"}`}
+                    >
+                      {item.name}
+                    </p>
+                  </div>
+                </div>
+
+                {/* <div className="flex">
+                  {orderHis.items?.packages[0].date.map((dt, idx) => (
+                    <p
+                      className={`text-sm opacity-50 text-left ${"text-white"}`}
+                    >
+                      {moment(dt, "YYYY-MM-DD").format("DD-MM-YYYY")}
+                      {orderHis.items?.packages[0].date.length !== idx + 1 && (
+                        <span>,&nbsp;</span>
+                      )}
+                    </p>
+                  ))}
+                </div> */}
+
+                {/* py-[1rem]  */}
+                <div className={`mt-[1rem]`}>
+                  <div className="border border-screen-light opacity-70 mb-5" />{" "}
+                  {/* {Object.keys(orderHis.items.packages[0].addons).map(
+                    (addon) => (
+                      <DataLine
+                        key={addon.text}
+                        leftData={addon.text}
+                        rightData={addon.text}
+                        whiteText
+                      />
+                    )
+                  )} */}
+                  {/* DEMO  */}
+                  <DataLine
+                    leftData={
+                      <Link
+                        to={`/view-ticket/${item.purchase_number}`}
+                        className="flex gap-3"
+                      >
+                        details
+                        <img width="8px" src={caretRightWhite} />
+                      </Link>
+                    }
+                    rightData={"AED " + item.price}
                     whiteText
                   />
                 </div>

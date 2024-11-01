@@ -118,7 +118,7 @@ export default function Pay({
         // Create a FormData object
         const formData = new FormData();
         formData.append("action", "process-applepay-payment");
-        formData.append('paymentToken', JSON.stringify(paymentToken));
+        formData.append('paymentToken', paymentToken);
         formData.append('purchaseData', JSON.stringify(purchase));
       
         // Send the form data to the PHP backend
@@ -137,64 +137,6 @@ export default function Pay({
           session.completePayment(window.ApplePaySession.STATUS_FAILURE);
           alert("Error processing payment: " + error.message);
         });
-        // Call Fiserv API with the payment token and Fiserv merchant ID
-        // fetch(
-        //   "https://prod.emea.api.fiservapps.com/ipp/payments-gateway/v2/payments",
-        //   {
-        //     method: "POST",
-        //     headers: {
-        //       "Content-Type": "application/json",
-        //       accept: "application/json",
-        //       "Api-Key": "jnqDITZ0zldtADqvbKN91ZExXsifGb1l",
-        //     },
-        //     body: JSON.stringify({
-        //       transactionAmount: { 
-        //         total: purchaseData.total, // Total amount from your purchase data
-        //         currency: "AED" // Currency for the transaction
-        //       },
-              
-        //       walletPaymentMethod: {
-        //         walletType: "EncryptedApplePayWalletPaymentMethod",
-        //         encryptedApplePay: {
-        //           data: paymentToken.paymentData.data, // Apple Pay encrypted data
-        //           signature: paymentToken.paymentData.signature, // Apple Pay signature
-        //           version: paymentToken.paymentData.version, // Apple Pay version
-        //           applicationData: "MzMxRjdENDktQkRCMi00RkY0LTlDQUItQzEzREU1NzE2QjA3", // Static application data (you may need to generate this)
-        //           merchantId: "merchant.com.tanweerfestival", // Your Merchant ID
-                  
-        //           // Matching the "header" fields required by Fiserv
-        //           header: {
-        //             applicationDataHash: paymentToken.paymentData.header.applicationDataHash, // Hash (if available)
-        //             ephemeralPublicKey: paymentToken.paymentData.header.ephemeralPublicKey, // Ephemeral public key
-        //             publicKeyHash: paymentToken.paymentData.header.publicKeyHash, // Public key hash
-        //             transactionId: paymentToken.paymentData.header.transactionId // Transaction ID
-        //           }
-        //         }
-        //       },
-        //       requestType: "WalletSaleTransaction", // Transaction type for Fiserv
-        //       storeId: "811189806", // Store ID (use your Fiserv Store ID)
-        //       parentUri: "https://tickets-tanweerfestival.vercel.app/"
-        //     }),
-        //   }
-        // )
-        //   .then((res) => {
-        //     console.log("Fiserv response", res);
-        //     return res.json();
-        //   })
-        //   .then((data) => {
-        //     if (data.success) {
-        //       session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
-        //       alert("Payment successful!");
-        //       navigate(`/view-ticket/${purchaseData.purchase_number}`); // Redirect to ticket view page
-        //     } else {
-        //       session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-        //       alert("Payment failed: " + data.error);
-        //     }
-        //   })
-        //   .catch((error) => {
-        //     session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-        //     alert("Error processing payment: " + error.message);
-        //   });
       };
 
       session.begin();
@@ -403,7 +345,7 @@ export default function Pay({
   // Working code MPGS - END
 
   return (
-    <div className="pay flex flex-col min-h-full   sm:px-6 lg:px-8 h-[100vh] sm:h-auto pb-0">
+    <div className="pay flex flex-col min-h-full sm:px-6 lg:px-8 h-[100vh] sm:h-auto pb-0">
       <div className="flex flex-row justify-between items-center shadow-[0_4px_4px_-1px_rgba(0,0,0,0.1)] p-6 sm:px-6 sm:py-6 mx-auto w-full sticky top-0 bg-[#fff] z-10">
         <div className="flex"></div>
         <img

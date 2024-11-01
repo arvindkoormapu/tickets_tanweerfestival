@@ -12,12 +12,8 @@ const noop = () => null;
 
 export default function Addons({
   addonList = [],
-  selectedAddon = {},
-  setSelectedAddon = noop,
   handleNextStep,
   setAddonList = noop,
-  tempAddonList,
-  selectedTicket,
   handlePreviousStep,
   payAmount,
   loading,
@@ -32,18 +28,18 @@ export default function Addons({
 
   // Preselect dates and set activeDate
   useEffect(() => {
-    const addonListWithSelectedDates = addonList.map((addon) => ({
-      ...addon,
-      selectedDates: addon.selectedDates || [],
-    }));
-    setAddonList(addonListWithSelectedDates);
+      const addonListWithSelectedDates = addonList.map((addon) => ({
+        ...addon,
+        selectedDates: addon.selectedDates || [],
+      }));
+      setAddonList(addonListWithSelectedDates);
 
-    // Automatically set activeDate to the first selected date (if any)
-    addonList.forEach((addon) => {
-      if (addon.selectedDates?.length > 0) {
-        setActiveDate(addon.selectedDates[0]?.date); // Set first selected date as active
-      }
-    });
+      // Automatically set activeDate to the first selected date (if any)
+      addonList.forEach((addon) => {
+        if (addon.selectedDates?.length > 0) {
+          setActiveDate(addon.selectedDates[0]?.date); // Set first selected date as active
+        }
+      });
   }, []);
 
   const handleExpand = async (addon) => {
@@ -99,9 +95,8 @@ export default function Addons({
           // Allow user to adjust qty
           if (action === quantityActions.INCREMENT) {
             addon.qty += 1;
-console.log(addon)
             // Check if the selected time slot has enough inventory for the new qty
-            if (addon.selectedDates.length > 0) {
+            if (addon.selectedDates?.length > 0) {
               addon.selectedDates = addon.selectedDates.map((selectedDate) => {
                 const selectedSlot = groupedDates[selectedDate.date]?.find(
                   (slot) => slot.id === selectedDate.time_slot_id
@@ -335,25 +330,33 @@ console.log(addon)
 
   const handleNextStepWithValidation = () => {
     let newErrorAddons = [];
-  console.log(addonList)
+    console.log(addonList);
     // Check if any addon has quantity > 0 but no date selected, skipping the check if slots is empty
     const hasMissingDate = addonList.some((addon) => {
-      if (addon.qty > 0 && addon.slots.length > 0 && addon.selectedDates.length === 0) {
+      if (
+        addon.qty > 0 &&
+        addon.slots.length > 0 &&
+        addon.selectedDates.length === 0
+      ) {
         newErrorAddons.push(addon.id);
         return true;
       }
       return false;
     });
-  
+
     // Check if any addon has date selected but quantity is 0, skipping the check if slots is empty
     const hasMissingQuantity = addonList.some((addon) => {
-      if (addon.qty === 0 && addon.slots.length > 0 && addon.selectedDates.length > 0) {
+      if (
+        addon.qty === 0 &&
+        addon.slots.length > 0 &&
+        addon.selectedDates.length > 0
+      ) {
         newErrorAddons.push(addon.id);
         return true;
       }
       return false;
     });
-  
+
     // Check if selected dates require a time slot, but none is selected
     const hasMissingTimeSlot = addonList.some((addon) => {
       const hasError = addon.selectedDates.some((selectedDate) => {
@@ -361,9 +364,13 @@ console.log(addon)
         const matchingSlot = addon.slots.find(
           (slot) => slot.event_date.split(" ")[0] === selectedDate.date
         );
-  
+
         // If the matching slot has time slots, check if a time slot is selected
-        if (matchingSlot && matchingSlot.time_slot !== "" && selectedDate.timeSlot === null) {
+        if (
+          matchingSlot &&
+          matchingSlot.time_slot !== "" &&
+          selectedDate.timeSlot === null
+        ) {
           newErrorAddons.push(addon.id);
           return true;
         }
@@ -371,28 +378,27 @@ console.log(addon)
       });
       return hasError;
     });
-  
+
     if (hasMissingDate) {
       toast.error("Please select a date for all addons you selected.");
     }
-  
+
     if (hasMissingQuantity) {
       toast.error("Please select a quantity for all addons you selected.");
     }
-  
+
     if (hasMissingTimeSlot) {
       toast.error("Please select a time slot for all selected dates.");
     }
-  
+
     setErrorAddons(newErrorAddons); // Set the addons with errors
-  
+
     if (newErrorAddons.length > 0) {
       return; // Prevent proceeding to the next step
     }
-  
+
     handleNextStep();
   };
-  
 
   // Function to check if the entire tab (date) should be disabled
   const getIsTabDisabled = (addon, date, groupedDates) => {
@@ -476,9 +482,13 @@ console.log(addon)
                         className={`addon rounded-lg ${
                           !loading ? "cursor-pointer" : ""
                         } px-[28px] py-[15px] transition-all ease-in-out duration-500 ${
-                          addon.selected ? "bg-secondary-orange" : "bg-[#FFF7E0]"
+                          addon.selected
+                            ? "bg-secondary-orange"
+                            : "bg-[#FFF7E0]"
                         } py-[1rem] mt-[1rem] ${
-                          errorAddons.includes(addon.id) ? "border-4 border-[#ff2d55]" : ""
+                          errorAddons.includes(addon.id)
+                            ? "border-4 border-[#ff2d55]"
+                            : ""
                         }`}
                       >
                         <div className="flex justify-between ">
@@ -857,7 +867,7 @@ console.log(addon)
             <span className="mr-8">
               {addonList.filter((addon) => addon.qty > 0).length > 0
                 ? "Continue"
-                : "Skip and Continue"}
+                : "Select add-ons"}
             </span>
           </div>
 

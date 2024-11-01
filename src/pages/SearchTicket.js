@@ -9,10 +9,12 @@ import { title } from "../constants/index";
 import moment from "moment";
 import Popup from "../components/Popup";
 import { profileDetails } from "../ProfileApi";
+import Logo from "../logo_dark.png";
 import axios from "axios";
 
 export default function Events() {
   const [step, setStep] = useState(0);
+  const [ticketSlug, setTicketSlug] = useState("");
   const [loading, setLoading] = useState(false);
   const [packageLoading, setPackageLoading] = useState(false);
   const [payAmount, setPayAmount] = useState(0);
@@ -84,13 +86,6 @@ export default function Events() {
     deadline.setSeconds(deadline.getSeconds() + 900);
     return deadline;
   };
-
-  useEffect(() => {
-    document.title = `Events - ${title}`;
-    window.analytics.page();
-    if (localStorage.getItem("uuid")) profileDetails();
-    window.history.pushState(null, null, "/");
-  }, []);
 
   function convertMinutesToSeconds(time) {
     // Split the time string into minutes and seconds
@@ -181,11 +176,11 @@ export default function Events() {
             showMore: selected ? selectedTicket.showMore : false,
           };
         });
-        setTicketList(
-          selectedFilter === "All"
-            ? tempList
-            : tempList.filter((item) => item.tags.includes(selectedFilter))
-        );
+        // setTicketList(
+        //   selectedFilter === "All"
+        //     ? tempList
+        //     : tempList.filter((item) => item.tags.includes(selectedFilter))
+        // );
         setTempTicketList(tempList);
         setPackageLoading(false);
       }
@@ -305,47 +300,6 @@ export default function Events() {
     );
   };
 
-  // useEffect(() => {
-  //   var total = 0;
-  //   const dateQty = dateList.filter((date) => date.selected).length;
-  //   if (Object.keys(selectedTicket).length)
-  //     total = selectedTicket.price * selectedTicket.qty;
-  //   if (dateQty) total = total * dateQty;
-  //   if (addonList.length) {
-  //     addonList.map((addon) => (total = total + addon.price * addon.qty));
-  //   }
-  //   total = total - deductedValue;
-
-  //   setPayAmount(total);
-  // }, [addonList, dateList, selectedTicket.qty, selectedTicket, deductedValue]);
-  // useEffect(() => {
-  //   let total = 0;
-  //   const ticketQty = selectedTicket.qty || 0;
-  //   const ticketPrice = selectedTicket.price || 0;
-  //   const dateQty = dateList.filter((date) => date.selected).length;
-
-  //   // Calculate ticket total with selected dates
-  //   let ticketTotal = ticketPrice * ticketQty;
-  //   if (dateQty) {
-  //     ticketTotal *= dateQty;
-  //   }
-  //   total += ticketTotal;
-
-  //   // Calculate addon total
-  //   addonList.forEach((addon) => {
-  //     if (addon.qty > 0) {
-  //       const dateCount = addon.selectedDates ? addon.selectedDates.length : 1;
-  //       const addonTotal = addon.price * addon.qty * dateCount;
-  //       total += addonTotal;
-  //     }
-  //   });
-
-  //   // Subtract deducted value
-  //   total -= deductedValue;
-
-  //   // Set total to the pay amount
-  //   setPayAmount(total);
-  // }, [addonList, dateList, selectedTicket.qty, selectedTicket.price, deductedValue]);
   useEffect(() => {
     let total = 0;
     const ticketQty = selectedTicket.qty || 0;
@@ -486,22 +440,6 @@ export default function Events() {
     if (url) window.location.href = url;
   };
 
-  // useEffect(() => {
-  //   const getPaymentURL = async () => {
-  //     const url = await initiatePayment("tahseel");
-  //     setPaymentUrl(url);
-  //     if (window.ApplePaySession) {
-  //       if (window.ApplePaySession.canMakePayments) {
-  //         const appleUrl = await initiatePayment("apple");
-  //         setApplePaymentUrl(appleUrl);
-  //       }
-  //     }
-  //   };
-  //   if (step === 4 && purchaseData) {
-  //     getPaymentURL();
-  //   }
-  // }, [step, purchaseData]);
-
   const initiatePayment = async (method) => {
     const formData = new FormData();
     formData.append("action", "initiatePayment");
@@ -601,11 +539,78 @@ export default function Events() {
     return `Day ${dayDifference}`;
   };
 
+  const handleSearch = () => {
+    console.log(tempAddonList);
+
+    const filter = tempTicketList.filter((elm) => elm.url_slug === ticketSlug);
+    console.log(filter);
+    setTicketList(filter);
+  };
+
   return (
     <div>
-      {!step && (
+      {!step && ticketList.length === 0 && (
+        <div className="pay flex flex-col min-h-full sm:px-6 lg:px-8 h-[100vh] sm:h-auto pb-0">
+          <div className="flex flex-row justify-between items-center shadow-[0_4px_4px_-1px_rgba(0,0,0,0.1)] p-6 sm:px-6 sm:py-6 mx-auto w-full sticky top-0 bg-[#fff] z-10">
+            <div className="flex"></div>
+            <img
+              src={Logo}
+              alt="Visa and Mastercard Logos"
+              className={`h-[30px] w-[100%] object-contain`}
+            />
+            <div className="flex"></div>
+          </div>
+          <div className="flex flex-1 flex-col px-6 sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6  h-min-[100vh] sm:h-auto pb-0 justify-start">
+            <div className="flex flex-row justify-between items-center w-full">
+              <h2 className="text-[26px] mt-[1rem] mb-[1rem] text-left w-full text-4xl leading-9 tracking-tight text-primary-orange">
+                Search Ticket
+              </h2>
+            </div>
+            <div className="relative">
+              <input
+                id="slug"
+                name="slug"
+                type="text"
+                required
+                placeholder=" "
+                value={ticketSlug}
+                disabled={loading}
+                onChange={(e) => setTicketSlug(e.target.value)}
+                className={`border ${
+                  ticketSlug !== ""
+                    ? // #note: Design file has border-1.5 and border-1 respectively
+                      "border-primary-orange border-solid border-2" // border-2 looks accurate to the design
+                    : "border-secondary-orange border-solid border-2" // If we put border-1 and 2 above, it will have a minor UI breakage
+                } outline-none ring-transparent w-full rounded-[30px] px-[28px] py-[16px] text-primary-orange flex items-center focus:ring focus:border-primary-400 focus:placeholder-transparent`}
+              />
+              <label
+                htmlFor="email"
+                className={`absolute pointer-events-none left-[1.8rem]  top-2 text-primary-orange transition-all duration-300 ${
+                  ticketSlug !== ""
+                    ? "text-xs top-[.2rem]"
+                    : "text-md top-[1rem]"
+                }`}
+              >
+                Ticket
+              </label>
+            </div>
+            <div className="flex w-full sticky sm:static bottom-0 sm:bottom-auto">
+              <button
+                onClick={() => handleSearch()}
+                disabled={loading}
+                className={`flex sm:my-10 h-16 sm:rounded-lg w-full justify-center items-center ${
+                  !loading && "cursor-pointer"
+                }   overflow-hidden  px-[1rem] py-[2rem] text-base px-[28px] py-[16px] text-center bg-primary-orange font-medium text-white shadow-sm focus-visible:outline`}
+              >
+                Search
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {!step && ticketList.length && (
         <Tickets
-          hideFilter={false}
+          hideFilter={true}
           tempTicketList={tempTicketList}
           ticketList={ticketList}
           setTicketList={setTicketList}
