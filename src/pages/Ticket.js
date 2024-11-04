@@ -243,7 +243,7 @@ export default function Ticket({
           <div className="sm:mx-auto sm:w-full">
             <div className="flex flex-col justify-start items-start mt-10 w-auto">
               <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
-              Purchase &nbsp; #{orderDetails[0].order_number}
+              Purchase # &nbsp; {orderDetails[0].purchase_number}
               </h2>
               <h5 className="text-start text-[16px] leading-9 tracking-tight text-primary-orange">
                 Date: &nbsp; {orderDetails[0].items.packages[0].date.join(", ")}
@@ -317,7 +317,7 @@ export default function Ticket({
                 {purchaseList && (
                   <>
                     <h2 className="text-center text-[23px] leading-9 tracking-tight text-gray-900">
-                    Purchase &nbsp; #{purchaseList.purchase_number}
+                    Purchase # &nbsp; {purchaseList.purchase_number}
                     </h2>
                     <h2 className="text-center mt-4 text-[28px] leading-9 tracking-tight text-gray-900">
                       Sorry, your Payment has failed
@@ -416,15 +416,14 @@ export default function Ticket({
               </>
             )}
 
-            <button
-              onClick={() => navigate(`/addons`)}
-              disabled={loading}
-              className={`flex sm:my-10 h-16 sm:rounded-lg w-full justify-center items-center ${
-                !loading && "cursor-pointer"
-              }   overflow-hidden  px-[1rem] py-[2rem] text-base px-[28px] py-[16px] text-center bg-primary-orange font-medium text-white shadow-sm focus-visible:outline`}
-            >
-              Purchase Add-ons here
-            </button>
+            <Link to="/addons" className="font-semibold leading-6 text-screen-light">
+              <button
+                className={`flex w-full justify-between  mt-10 items-center  bg-primary-orange  px-[1rem] py-[2rem] text-[16px] px-[28px] py-[16px] text-sm font-medium text-white shadow-sm focus-visible:outline`}
+              >
+                <div>Purchase Add-ons here</div>
+                <CaretIcon width={"14px"} />
+              </button>
+            </Link>
           </div>
         ) : null}
 
@@ -433,7 +432,7 @@ export default function Ticket({
           <div className="sm:mx-auto sm:w-full mb-10">
             <div className="flex flex-col justify-start items-start mt-10 w-auto">
               <h2 className="text-start text-[27px] leading-9 tracking-tight text-primary-orange">
-                Purchase &nbsp; #{purchaseAddonsDetails[0].purchase_number}
+                Purchase # &nbsp; {purchaseAddonsDetails[0].purchase_number}
               </h2>
             </div>
             {purchaseAddonsDetails.length > 0 && (
@@ -482,7 +481,7 @@ export default function Ticket({
               </>
             )}
 
-            <Link to="/" className="font-semibold leading-6 text-screen-light">
+            <Link to="/addons" className="font-semibold leading-6 text-screen-light">
               <button
                 className={`flex w-full justify-between  mt-10 items-center  bg-primary-orange  px-[1rem] py-[2rem] text-[16px] px-[28px] py-[16px] text-sm font-medium text-white shadow-sm focus-visible:outline`}
               >
@@ -505,7 +504,7 @@ export default function Ticket({
                 images={[
                   "https://bo.discovershurooq.ae/tanweer/assets/img/og.jpg",
                 ]}
-                description={`${orderDetails[0].ticketData[0].ticket_name} - #${orderDetails[0].order_number} - Entry Ticket for ${orderDetails[0].ticketData[0].qty} People.`}
+                description={`${orderDetails[0].ticketData[0].ticket_name} - #${orderDetails[0].purchase_number} - Entry Ticket for ${orderDetails[0].ticketData[0].qty} People.`}
                 location="Mleiha, Sharjah, United Arab Emirates"
                 startDate={calendarDate}
                 endDate={"2024-11-24"}
