@@ -171,7 +171,7 @@ export default function Events() {
       setPackageLoading(true);
       const formData = new FormData();
       formData.append("action", "packages");
-      const data = await fetchClient(formData, "POST", "/");
+      const data = await fetchClient(formData, "POST", "");
       if (data) {
         const tempList = data.data.map((list) => {
           const selected = selectedTicket.id === list.id;

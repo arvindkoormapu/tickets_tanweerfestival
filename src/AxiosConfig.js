@@ -4,7 +4,7 @@ import { notifyError, notifySuccess } from "./utils/notifyToast";
 
 export const fetchClient = (data, method, url) => {
   const axiosInstance = axios.create({
-    baseURL: process.env.REACT_APP_BASE_URL + url,
+    baseURL: process.env.REACT_APP_BASE_URL + "/" + url,
     method: method,
   });
 
