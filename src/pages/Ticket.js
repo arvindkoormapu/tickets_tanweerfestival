@@ -79,7 +79,7 @@ export default function Ticket({
       const resultIndicator = queryParams.get("resultIndicator");
       if (resultIndicator) {
         await axios.get(
-          `${process.env.REACT_APP_BASE_URL}payment/magnati/mpg/success.php?order_ID=${params.purchase_number}`
+          `${process.env.REACT_APP_BASE_URL}/payment/magnati/mpg/success.php?order_ID=${params.purchase_number}`
         );
       }
       setTimeout(async () => {
