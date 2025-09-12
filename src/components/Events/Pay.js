@@ -10,7 +10,7 @@ import { useNavigate } from "../../../node_modules/react-router-dom/dist/index";
 import { fetchClient } from "../../AxiosConfig";
 
 export default function Pay({
-  handlePay = () => {},
+  handlePay = () => { },
   payAmount,
   handlePreviousStep,
   paymentProcess,
@@ -73,12 +73,84 @@ export default function Pay({
     }
   }, []);
 
+  // const handleApplePay = () => {
+  //   const paymentRequest = {
+  //     countryCode: "AE",
+  //     currencyCode: "AED",
+  //     total: {
+  //       label: "Tanweer festival",
+  //       amount: purchaseData.total,
+  //     },
+  //     supportedNetworks: ["visa", "masterCard", "amex"],
+  //     merchantCapabilities: ["supports3DS"],
+  //   };
+
+  //   if (
+  //     typeof window !== "undefined" &&
+  //     window.ApplePaySession &&
+  //     window.ApplePaySession.canMakePayments()
+  //   ) {
+  //     const session = new window.ApplePaySession(3, paymentRequest);
+
+  //     // Handle merchant validation
+  // session.onvalidatemerchant = (event) => {
+  //   const formData = new FormData();
+  //   formData.append("action", "validate-merchant");
+  //   formData.append("validationURL", event.validationURL);
+  //   fetchClient(formData, "POST", "")
+  //     .then((res) => {
+  //       console.log("merchant validation response", res);
+  //       session.completeMerchantValidation(res.data);
+  //     })
+  //     .catch((err) => console.error("Merchant validation failed", err));
+  // };
+
+  //     // Handle payment authorization
+  //     session.onpaymentauthorized = (event) => {
+  //       const paymentToken = event.payment.token;
+  //       console.log("paymentToken", paymentToken);
+
+  //       const purchase = {
+  //         total: purchaseData.total, // Example purchase data
+  //         currency: "AED"
+  //       };
+
+  //       // Create a FormData object
+  //       const formData = new FormData();
+  //       formData.append("action", "process-applepay-payment");
+  //       formData.append('paymentToken', paymentToken);
+  //       formData.append('purchaseData', JSON.stringify(purchase));
+
+  //       // Send the form data to the PHP backend
+  //       fetchClient(formData, "POST", "")
+  //       .then((res) => {
+  //         if (res.success) {
+  //           session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
+  //           alert("Payment successful!");
+  //           navigate(`/view-ticket/${purchaseData.purchase_number}`); // Redirect to ticket view page
+  //         } else {
+  //           session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+  //           alert("Payment failed:");
+  //         }
+  //       })
+  //       .catch((error) => {
+  //         session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+  //         alert("Error processing payment: " + error.message);
+  //       });
+  //     };
+
+  //     session.begin();
+  //   } else {
+  //     console.error("Apple Pay is not supported in this environment.");
+  //   }
+  // };
+
   const handleApplePay = () => {
     const paymentRequest = {
       countryCode: "AE",
       currencyCode: "AED",
       total: {
-        label: "Tanweer festival",
+        label: "Tanweer Festival",
         amount: purchaseData.total,
       },
       supportedNetworks: ["visa", "masterCard", "amex"],
@@ -92,56 +164,54 @@ export default function Pay({
     ) {
       const session = new window.ApplePaySession(3, paymentRequest);
 
-      // Handle merchant validation
+      // Merchant validation
       session.onvalidatemerchant = (event) => {
         const formData = new FormData();
         formData.append("action", "validate-merchant");
         formData.append("validationURL", event.validationURL);
         fetchClient(formData, "POST", "")
-          .then((res) => {
-            console.log("merchant validation response", res);
-            session.completeMerchantValidation(res.data);
+          .then((res) => res.json())
+          .then((merchantSession) => {
+            session.completeMerchantValidation(merchantSession);
           })
-          .catch((err) => console.error("Merchant validation failed", err));
+          .catch((err) => {
+            console.error("Merchant validation failed", err);
+            session.abort();
+          });
       };
 
       // Handle payment authorization
       session.onpaymentauthorized = (event) => {
         const paymentToken = event.payment.token;
-        console.log("paymentToken", paymentToken);
 
-        const purchase = {
-          total: purchaseData.total, // Example purchase data
-          currency: "AED"
-        };
-      
-        // Create a FormData object
         const formData = new FormData();
         formData.append("action", "process-applepay-payment");
-        formData.append('paymentToken', paymentToken);
-        formData.append('purchaseData', JSON.stringify(purchase));
-      
-        // Send the form data to the PHP backend
+        formData.append("paymentToken", JSON.stringify(paymentToken)); // token is an object, stringify it
+        formData.append("total", purchaseData.total);
+        formData.append("currency", "AED");
+        formData.append("purchase_number", purchaseData.purchase_number);
+
         fetchClient(formData, "POST", "")
-        .then((res) => {
-          if (res.success) {
-            session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
-            alert("Payment successful!");
-            navigate(`/view-ticket/${purchaseData.purchase_number}`); // Redirect to ticket view page
-          } else {
+          .then((res) => res.json())
+          .then((result) => {
+            if (result.success) {
+              session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
+              alert("Payment successful!");
+              navigate(`/view-ticket/${purchaseData.purchase_number}`);
+            } else {
+              session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+              alert("Payment failed: " + result.message);
+            }
+          })
+          .catch((error) => {
             session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-            alert("Payment failed:");
-          }
-        })
-        .catch((error) => {
-          session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-          alert("Error processing payment: " + error.message);
-        });
+            alert("Error: " + error.message);
+          });
       };
 
       session.begin();
     } else {
-      console.error("Apple Pay is not supported in this environment.");
+      console.error("Apple Pay is not supported.");
     }
   };
 
@@ -150,7 +220,7 @@ export default function Pay({
       (typeof navigator !== "undefined" &&
         navigator.userAgent.includes("Safari") &&
         !navigator.userAgent.includes("Chrome")) ||
-        /iP(hone|ad|od)/.test(navigator.platform)
+      /iP(hone|ad|od)/.test(navigator.platform)
     );
   }, []);
 
@@ -467,20 +537,25 @@ export default function Pay({
                 className="flex w-full sticky sm:static bottom-0 sm:bottom-auto bg-[#000] items-center justify-center h-[50px] border rounded-lg cursor-pointer"
                 onClick={() => handleApplePay()}
               >
-                <img
+                {/* <img
                   src={ApplePay}
                   alt="Visa and Mastercard Logos"
                   className={`h-[20px] w-[100%] object-contain`}
-                />
+                /> */}
+                <apple-pay-button
+                  buttonstyle="black"
+                  type="plain"
+                  locale="en"
+                  style={{ width: "100%", height: "40px" }}
+                ></apple-pay-button>
               </div>
             ) : (
               <div className="flex w-full sticky sm:static bottom-0 sm:bottom-auto">
                 <button
                   onClick={() => handlePayment()}
                   disabled={loading}
-                  className={`flex sm:my-10 h-16 sm:rounded-lg w-full justify-center items-center ${
-                    !loading && "cursor-pointer"
-                  }   overflow-hidden  px-[1rem] py-[2rem] text-base px-[28px] py-[16px] text-center bg-primary-orange font-medium text-white shadow-sm focus-visible:outline`}
+                  className={`flex sm:my-10 h-16 sm:rounded-lg w-full justify-center items-center ${!loading && "cursor-pointer"
+                    }   overflow-hidden  px-[1rem] py-[2rem] text-base px-[28px] py-[16px] text-center bg-primary-orange font-medium text-white shadow-sm focus-visible:outline`}
                 >
                   Continue
                 </button>
