@@ -495,7 +495,7 @@ export default function Pay({
                   </label>
                 )} */}
 
-                {canUseApplePay && (
+                {/* {canUseApplePay && (
                   <label className="flex items-center space-x-2">
                     <input
                       type="radio"
@@ -507,9 +507,9 @@ export default function Pay({
                     />
                     <span>Apple Pay</span>
                   </label>
-                )}
+                )} */}
 
-                <label className="flex items-center space-x-2">
+                {/* <label className="flex items-center space-x-2">
                   <input
                     type="radio"
                     name="paymentMethod"
@@ -529,7 +529,7 @@ export default function Pay({
                     className="text-blue-600"
                   />
                   <span>Samsung Pay</span>
-                </label>
+                </label> */}
               </div>
             </div>
             {canUseApplePay && paymentMethod === "applePay" ? (
