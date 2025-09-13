@@ -537,17 +537,11 @@ export default function Pay({
                 className="flex w-full sticky sm:static bottom-0 sm:bottom-auto bg-[#000] items-center justify-center h-[50px] border rounded-lg cursor-pointer"
                 onClick={() => handleApplePay()}
               >
-                {/* <img
+                <img
                   src={ApplePay}
                   alt="Visa and Mastercard Logos"
                   className={`h-[20px] w-[100%] object-contain`}
-                /> */}
-                <apple-pay-button
-                  buttonstyle="black"
-                  type="plain"
-                  locale="en"
-                  style={{ width: "100%", height: "40px" }}
-                ></apple-pay-button>
+                />
               </div>
             ) : (
               <div className="flex w-full sticky sm:static bottom-0 sm:bottom-auto">

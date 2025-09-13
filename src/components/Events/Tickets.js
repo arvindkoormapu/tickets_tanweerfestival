@@ -42,6 +42,18 @@ export default function Tickets({
   const filters = ["All", "Day Pass", "Festival Pass"];
   const navigate = useNavigate();
 
+  const getPricingText = (ticket) => {
+    const tag = ticket?.tags?.[0]?.tag;
+    switch(tag) {
+      case "Group Pass":
+        return "For 5 people";
+      case "Together Pass":
+        return "For 2 people";
+      default:
+        return "Per person";
+    }
+  };
+
   const handleExpand = (ticket) => {
     if (loading) {
       return;
@@ -626,7 +638,7 @@ export default function Tickets({
                                     : " text-secondary-orange "
                                 }`}
                               >
-                                Per person
+                                {getPricingText(ticket)}
                               </p>
                             </span>
 
