@@ -532,7 +532,7 @@ export default function Pay({
                 </label> */}
               </div>
             </div>
-            {canUseApplePay && paymentMethod === "applePay" ? (
+            {/* {canUseApplePay && paymentMethod === "applePay" ? (
               <div
                 className="flex w-full sticky sm:static bottom-0 sm:bottom-auto bg-[#000] items-center justify-center h-[50px] border rounded-lg cursor-pointer"
                 onClick={() => handleApplePay()}
@@ -543,7 +543,7 @@ export default function Pay({
                   className={`h-[20px] w-[100%] object-contain`}
                 />
               </div>
-            ) : (
+            ) : ( */}
               <div className="flex w-full sticky sm:static bottom-0 sm:bottom-auto">
                 <button
                   onClick={() => handlePayment()}
@@ -554,7 +554,7 @@ export default function Pay({
                   Continue
                 </button>
               </div>
-            )}
+            {/* )} */}
           </>
         )}
 

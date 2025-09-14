@@ -611,7 +611,7 @@ export default function Events() {
 
   // Helper function to calculate "Day 1", "Day 2", etc.
   const calculateDay = (dateStr) => {
-    const baseDate = new Date("2024-11-22"); // Base date: 22 Nov 2024
+    const baseDate = new Date("2025-11-21"); // Base date: 22 Nov 2024
     const selectedDate = new Date(dateStr);
 
     // Calculate the difference in days from the base date
