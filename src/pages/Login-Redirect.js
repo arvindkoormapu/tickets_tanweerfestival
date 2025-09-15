@@ -39,8 +39,8 @@ export default function LoginRedirect() {
           console.warn("Could not store uuid", e);
         }
 
-        await profileDetails();
-        const traits = JSON.parse(localStorage.getItem("ajs_user_traits") || "{}");
+        const userData = await profileDetails();
+        const traits = JSON.parse(localStorage.setItem("user_data", userData) || "{}");
         const hasMobile = traits.mobile;
 
         navigate(hasMobile ? "/" : "/complete-profile");
