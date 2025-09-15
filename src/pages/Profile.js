@@ -135,7 +135,7 @@ export default function Profile({
 
   const handleLogout = () => {
     googleLogout();
-    localStorage.removeItem("uuid");
+    localStorage.clear();
     navigate("/signin");
   };
 
