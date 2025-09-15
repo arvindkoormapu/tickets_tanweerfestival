@@ -10,5 +10,5 @@ export const profileDetails = async () => {
       mobile: data.data.mobile
     });
   }
-  return data ? data.data : "";
+  return data ? data : "";
 };

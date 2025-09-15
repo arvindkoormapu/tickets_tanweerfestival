@@ -40,7 +40,7 @@ export default function LoginRedirect() {
         }
 
         const userData = await profileDetails();
-        const traits = JSON.parse(localStorage.setItem("user_data", userData) || "{}");
+        const traits = JSON.parse(localStorage.setItem("user_data", userData.data) || "{}");
         const hasMobile = traits.mobile;
 
         navigate(hasMobile ? "/" : "/complete-profile");
