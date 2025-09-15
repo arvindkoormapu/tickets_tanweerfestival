@@ -16,7 +16,7 @@ export default function LoginRedirect() {
     const handleRegister = async () => {
       setLoading(true);
 
-      // ✅ safer: read token from query params
+      // ✅ safer: read token from query params or state
       const query = new URLSearchParams(location.search);
       const token = query.get("token") || location.state;
 
@@ -30,27 +30,47 @@ export default function LoginRedirect() {
       formData.append("action", "googleLogin");
       formData.append("token", token);
 
-      const data = await fetchClient(formData, "POST", "");
+      try {
+        const data = await fetchClient(formData, "POST", "");
 
-      if (data?.data?.token) {
-        try {
-          localStorage.setItem("uuid", data.data.token);
-        } catch (e) {
-          console.warn("Could not store uuid", e);
+        if (data?.data?.token) {
+          // store auth token
+          try {
+            localStorage.setItem("uuid", data.data.token);
+          } catch (e) {
+            console.warn("Could not store uuid", e);
+          }
+
+          // fetch profile and store it
+          const userData = await profileDetails();
+          try {
+            localStorage.setItem("user_data", JSON.stringify(userData.data));
+          } catch (e) {
+            console.warn("Could not store user data", e);
+          }
+
+          // ✅ now read user_data instead of ajs_user_traits
+          let hasMobile = false;
+          try {
+            const storedUser = JSON.parse(localStorage.getItem("user_data") || "{}");
+            hasMobile = !!storedUser.mobile;
+          } catch (e) {
+            console.warn("Could not parse user_data", e);
+          }
+
+          // redirect user
+          navigate(hasMobile ? "/" : "/complete-profile");
         }
-
-        const userData = await profileDetails();
-        const traits = JSON.parse(localStorage.setItem("user_data", userData.data) || "{}");
-        const hasMobile = traits.mobile;
-
-        navigate(hasMobile ? "/" : "/complete-profile");
+      } catch (err) {
+        console.error("Login redirect failed:", err);
+        navigate("/login");
       }
 
       setLoading(false);
     };
 
     handleRegister();
-  }, []);
+  }, [location, navigate]);
 
   return <></>;
 }
