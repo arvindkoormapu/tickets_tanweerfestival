@@ -14,14 +14,21 @@ export default function StoreMobileNumber() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const hasMobile = JSON.parse(
-      localStorage.getItem("ajs_user_traits")
-    ).mobile;
-    if (hasMobile !== "") {
-      notifyInfo("Redirecting...");
-      setTimeout(() => navigate("/"), 1000);
+    try {
+      const stored = localStorage.getItem("user_data");
+      if (!stored) return; // nothing in storage
+
+      const parsed = JSON.parse(stored);
+      const hasMobile = parsed?.mobile;
+
+      if (hasMobile && hasMobile !== "") {
+        notifyInfo("Redirecting...");
+        setTimeout(() => navigate("/"), 1000);
+      }
+    } catch (e) {
+      console.warn("Could not read user_data", e);
     }
-  }, []);
+  }, [navigate]);
 
   const updateMobile = (e) => {
     setMobileNumber(e);
@@ -74,11 +81,10 @@ export default function StoreMobileNumber() {
                 value={mobileNumber}
                 disabled={loading}
                 onChange={(phone) => updateMobile(phone)}
-                containerClass={` border ${
-                  mobileNumber?.length
+                containerClass={` border ${mobileNumber?.length
                     ? "border-primary-orange border-solid border-2"
                     : "border-secondary-orange border-solid border-1"
-                } outline-none ring-transparent w-full rounded-[30px] px-[28px] py-[12px]   items-center focus:ring focus:border-primary-400 focus:placeholder-transparent mt-2`}
+                  } outline-none ring-transparent w-full rounded-[30px] px-[28px] py-[12px]   items-center focus:ring focus:border-primary-400 focus:placeholder-transparent mt-2`}
                 buttonStyle={{
                   border: "none",
                   backgroundColor: "white",
@@ -95,9 +101,8 @@ export default function StoreMobileNumber() {
               />
               <label
                 htmlFor="email"
-                className={`absolute pointer-events-none left-[1.8rem]  text-formSubGray transition-all duration-300 ${
-                  mobileNumber ? "text-xs top-[1rem]" : "text-md top-[1.5rem]"
-                }`}
+                className={`absolute pointer-events-none left-[1.8rem]  text-formSubGray transition-all duration-300 ${mobileNumber ? "text-xs top-[1rem]" : "text-md top-[1.5rem]"
+                  }`}
               ></label>
             </div>
           </div>
@@ -107,11 +112,10 @@ export default function StoreMobileNumber() {
             <button
               disabled={loading || !mobileNumber?.length}
               onClick={() => handleFormSubmit()}
-              className={`flex w-full justify-between items-center ${
-                loading || !mobileNumber?.length
+              className={`flex w-full justify-between items-center ${loading || !mobileNumber?.length
                   ? "bg-light-orange bg-opacity-[75%]"
                   : "bg-primary-orange"
-              } overflow-hidden px-[1rem] py-[2rem] text-[16px] px-[28px] py-[16px] text-sm font-semibold text-white shadow-sm focus-visible:outline sticky sm:static bottom-0 sm:bottom-auto`}
+                } overflow-hidden px-[1rem] py-[2rem] text-[16px] px-[28px] py-[16px] text-sm font-semibold text-white shadow-sm focus-visible:outline sticky sm:static bottom-0 sm:bottom-auto`}
             >
               {loading && <Loader />}
               <div className="flex justify-center items-center whitespace-nowrap">

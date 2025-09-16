@@ -296,22 +296,23 @@ export default function Pay({
   const handlePayment = () => {
     setSpinner(true);
     setHidePaymentMethod(true);
-    if (paymentMethod === "card") {
+    // if (paymentMethod === "card") {
       handlePayNowClick();
       setShowCard(true);
       setShowWallet(false);
-    } else if (
-      paymentMethod === "applePay" ||
-      paymentMethod === "googlePay" ||
-      paymentMethod === "samsung_pay_wallet"
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        paymentMethod: paymentMethod,
-      }));
-      setShowCard(false);
-      setShowWallet(true);
-    }
+    // } 
+    // else if (
+    //   paymentMethod === "applePay" ||
+    //   paymentMethod === "googlePay" ||
+    //   paymentMethod === "samsung_pay_wallet"
+    // ) {
+    //   setFormData((prev) => ({
+    //     ...prev,
+    //     paymentMethod: paymentMethod,
+    //   }));
+    //   setShowCard(false);
+    //   setShowWallet(true);
+    // }
   };
 
   // Working code MPGS - START
