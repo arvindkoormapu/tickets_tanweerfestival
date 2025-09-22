@@ -39,7 +39,7 @@ export default function Tickets({
   packageLoading,
 }) {
   const [isPopupOpen, setIspopupOpen] = useState(false);
-  const filters = ["All", "Festival Pass"];
+  const filters = ["All", "Day Pass", "Festival Pass"];
   const navigate = useNavigate();
 
   const getPricingText = (ticket) => {
