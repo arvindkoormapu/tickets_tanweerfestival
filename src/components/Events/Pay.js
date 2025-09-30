@@ -62,16 +62,16 @@ export default function Pay({
   });
 
   // Check if Apple Pay is available
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      window.ApplePaySession &&
-      window.ApplePaySession.canMakePayments()
-    ) {
-      setCanUseApplePay(true);
-      sePaymentMethod("applePay");
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (
+  //     typeof window !== "undefined" &&
+  //     window.ApplePaySession &&
+  //     window.ApplePaySession.canMakePayments()
+  //   ) {
+  //     setCanUseApplePay(true);
+  //     sePaymentMethod("applePay");
+  //   }
+  // }, []);
 
   // const handleApplePay = () => {
   //   const paymentRequest = {
@@ -145,84 +145,84 @@ export default function Pay({
   //   }
   // };
 
-  const handleApplePay = () => {
-    const paymentRequest = {
-      countryCode: "AE",
-      currencyCode: "AED",
-      total: {
-        label: "Tanweer Festival",
-        amount: purchaseData.total,
-      },
-      supportedNetworks: ["visa", "masterCard", "amex"],
-      merchantCapabilities: ["supports3DS"],
-    };
+  // const handleApplePay = () => {
+  //   const paymentRequest = {
+  //     countryCode: "AE",
+  //     currencyCode: "AED",
+  //     total: {
+  //       label: "Tanweer Festival",
+  //       amount: purchaseData.total,
+  //     },
+  //     supportedNetworks: ["visa", "masterCard", "amex"],
+  //     merchantCapabilities: ["supports3DS"],
+  //   };
 
-    if (
-      typeof window !== "undefined" &&
-      window.ApplePaySession &&
-      window.ApplePaySession.canMakePayments()
-    ) {
-      const session = new window.ApplePaySession(3, paymentRequest);
+  //   if (
+  //     typeof window !== "undefined" &&
+  //     window.ApplePaySession &&
+  //     window.ApplePaySession.canMakePayments()
+  //   ) {
+  //     const session = new window.ApplePaySession(3, paymentRequest);
 
-      // Merchant validation
-      session.onvalidatemerchant = (event) => {
-        const formData = new FormData();
-        formData.append("action", "validate-merchant");
-        formData.append("validationURL", event.validationURL);
-        fetchClient(formData, "POST", "")
-          .then((res) => res.json())
-          .then((merchantSession) => {
-            session.completeMerchantValidation(merchantSession);
-          })
-          .catch((err) => {
-            console.error("Merchant validation failed", err);
-            session.abort();
-          });
-      };
+  //     // Merchant validation
+  //     session.onvalidatemerchant = (event) => {
+  //       const formData = new FormData();
+  //       formData.append("action", "validate-merchant");
+  //       formData.append("validationURL", event.validationURL);
+  //       fetchClient(formData, "POST", "")
+  //         .then((res) => res.json())
+  //         .then((merchantSession) => {
+  //           session.completeMerchantValidation(merchantSession);
+  //         })
+  //         .catch((err) => {
+  //           console.error("Merchant validation failed", err);
+  //           session.abort();
+  //         });
+  //     };
 
-      // Handle payment authorization
-      session.onpaymentauthorized = (event) => {
-        const paymentToken = event.payment.token;
+  //     // Handle payment authorization
+  //     session.onpaymentauthorized = (event) => {
+  //       const paymentToken = event.payment.token;
 
-        const formData = new FormData();
-        formData.append("action", "process-applepay-payment");
-        formData.append("paymentToken", JSON.stringify(paymentToken)); // token is an object, stringify it
-        formData.append("total", purchaseData.total);
-        formData.append("currency", "AED");
-        formData.append("purchase_number", purchaseData.purchase_number);
+  //       const formData = new FormData();
+  //       formData.append("action", "process-applepay-payment");
+  //       formData.append("paymentToken", JSON.stringify(paymentToken)); // token is an object, stringify it
+  //       formData.append("total", purchaseData.total);
+  //       formData.append("currency", "AED");
+  //       formData.append("purchase_number", purchaseData.purchase_number);
 
-        fetchClient(formData, "POST", "")
-          .then((res) => res.json())
-          .then((result) => {
-            if (result.success) {
-              session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
-              alert("Payment successful!");
-              navigate(`/view-ticket/${purchaseData.purchase_number}`);
-            } else {
-              session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-              alert("Payment failed: " + result.message);
-            }
-          })
-          .catch((error) => {
-            session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-            alert("Error: " + error.message);
-          });
-      };
+  //       fetchClient(formData, "POST", "")
+  //         .then((res) => res.json())
+  //         .then((result) => {
+  //           if (result.success) {
+  //             session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
+  //             alert("Payment successful!");
+  //             navigate(`/view-ticket/${purchaseData.purchase_number}`);
+  //           } else {
+  //             session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+  //             alert("Payment failed: " + result.message);
+  //           }
+  //         })
+  //         .catch((error) => {
+  //           session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+  //           alert("Error: " + error.message);
+  //         });
+  //     };
 
-      session.begin();
-    } else {
-      console.error("Apple Pay is not supported.");
-    }
-  };
+  //     session.begin();
+  //   } else {
+  //     console.error("Apple Pay is not supported.");
+  //   }
+  // };
 
-  useEffect(() => {
-    setIsApplePayAvailable(
-      (typeof navigator !== "undefined" &&
-        navigator.userAgent.includes("Safari") &&
-        !navigator.userAgent.includes("Chrome")) ||
-      /iP(hone|ad|od)/.test(navigator.platform)
-    );
-  }, []);
+  // useEffect(() => {
+  //   setIsApplePayAvailable(
+  //     (typeof navigator !== "undefined" &&
+  //       navigator.userAgent.includes("Safari") &&
+  //       !navigator.userAgent.includes("Chrome")) ||
+  //     /iP(hone|ad|od)/.test(navigator.platform)
+  //   );
+  // }, []);
 
   useEffect(() => {
     const newTxnDatetime = moment()
@@ -293,7 +293,7 @@ export default function Pay({
     }
   }, [formData.hashExtended, formData.paymentMethod]);
 
-  const handlePayment = () => {
+  useEffect(() => {
     setSpinner(true);
     setHidePaymentMethod(true);
     // if (paymentMethod === "card") {
@@ -313,7 +313,7 @@ export default function Pay({
     //   setShowCard(false);
     //   setShowWallet(true);
     // }
-  };
+  },[]);
 
   // Working code MPGS - START
   // Effect to load and configure the Checkout script
@@ -374,6 +374,7 @@ export default function Pay({
     );
     formData.append("amount", purchaseData.total);
     formData.append("id", purchaseData.purchase_number);
+    formData.append("ticket_name", purchaseData.ticket_name);
 
     try {
       const response = await fetch(url, { method: "POST", body: formData });
@@ -407,7 +408,8 @@ export default function Pay({
   // Show the embedded payment page
   const handleEmbeddedPage = () => {
     if (window.Checkout) {
-      window.Checkout.showEmbeddedPage("#embed-target");
+      // window.Checkout.showEmbeddedPage("#embed-target");
+      window.Checkout.showPaymentPage()
       setTimeout(() => {
         setSpinner(false);
       }, 3000);
@@ -467,7 +469,7 @@ export default function Pay({
 
         {!hidePaymentMethod && !spinner && (
           <>
-            <div className="flex flex-col p-5">
+            {/* <div className="flex flex-col p-5">
               <h3 className="mb-4 text-lg font-semibold">
                 Select Payment Method
               </h3>
@@ -481,7 +483,7 @@ export default function Pay({
                     className="text-blue-600"
                   />
                   <span>Pay with Card</span>
-                </label>
+                </label> */}
 
                 {/* {isApplePayAvailable && (
                   <label className="flex items-center space-x-2">
@@ -531,8 +533,8 @@ export default function Pay({
                   />
                   <span>Samsung Pay</span>
                 </label> */}
-              </div>
-            </div>
+              {/* </div>
+            </div> */}
             {/* {canUseApplePay && paymentMethod === "applePay" ? (
               <div
                 className="flex w-full sticky sm:static bottom-0 sm:bottom-auto bg-[#000] items-center justify-center h-[50px] border rounded-lg cursor-pointer"
@@ -545,7 +547,7 @@ export default function Pay({
                 />
               </div>
             ) : ( */}
-              <div className="flex w-full sticky sm:static bottom-0 sm:bottom-auto">
+              {/* <div className="flex w-full sticky sm:static bottom-0 sm:bottom-auto">
                 <button
                   onClick={() => handlePayment()}
                   disabled={loading}
@@ -554,7 +556,7 @@ export default function Pay({
                 >
                   Continue
                 </button>
-              </div>
+              </div> */}
             {/* )} */}
           </>
         )}
