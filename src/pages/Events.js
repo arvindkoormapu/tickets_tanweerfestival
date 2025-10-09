@@ -87,7 +87,7 @@ export default function Events() {
 
   useEffect(() => {
     document.title = `Events - ${title}`;
-    window.analytics.page();
+    // window.analytics.page();
     if (localStorage.getItem("uuid")) profileDetails();
     window.history.pushState(null, null, "/");
   }, []);
@@ -437,17 +437,17 @@ export default function Events() {
     formData.append("items", JSON.stringify(param));
     const data = await fetchClient(formData, "POST", "");
     if (data.purchase_number) {
-      window.analytics.track("Checkout Started", {
-        order_id: data.purchase_number,
-        value: data.total,
-        currency: "AED",
-        products: [
-          {
-            name: selectedTicket.package_name,
-            price: payAmount,
-          },
-        ],
-      });
+      // window.analytics.track("Checkout Started", {
+      //   order_id: data.purchase_number,
+      //   value: data.total,
+      //   currency: "AED",
+      //   products: [
+      //     {
+      //       name: selectedTicket.package_name,
+      //       price: payAmount,
+      //     },
+      //   ],
+      // });
 
       // Storing the data in localStorage
       localStorage.setItem("lastAnalyticsData", JSON.stringify(data));
@@ -512,9 +512,9 @@ export default function Events() {
       `${window.location.origin}/view-ticket/${purchaseData.purchase_number}`
     );
     const data = await fetchClient(formData, "POST", "");
-    window.analytics.track("Payment Info Entered", {
-      checkout_id: purchaseData.purchase_number,
-    });
+    // window.analytics.track("Payment Info Entered", {
+    //   checkout_id: purchaseData.purchase_number,
+    // });
     setLoading(false);
     return data.payment_url || "";
   };

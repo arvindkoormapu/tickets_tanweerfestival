@@ -100,7 +100,7 @@ export default function Profile({
   const navigate = useNavigate();
 
   useEffect(() => {
-    window.analytics.page();
+    // window.analytics.page();
     document.title = `Profile - ${title}`;
     const getprofileDetails = async () => {
       setLoading(true);

@@ -92,16 +92,15 @@ export default function Summary({
               </div>
             ))}
 
-            
+
           </div>
         </div>
       </div>
       <div className="w-full mx-auto sticky bottom-0 mt-6">
         <div
           onClick={handleNextStep}
-          className={`relative sm:px-6 overflow-hidden flex justify-between items-center text-screen-light bg-primary-orange px-[1rem] py-[2rem] ${
-            !loading && "cursor-pointer"
-          }`}
+          className={`relative sm:px-6 overflow-hidden flex justify-between items-center text-screen-light bg-primary-orange px-[1rem] py-[2rem] ${!loading && "cursor-pointer"
+            }`}
         >
           <div className="w-full flex justify-between">
             <span>Total Cost: AED {payAmount}</span>

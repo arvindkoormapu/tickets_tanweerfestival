@@ -5,7 +5,7 @@ import { title } from "../constants/index";
 
 export default function TC() {
   useEffect(() => {
-    window.analytics.page();
+    // window.analytics.page();
     document.title = `Terms & Conditions - ${title}`;
   }, []);
   const termsConditions = [

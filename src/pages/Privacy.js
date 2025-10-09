@@ -5,7 +5,7 @@ import { title } from "../constants/index";
 
 export default function Privacy() {
   useEffect(() => {
-    window.analytics.page();
+    // window.analytics.page();
     document.title = `Privacy Policy - ${title}`;
   }, []);
   const termsConditions = [

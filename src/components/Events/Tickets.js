@@ -77,10 +77,10 @@ export default function Tickets({
         return tkt;
       });
       setTicketList(tempTicketList);
-      window.analytics.track("Product Viewed", {
-        name: ticket.package_name,
-        product_id: ticket.id,
-      });
+      // window.analytics.track("Product Viewed", {
+      //   name: ticket.package_name,
+      //   product_id: ticket.id,
+      // });
     };
 
     // if (selectedTicket.id !== ticket.id) setQty(0);

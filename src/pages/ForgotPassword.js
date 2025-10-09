@@ -13,7 +13,7 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    window.analytics.page();
+    // window.analytics.page();
     document.title = `Terms & Conditions - ${title}`;
   }, []);
 

@@ -68,17 +68,17 @@ export default function Summary({
   closePopup,
   setCloseToStep0,
 }) {
-  useEffect(() => {
-    window.analytics.track("Cart Viewed", {
-      cart_id: Math.random(),
-      products: [
-        {
-          name: selectedTicket.package_name,
-          price: payAmount,
-        },
-      ],
-    });
-  }, []);
+  // useEffect(() => {
+  //   window.analytics.track("Cart Viewed", {
+  //     cart_id: Math.random(),
+  //     products: [
+  //       {
+  //         name: selectedTicket.package_name,
+  //         price: payAmount,
+  //       },
+  //     ],
+  //   });
+  // }, []);
 
   return (
     <div className="addons flex flex-col min-h-full   sm:px-6 lg:px-8 h-[100vh] sm:h-auto pb-0">

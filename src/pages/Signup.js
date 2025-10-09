@@ -34,7 +34,7 @@ export default function Signup() {
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 
   useEffect(() => {
-    window.analytics.page();
+    // window.analytics.page();
     document.title = `Sign up - ${title}`;
     if (localStorage.getItem("uuid")) {
       notifyInfo("Redirecting...");

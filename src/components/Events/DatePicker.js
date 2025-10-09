@@ -18,6 +18,11 @@ export default function DatePicker({
   payAmount,
   loading,
 }) {
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   const dataFromDate = (value) => {
     const date = new Date(value);
     const day = date.getDate().toString().padStart(2, "0");
@@ -93,23 +98,19 @@ export default function DatePicker({
                 key={i}
                 onClick={() => handleSelectDate(date)}
                 className={`date h-[108px] px-5 mb-5  w-full flex items-center justify-between
-                                  rounded-lg hover:opacity-95 transition-all duration-500 ${
-                                    !loading && "cursor-pointer"
-                                  } ${
-                  date.selected ? "bg-primary-orange  " : " bg-[#FFF7E0] "
-                } `}
+                                  rounded-lg hover:opacity-95 transition-all duration-500 ${!loading && "cursor-pointer"
+                  } ${date.selected ? "bg-primary-orange  " : " bg-[#FFF7E0] "
+                  } `}
               >
                 <div
-                  className={`text-[18px]  ${
-                    date.selected ? "text-[#fbe899]" : "text-primary-orange"
-                  }`}
+                  className={`text-[18px]  ${date.selected ? "text-[#fbe899]" : "text-primary-orange"
+                    }`}
                 >
                   DAY {i + 1}
                 </div>
                 <span
-                  className={`text-[18px]  ${
-                    date.selected ? "text-[#fbe899]" : "text-primary-orange"
-                  }`}
+                  className={`text-[18px]  ${date.selected ? "text-[#fbe899]" : "text-primary-orange"
+                    }`}
                 >
                   {day} {month} {year}
                 </span>
@@ -128,9 +129,8 @@ export default function DatePicker({
                   ) : (
                     <>
                       {qtyCheck(date).isAvailable ? (
-                        <small className="text-base text-center text-d-orange font-medium">{`Only ${
-                          qtyCheck(date).qty
-                        } available`}</small>
+                        <small className="text-base text-center text-d-orange font-medium">{`Only ${qtyCheck(date).qty
+                          } available`}</small>
                       ) : (
                         <>
                           {!date.selected ? (
@@ -179,15 +179,13 @@ export default function DatePicker({
           onClick={() =>
             dates.filter((date) => date.selected).length && handleNextStep()
           }
-          className={`flex justify-between items-center sm:px-6 ${
-            dates.filter((date) => date.selected).length
+          className={`flex justify-between items-center sm:px-6 ${dates.filter((date) => date.selected).length
               ? "bg-primary-orange"
               : "bg-primary-orange opacity-[75%]"
-          } relative overflow-hidden text-white  px-[1rem] py-[2rem] ${
-            !loading &&
+            } relative overflow-hidden text-white  px-[1rem] py-[2rem] ${!loading &&
             dates.filter((date) => date.selected).length &&
             "cursor-pointer"
-          } `}
+            } `}
         >
           <div className="w-full flex justify-between text-screen-light">
             <span>Total Cost: AED {payAmount}</span>

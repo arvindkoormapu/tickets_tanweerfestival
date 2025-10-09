@@ -18,7 +18,7 @@ export default function SignIn() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    window.analytics.page();
+    // window.analytics.page();
     document.title = `Sign in - ${title}`;
     if (localStorage.getItem("uuid")) {
       notifyInfo("Redirecting...");

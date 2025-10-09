@@ -17,7 +17,7 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    window.analytics.page();
+    // window.analytics.page();
     document.title = `Reset Password - ${title}`;
   }, []);
 

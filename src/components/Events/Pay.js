@@ -39,27 +39,27 @@ export default function Pay({
   const [showWallet, setShowWallet] = useState(false);
   const [spinner, setSpinner] = useState(false);
   const [hidePaymentMethod, setHidePaymentMethod] = useState(false);
-  const [formData, setFormData] = useState({
-    hash_algorithm: "HMACSHA256",
-    checkoutoption: "combinedpage",
-    language: "en_US",
-    hashExtended: "",
-    mobileMode: true,
-    storename: `${process.env.REACT_APP_STORE}`,
-    timezone: "Asia/Dubai",
-    txndatetime: "",
-    txntype: "sale",
-    chargetotal: "",
-    authenticateTransaction: true,
-    paymentMethod: "",
-    parentUri: `${process.env.REACT_APP_URL}`,
-    oid: "",
-    currency: "784",
-    responseFailURL: `${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/success.php`,
-    responseSuccessURL: `${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/success.php`,
-    transactionNotificationURL:
-      "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
-  });
+  // const [formData, setFormData] = useState({
+  //   hash_algorithm: "HMACSHA256",
+  //   checkoutoption: "combinedpage",
+  //   language: "en_US",
+  //   hashExtended: "",
+  //   mobileMode: true,
+  //   storename: `${process.env.REACT_APP_STORE}`,
+  //   timezone: "Asia/Dubai",
+  //   txndatetime: "",
+  //   txntype: "sale",
+  //   chargetotal: "",
+  //   authenticateTransaction: true,
+  //   paymentMethod: "",
+  //   parentUri: `${process.env.REACT_APP_URL}`,
+  //   oid: "",
+  //   currency: "784",
+  //   responseFailURL: `${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/success.php`,
+  //   responseSuccessURL: `${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/success.php`,
+  //   transactionNotificationURL:
+  //     "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
+  // });
 
   // Check if Apple Pay is available
   // useEffect(() => {
@@ -224,82 +224,82 @@ export default function Pay({
   //   );
   // }, []);
 
-  useEffect(() => {
-    const newTxnDatetime = moment()
-      .tz(formData.timezone)
-      .format("YYYY:MM:DD-HH:mm:ss");
-    setFormData((prev) => ({
-      ...prev,
-      txndatetime: newTxnDatetime,
-      oid: purchaseData.purchase_number,
-      chargetotal: purchaseData.total,
-    }));
-  }, []);
+  // useEffect(() => {
+  //   const newTxnDatetime = moment()
+  //     .tz(formData.timezone)
+  //     .format("YYYY:MM:DD-HH:mm:ss");
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     txndatetime: newTxnDatetime,
+  //     oid: purchaseData.purchase_number,
+  //     chargetotal: purchaseData.total,
+  //   }));
+  // }, []);
 
   // Recalculate hash when txndatetime, oid, or paymentMethod changes
+  // useEffect(() => {
+  //   if (formData.txndatetime && formData.oid && formData.paymentMethod) {
+  //     const messageSignatureContent = Object.keys(formData)
+  //       .filter((key) => key !== "hashExtended")
+  //       .sort()
+  //       .map((key) => formData[key])
+  //       .join("|");
+
+  //     const messageSignature = CryptoJS.HmacSHA256(
+  //       messageSignatureContent,
+  //       `${process.env.REACT_APP_SHARED_SECRET}`
+  //     );
+  //     const messageSignatureBase64 =
+  //       CryptoJS.enc.Base64.stringify(messageSignature);
+
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       hashExtended: messageSignatureBase64,
+  //     }));
+  //   }
+  // }, [
+  //   formData.txndatetime,
+  //   formData.oid,
+  //   formData.chargetotal,
+  //   formData.paymentMethod,
+  // ]);
+
+  // const payOnline = () => {
+  //   if (formData.hashExtended) {
+  //     const form = document.createElement("form");
+  //     form.action = process.env.REACT_APP_IPG_URL;
+  //     form.method = "POST";
+  //     form.target = "saleiframe";
+
+  //     Object.keys(formData).forEach((key) => {
+  //       const input = document.createElement("input");
+  //       input.type = "hidden";
+  //       input.name = key;
+  //       input.value = formData[key];
+  //       form.appendChild(input);
+  //     });
+
+  //     document.body.appendChild(form);
+  //     form.submit();
+  //     // setTimeout(() => {
+  //     //   setSpinner(false);
+  //     // }, 3000);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (formData.hashExtended && formData.paymentMethod) {
+  //     payOnline();
+  //   }
+  // }, [formData.hashExtended, formData.paymentMethod]);
+
   useEffect(() => {
-    if (formData.txndatetime && formData.oid && formData.paymentMethod) {
-      const messageSignatureContent = Object.keys(formData)
-        .filter((key) => key !== "hashExtended")
-        .sort()
-        .map((key) => formData[key])
-        .join("|");
-
-      const messageSignature = CryptoJS.HmacSHA256(
-        messageSignatureContent,
-        `${process.env.REACT_APP_SHARED_SECRET}`
-      );
-      const messageSignatureBase64 =
-        CryptoJS.enc.Base64.stringify(messageSignature);
-
-      setFormData((prev) => ({
-        ...prev,
-        hashExtended: messageSignatureBase64,
-      }));
-    }
-  }, [
-    formData.txndatetime,
-    formData.oid,
-    formData.chargetotal,
-    formData.paymentMethod,
-  ]);
-
-  const payOnline = () => {
-    if (formData.hashExtended) {
-      const form = document.createElement("form");
-      form.action = process.env.REACT_APP_IPG_URL;
-      form.method = "POST";
-      form.target = "saleiframe";
-
-      Object.keys(formData).forEach((key) => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = formData[key];
-        form.appendChild(input);
-      });
-
-      document.body.appendChild(form);
-      form.submit();
-      setTimeout(() => {
-        setSpinner(false);
-      }, 3000);
-    }
-  };
-
-  useEffect(() => {
-    if (formData.hashExtended && formData.paymentMethod) {
-      payOnline();
-    }
-  }, [formData.hashExtended, formData.paymentMethod]);
-
-  useEffect(() => {
-    setSpinner(true);
-    setHidePaymentMethod(true);
+    // setSpinner(true);
+    // setHidePaymentMethod(true);
     // if (paymentMethod === "card") {
       handlePayNowClick();
-      setShowCard(true);
-      setShowWallet(false);
+      // setShowCard(true);
+      // setShowWallet(false);
     // } 
     // else if (
     //   paymentMethod === "applePay" ||
@@ -380,6 +380,7 @@ export default function Pay({
       const response = await fetch(url, { method: "POST", body: formData });
       const data = await response.json();
       if (data && data.session && data.session.id) {
+        console.log('session', data.session)
         return data.session.id;
       } else {
         console.error("Session ID not found in response");
@@ -410,9 +411,9 @@ export default function Pay({
     if (window.Checkout) {
       // window.Checkout.showEmbeddedPage("#embed-target");
       window.Checkout.showPaymentPage()
-      setTimeout(() => {
-        setSpinner(false);
-      }, 3000);
+      // setTimeout(() => {
+      //   setSpinner(false);
+      // }, 3000);
     }
   };
   // Working code MPGS - END
@@ -461,14 +462,14 @@ export default function Pay({
           </div>
         </div>
 
-        {spinner && (
+        {/* {spinner && (
           <div className="flex justify-center items-center h-[200px]">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
           </div>
-        )}
+        )} */}
 
-        {!hidePaymentMethod && !spinner && (
-          <>
+        {/* {!hidePaymentMethod && !spinner && (
+          <> */}
             {/* <div className="flex flex-col p-5">
               <h3 className="mb-4 text-lg font-semibold">
                 Select Payment Method
@@ -558,8 +559,8 @@ export default function Pay({
                 </button>
               </div> */}
             {/* )} */}
-          </>
-        )}
+          {/* </>
+        )} */}
 
         <div className="mx-5 m-5">
           <div

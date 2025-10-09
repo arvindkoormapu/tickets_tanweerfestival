@@ -10,7 +10,7 @@ export default function LoginRedirect() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    window.analytics.page();
+    // window.analytics.page();
     document.title = `Login Redirect - ${title}`;
 
     const handleRegister = async () => {

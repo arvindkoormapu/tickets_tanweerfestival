@@ -119,18 +119,18 @@ export default function Ticket({
               const minDate = moment.min(dates).format("YYYY-MM-DD");
               setCalendarDate(minDate);
             }
-            window.analytics.track("Order Completed", {
-              total: data.data.tickets[0].total,
-              checkout_id: data.data.tickets[0].purchase_number,
-              order_id: data.data.tickets[0].order_number,
-              currency: "AED",
-              products: [
-                {
-                  name: data.data.tickets[0].ticketData[0].ticket_name,
-                  price: data.data.tickets[0].ticketData[0].price,
-                },
-              ],
-            });
+            // window.analytics.track("Order Completed", {
+            //   total: data.data.tickets[0].total,
+            //   checkout_id: data.data.tickets[0].purchase_number,
+            //   order_id: data.data.tickets[0].order_number,
+            //   currency: "AED",
+            //   products: [
+            //     {
+            //       name: data.data.tickets[0].ticketData[0].ticket_name,
+            //       price: data.data.tickets[0].ticketData[0].price,
+            //     },
+            //   ],
+            // });
 
             // const user = JSON.parse(localStorage.getItem("ajs_user_traits"));
             // Push order data to the GTM data layer
