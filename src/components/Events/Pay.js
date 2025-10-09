@@ -173,13 +173,13 @@ export default function Pay({
       <div className="flex flex-1 flex-col px-6 sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6  h-min-[100vh] sm:h-auto pb-0 justify-start">
         <div className="flex flex-row justify-between items-center w-full">
           <h2 className="text-[26px] mt-[1rem] mb-[1rem] text-left w-full text-4xl leading-9 tracking-tight text-primary-orange">
-            Select your method of payment
+            {/* Select your method of payment */}
           </h2>
-          <div className="w-[40px] flex justify-end">
+          {/* <div className="w-[40px] flex justify-end">
             <button className="text-[20px] font-bold" onClick={handleClosePay}>
               &#x2715;
             </button>
-          </div>
+          </div> */}
         </div>
         <CounterDownTimer timer={timer} percent={percent} />
         <div
@@ -202,6 +202,82 @@ export default function Pay({
             </p>
           </div>
         </div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex flex-col justify-center items-center h-[400px] mx-5 my-5">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-orange"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-8 h-8 bg-primary-orange rounded-full opacity-20"></div>
+              </div>
+            </div>
+            <div className="mt-6 text-center">
+              <p className="text-lg font-medium text-gray-700 mb-2">
+                Preparing secure payment...
+              </p>
+              <p className="text-sm text-gray-500">
+                Loading payment system, please wait
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="mx-5 my-5 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className="text-sm font-medium text-red-800">
+                  Payment System Error
+                </h3>
+                <p className="text-sm text-red-700 mt-1">
+                  {error}
+                </p>
+                <div className="mt-4">
+                  {retryCount < 3 ? (
+                    <button
+                      onClick={handleRetry}
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                    >
+                      Try Again ({retryCount}/3)
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                    >
+                      Refresh Page
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Success State */}
+        {checkoutReady && !isLoading && !error && (
+          <div className="mx-5 my-5 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-green-800">
+                  Payment system ready! The checkout window should open automatically.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
 
