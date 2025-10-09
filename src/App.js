@@ -37,8 +37,41 @@ export default function App() {
     { path: "/search", page: SearchTicket }
   ];
 
+  // Load MPGS script early for faster checkout
   useEffect(() => {
     clarity.init("j4a22d7wbp");
+    
+    // Load MPGS script in background
+    const loadMPGSScript = () => {
+      // Check if script already exists
+      if (document.querySelector('script[src*="checkout.min.js"]')) {
+        console.log('🔄 MPGS script already exists');
+        return;
+      }
+
+      console.log('🚀 Preloading MPGS script in App.js...');
+      
+      const script = document.createElement('script');
+      script.src = 'https://ap-gateway.mastercard.com/static/checkout/checkout.min.js';
+      script.async = true;
+      
+      script.onload = () => {
+        console.log('✅ MPGS script preloaded successfully');
+        // Check if window.Checkout is available
+        if (window.Checkout && typeof window.Checkout.configure === 'function') {
+          console.log('✅ window.Checkout is ready and available globally');
+        }
+      };
+      
+      script.onerror = () => {
+        console.warn('⚠️ MPGS script preload failed, will retry when needed');
+      };
+      
+      document.head.appendChild(script);
+    };
+
+    // Load script after a short delay to not block initial render
+    setTimeout(loadMPGSScript, 1000);
   }, []);
 
   return (

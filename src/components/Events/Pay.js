@@ -1,422 +1,163 @@
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import CaretIcon from "../Icons/CaretIcon";
 import Popup from "../Popup";
 import CounterDownTimer from "../CounterDownTimer";
-import moment from "moment-timezone";
-import CryptoJS from "crypto-js";
 import Logo from "../../logo_dark.png";
-import ApplePay from "../../apple-pay.png";
-import { useNavigate } from "../../../node_modules/react-router-dom/dist/index";
-import { fetchClient } from "../../AxiosConfig";
+
+// Add custom styles for animations
+const customStyles = `
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+  
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse-slow 2s infinite;
+  }
+`;
+
+// Inject styles
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = customStyles;
+  document.head.appendChild(styleSheet);
+}
 
 export default function Pay({
-  handlePay = () => { },
-  payAmount,
-  handlePreviousStep,
-  paymentProcess,
   purchaseData,
-  setPayAmount,
-  setSelectedTicket,
-  setStep,
-  paymentUrl,
   timer,
   percent,
   isPopupOpen,
   closePopup,
-  loading,
-  applePaymentUrl,
-  setCloseToStep0,
   handleClosePay,
 }) {
-  const navigate = useNavigate();
+  // Simple state management
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [checkoutReady, setCheckoutReady] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
-  const [canUseApplePay, setCanUseApplePay] = useState(false);
-  const [paymentMethod, sePaymentMethod] = useState(null);
-  const [checkout, setCheckout] = useState(null);
-  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
-  const [isApplePayAvailable, setIsApplePayAvailable] = useState(false);
-  const [showCard, setShowCard] = useState(false);
-  const [showWallet, setShowWallet] = useState(false);
-  const [spinner, setSpinner] = useState(false);
-  const [hidePaymentMethod, setHidePaymentMethod] = useState(false);
-  // const [formData, setFormData] = useState({
-  //   hash_algorithm: "HMACSHA256",
-  //   checkoutoption: "combinedpage",
-  //   language: "en_US",
-  //   hashExtended: "",
-  //   mobileMode: true,
-  //   storename: `${process.env.REACT_APP_STORE}`,
-  //   timezone: "Asia/Dubai",
-  //   txndatetime: "",
-  //   txntype: "sale",
-  //   chargetotal: "",
-  //   authenticateTransaction: true,
-  //   paymentMethod: "",
-  //   parentUri: `${process.env.REACT_APP_URL}`,
-  //   oid: "",
-  //   currency: "784",
-  //   responseFailURL: `${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/success.php`,
-  //   responseSuccessURL: `${process.env.REACT_APP_BASE_URL}payment/magnati/ipg/success.php`,
-  //   transactionNotificationURL:
-  //     "https://dev-services.hubdev.wine/api-json/magnati?token=2643ihdfuig",
-  // });
+  // Simple, reliable MPGS script loading with retry
+  // Simple check for window.Checkout (preloaded by App.js)
+  const checkMPGSReady = () => {
+    return new Promise((resolve, reject) => {
+      console.log('🔍 Checking for window.Checkout...');
 
-  // Check if Apple Pay is available
-  // useEffect(() => {
-  //   if (
-  //     typeof window !== "undefined" &&
-  //     window.ApplePaySession &&
-  //     window.ApplePaySession.canMakePayments()
-  //   ) {
-  //     setCanUseApplePay(true);
-  //     sePaymentMethod("applePay");
-  //   }
-  // }, []);
-
-  // const handleApplePay = () => {
-  //   const paymentRequest = {
-  //     countryCode: "AE",
-  //     currencyCode: "AED",
-  //     total: {
-  //       label: "Tanweer festival",
-  //       amount: purchaseData.total,
-  //     },
-  //     supportedNetworks: ["visa", "masterCard", "amex"],
-  //     merchantCapabilities: ["supports3DS"],
-  //   };
-
-  //   if (
-  //     typeof window !== "undefined" &&
-  //     window.ApplePaySession &&
-  //     window.ApplePaySession.canMakePayments()
-  //   ) {
-  //     const session = new window.ApplePaySession(3, paymentRequest);
-
-  //     // Handle merchant validation
-  // session.onvalidatemerchant = (event) => {
-  //   const formData = new FormData();
-  //   formData.append("action", "validate-merchant");
-  //   formData.append("validationURL", event.validationURL);
-  //   fetchClient(formData, "POST", "")
-  //     .then((res) => {
-  //       console.log("merchant validation response", res);
-  //       session.completeMerchantValidation(res.data);
-  //     })
-  //     .catch((err) => console.error("Merchant validation failed", err));
-  // };
-
-  //     // Handle payment authorization
-  //     session.onpaymentauthorized = (event) => {
-  //       const paymentToken = event.payment.token;
-  //       console.log("paymentToken", paymentToken);
-
-  //       const purchase = {
-  //         total: purchaseData.total, // Example purchase data
-  //         currency: "AED"
-  //       };
-
-  //       // Create a FormData object
-  //       const formData = new FormData();
-  //       formData.append("action", "process-applepay-payment");
-  //       formData.append('paymentToken', paymentToken);
-  //       formData.append('purchaseData', JSON.stringify(purchase));
-
-  //       // Send the form data to the PHP backend
-  //       fetchClient(formData, "POST", "")
-  //       .then((res) => {
-  //         if (res.success) {
-  //           session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
-  //           alert("Payment successful!");
-  //           navigate(`/view-ticket/${purchaseData.purchase_number}`); // Redirect to ticket view page
-  //         } else {
-  //           session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-  //           alert("Payment failed:");
-  //         }
-  //       })
-  //       .catch((error) => {
-  //         session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-  //         alert("Error processing payment: " + error.message);
-  //       });
-  //     };
-
-  //     session.begin();
-  //   } else {
-  //     console.error("Apple Pay is not supported in this environment.");
-  //   }
-  // };
-
-  // const handleApplePay = () => {
-  //   const paymentRequest = {
-  //     countryCode: "AE",
-  //     currencyCode: "AED",
-  //     total: {
-  //       label: "Tanweer Festival",
-  //       amount: purchaseData.total,
-  //     },
-  //     supportedNetworks: ["visa", "masterCard", "amex"],
-  //     merchantCapabilities: ["supports3DS"],
-  //   };
-
-  //   if (
-  //     typeof window !== "undefined" &&
-  //     window.ApplePaySession &&
-  //     window.ApplePaySession.canMakePayments()
-  //   ) {
-  //     const session = new window.ApplePaySession(3, paymentRequest);
-
-  //     // Merchant validation
-  //     session.onvalidatemerchant = (event) => {
-  //       const formData = new FormData();
-  //       formData.append("action", "validate-merchant");
-  //       formData.append("validationURL", event.validationURL);
-  //       fetchClient(formData, "POST", "")
-  //         .then((res) => res.json())
-  //         .then((merchantSession) => {
-  //           session.completeMerchantValidation(merchantSession);
-  //         })
-  //         .catch((err) => {
-  //           console.error("Merchant validation failed", err);
-  //           session.abort();
-  //         });
-  //     };
-
-  //     // Handle payment authorization
-  //     session.onpaymentauthorized = (event) => {
-  //       const paymentToken = event.payment.token;
-
-  //       const formData = new FormData();
-  //       formData.append("action", "process-applepay-payment");
-  //       formData.append("paymentToken", JSON.stringify(paymentToken)); // token is an object, stringify it
-  //       formData.append("total", purchaseData.total);
-  //       formData.append("currency", "AED");
-  //       formData.append("purchase_number", purchaseData.purchase_number);
-
-  //       fetchClient(formData, "POST", "")
-  //         .then((res) => res.json())
-  //         .then((result) => {
-  //           if (result.success) {
-  //             session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
-  //             alert("Payment successful!");
-  //             navigate(`/view-ticket/${purchaseData.purchase_number}`);
-  //           } else {
-  //             session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-  //             alert("Payment failed: " + result.message);
-  //           }
-  //         })
-  //         .catch((error) => {
-  //           session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-  //           alert("Error: " + error.message);
-  //         });
-  //     };
-
-  //     session.begin();
-  //   } else {
-  //     console.error("Apple Pay is not supported.");
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   setIsApplePayAvailable(
-  //     (typeof navigator !== "undefined" &&
-  //       navigator.userAgent.includes("Safari") &&
-  //       !navigator.userAgent.includes("Chrome")) ||
-  //     /iP(hone|ad|od)/.test(navigator.platform)
-  //   );
-  // }, []);
-
-  // useEffect(() => {
-  //   const newTxnDatetime = moment()
-  //     .tz(formData.timezone)
-  //     .format("YYYY:MM:DD-HH:mm:ss");
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     txndatetime: newTxnDatetime,
-  //     oid: purchaseData.purchase_number,
-  //     chargetotal: purchaseData.total,
-  //   }));
-  // }, []);
-
-  // Recalculate hash when txndatetime, oid, or paymentMethod changes
-  // useEffect(() => {
-  //   if (formData.txndatetime && formData.oid && formData.paymentMethod) {
-  //     const messageSignatureContent = Object.keys(formData)
-  //       .filter((key) => key !== "hashExtended")
-  //       .sort()
-  //       .map((key) => formData[key])
-  //       .join("|");
-
-  //     const messageSignature = CryptoJS.HmacSHA256(
-  //       messageSignatureContent,
-  //       `${process.env.REACT_APP_SHARED_SECRET}`
-  //     );
-  //     const messageSignatureBase64 =
-  //       CryptoJS.enc.Base64.stringify(messageSignature);
-
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       hashExtended: messageSignatureBase64,
-  //     }));
-  //   }
-  // }, [
-  //   formData.txndatetime,
-  //   formData.oid,
-  //   formData.chargetotal,
-  //   formData.paymentMethod,
-  // ]);
-
-  // const payOnline = () => {
-  //   if (formData.hashExtended) {
-  //     const form = document.createElement("form");
-  //     form.action = process.env.REACT_APP_IPG_URL;
-  //     form.method = "POST";
-  //     form.target = "saleiframe";
-
-  //     Object.keys(formData).forEach((key) => {
-  //       const input = document.createElement("input");
-  //       input.type = "hidden";
-  //       input.name = key;
-  //       input.value = formData[key];
-  //       form.appendChild(input);
-  //     });
-
-  //     document.body.appendChild(form);
-  //     form.submit();
-  //     // setTimeout(() => {
-  //     //   setSpinner(false);
-  //     // }, 3000);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (formData.hashExtended && formData.paymentMethod) {
-  //     payOnline();
-  //   }
-  // }, [formData.hashExtended, formData.paymentMethod]);
-
-  useEffect(() => {
-    // setSpinner(true);
-    // setHidePaymentMethod(true);
-    // if (paymentMethod === "card") {
-      handlePayNowClick();
-      // setShowCard(true);
-      // setShowWallet(false);
-    // } 
-    // else if (
-    //   paymentMethod === "applePay" ||
-    //   paymentMethod === "googlePay" ||
-    //   paymentMethod === "samsung_pay_wallet"
-    // ) {
-    //   setFormData((prev) => ({
-    //     ...prev,
-    //     paymentMethod: paymentMethod,
-    //   }));
-    //   setShowCard(false);
-    //   setShowWallet(true);
-    // }
-  },[]);
-
-  // Working code MPGS - START
-  // Effect to load and configure the Checkout script
-  useEffect(() => {
-    const loadAndConfigureScript = () => {
-      // Remove existing script if any to force reload
-      const existingScript = document.querySelector(
-        'script[src="https://ap-gateway.mastercard.com/static/checkout/checkout.min.js"]'
-      );
-      if (existingScript) {
-        existingScript.remove();
+      // Check if window.Checkout is available (should be preloaded by App.js)
+      if (window.Checkout && typeof window.Checkout.configure === 'function') {
+        console.log('✅ window.Checkout is ready!');
+        resolve(true);
+        return;
       }
 
-      // Load the script fresh
-      const script = document.createElement("script");
-      script.src =
-        "https://ap-gateway.mastercard.com/static/checkout/checkout.min.js";
-      script.async = true;
-      script.onload = () => {
-        console.log("Checkout script loaded successfully.");
-        setIsScriptLoaded(true); // Indicate that script is ready
+      // If not available immediately, wait a bit (script might still be loading)
+      console.log('⏳ Waiting for window.Checkout...');
+      let attempts = 0;
+      const maxAttempts = 30; // 3 seconds max
+
+      const checkCheckout = () => {
+        attempts++;
+
+        if (window.Checkout && typeof window.Checkout.configure === 'function') {
+          console.log('✅ window.Checkout is now ready!');
+          resolve(true);
+        } else if (attempts >= maxAttempts) {
+          console.error('❌ window.Checkout not available. Please refresh the page.');
+          reject(new Error('MPGS script not loaded. Please refresh the page.'));
+        } else {
+          setTimeout(checkCheckout, 100);
+        }
       };
-      script.onerror = (error) => {
-        console.error("Failed to load the Checkout script", error);
-      };
-      document.head.appendChild(script);
-    };
 
-    loadAndConfigureScript();
-
-    // Cleanup function to remove script when component unmounts
-    return () => {
-      const script = document.querySelector(
-        'script[src="https://ap-gateway.mastercard.com/static/checkout/checkout.min.js"]'
-      );
-      if (script) {
-        script.remove();
-      }
-      setIsScriptLoaded(false);
-    };
-  }, []);
-
-  // Load new session ID when script is ready
-  const handlePayNowClick = async () => {
-    const sessionID = await fetchSessionID();
-    if (sessionID) {
-      configureCheckout(sessionID);
-    }
+      checkCheckout();
+    });
   };
 
-  // Fetch session ID from the server
-  const fetchSessionID = async () => {
-    const url = `${process.env.REACT_APP_BASE_URL}/?action=mpgSession`;
-    const formData = new FormData();
-    formData.append(
-      "returnUrl",
-      `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`
-    );
-    formData.append("amount", purchaseData.total);
-    formData.append("id", purchaseData.purchase_number);
-    formData.append("ticket_name", purchaseData.ticket_name);
-
+  // Initialize checkout with session
+  const initializeCheckout = async () => {
     try {
-      const response = await fetch(url, { method: "POST", body: formData });
-      const data = await response.json();
-      if (data && data.session && data.session.id) {
-        console.log('session', data.session)
-        return data.session.id;
-      } else {
-        console.error("Session ID not found in response");
-        return null;
-      }
-    } catch (error) {
-      console.error("Error fetching session: ", error);
-      return null;
-    }
-  };
+      setIsLoading(true);
+      setError(null);
+      console.log('🚀 Starting checkout initialization...');
 
-  // Configure Checkout with the session ID
-  const configureCheckout = (sessionID) => {
-    if (window.Checkout) {
+      // Step 1: Check if MPGS script is ready (preloaded by App.js)
+      await checkMPGSReady();
+      console.log('✅ Script loaded, fetching session...');
+
+      // Step 2: Fetch session ID (using correct API format)
+      const url = `${process.env.REACT_APP_BASE_URL}/?action=mpgSession`;
+      const formData = new FormData();
+      formData.append("returnUrl", `${process.env.REACT_APP_URL}view-ticket/${purchaseData.purchase_number}`);
+      formData.append("amount", purchaseData.total);
+      formData.append("id", purchaseData.purchase_number);
+      formData.append("ticket_name", purchaseData.ticket_name);
+
+      const sessionResponse = await fetch(url, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!sessionResponse.ok) {
+        throw new Error(`Session creation failed: ${sessionResponse}`);
+      }
+
+      const sessionData = await sessionResponse.json();
+      console.log('✅ Session created:', sessionData.session.id);
+
+      // Step 3: Configure checkout
       window.Checkout.configure({
         session: {
-          id: sessionID,
-        },
+          id: sessionData.session.id
+        }
       });
-      handleEmbeddedPage();
-    } else {
-      console.error("Checkout not available or session ID is missing.");
+
+      console.log('✅ Checkout configured');
+      setCheckoutReady(true);
+      setIsLoading(false);
+
+      // Step 4: Show payment page
+      window.Checkout.showPaymentPage();
+      console.log('✅ Payment page shown');
+
+    } catch (error) {
+      console.error('❌ Checkout initialization failed:', error);
+      setError(error.message);
+      setIsLoading(false);
     }
   };
 
-  // Show the embedded payment page
-  const handleEmbeddedPage = () => {
-    if (window.Checkout) {
-      // window.Checkout.showEmbeddedPage("#embed-target");
-      window.Checkout.showPaymentPage()
-      // setTimeout(() => {
-      //   setSpinner(false);
-      // }, 3000);
+  // Retry logic with exponential backoff
+  const handleRetry = async () => {
+    if (retryCount < 3) {
+      const newRetryCount = retryCount + 1;
+      setRetryCount(newRetryCount);
+      console.log(`🔄 Retry attempt ${newRetryCount}/3`);
+
+      // Wait before retrying (exponential backoff)
+      const delay = Math.pow(2, newRetryCount) * 1000; // 2s, 4s, 8s
+      await new Promise(resolve => setTimeout(resolve, delay));
+
+      await initializeCheckout();
+    } else {
+      console.error('❌ Max retries reached');
+      setError('Maximum retry attempts reached. Please refresh the page.');
     }
   };
-  // Working code MPGS - END
+
+  // Initialize on mount
+  useEffect(() => {
+    console.log('🎬 Pay component mounted, initializing checkout...');
+    initializeCheckout();
+  }, []);
 
   return (
     <div className="pay flex flex-col min-h-full sm:px-6 lg:px-8 h-[100vh] sm:h-auto pb-0">
@@ -462,127 +203,6 @@ export default function Pay({
           </div>
         </div>
 
-        {/* {spinner && (
-          <div className="flex justify-center items-center h-[200px]">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-          </div>
-        )} */}
-
-        {/* {!hidePaymentMethod && !spinner && (
-          <> */}
-            {/* <div className="flex flex-col p-5">
-              <h3 className="mb-4 text-lg font-semibold">
-                Select Payment Method
-              </h3>
-              <div className="space-y-4">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="card"
-                    onChange={() => sePaymentMethod("card")}
-                    className="text-blue-600"
-                  />
-                  <span>Pay with Card</span>
-                </label> */}
-
-                {/* {isApplePayAvailable && (
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="apple"
-                      onChange={() => sePaymentMethod("applePay")}
-                      className="text-blue-600"
-                    />
-                    <span>Apple Pay</span>
-                  </label>
-                )} */}
-
-                {/* {canUseApplePay && (
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="applePay"
-                      onChange={() => sePaymentMethod("applePay")}
-                      className="text-blue-600"
-                      checked={paymentMethod === "applePay"}
-                    />
-                    <span>Apple Pay</span>
-                  </label>
-                )} */}
-
-                {/* <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="google"
-                    onChange={() => sePaymentMethod("googlePay")}
-                    className="text-blue-600"
-                  />
-                  <span>Google Pay</span>
-                </label>
-
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="samsung"
-                    onChange={() => sePaymentMethod("samsung_pay_wallet")}
-                    className="text-blue-600"
-                  />
-                  <span>Samsung Pay</span>
-                </label> */}
-              {/* </div>
-            </div> */}
-            {/* {canUseApplePay && paymentMethod === "applePay" ? (
-              <div
-                className="flex w-full sticky sm:static bottom-0 sm:bottom-auto bg-[#000] items-center justify-center h-[50px] border rounded-lg cursor-pointer"
-                onClick={() => handleApplePay()}
-              >
-                <img
-                  src={ApplePay}
-                  alt="Visa and Mastercard Logos"
-                  className={`h-[20px] w-[100%] object-contain`}
-                />
-              </div>
-            ) : ( */}
-              {/* <div className="flex w-full sticky sm:static bottom-0 sm:bottom-auto">
-                <button
-                  onClick={() => handlePayment()}
-                  disabled={loading}
-                  className={`flex sm:my-10 h-16 sm:rounded-lg w-full justify-center items-center ${!loading && "cursor-pointer"
-                    }   overflow-hidden  px-[1rem] py-[2rem] text-base px-[28px] py-[16px] text-center bg-primary-orange font-medium text-white shadow-sm focus-visible:outline`}
-                >
-                  Continue
-                </button>
-              </div> */}
-            {/* )} */}
-          {/* </>
-        )} */}
-
-        <div className="mx-5 m-5">
-          <div
-            id="embed-target"
-            className="mx-5 m-5"
-            style={{ display: showCard ? "inline" : "none" }}
-          ></div>
-        </div>
-
-        <div style={{ height: "432px" }} className="mx-5 m-5">
-          <iframe
-            allow="payment"
-            id="saleiframe"
-            name="saleiframe"
-            style={{
-              width: "100%",
-              height: "100%",
-              display: showWallet ? "inline" : "none",
-            }}
-            title="Payment Processing Frame"
-          ></iframe>
-        </div>
       </div>
 
       <Popup isOpen={isPopupOpen} width="w-[90vw] sm:w-[50vw]">
