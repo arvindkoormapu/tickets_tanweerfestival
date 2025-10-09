@@ -72,7 +72,6 @@ export default function Ticket({
 
   useEffect(() => {
     setSpinner(true);
-    window.analytics.page();
     document.title = `Ticket - ${title}`;
     const getOrderDetails = async () => {
       const queryParams = new URLSearchParams(location.search);
