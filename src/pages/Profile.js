@@ -97,6 +97,7 @@ export default function Profile({
   const [orderHistory, setOrderHistory] = useState([]);
   const [addonsHistory, setAddonsHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -139,6 +140,85 @@ export default function Profile({
     navigate("/signin");
   };
 
+  const handleDownloadAllPDFLinks = async () => {
+    try {
+      setDownloadProgress(1);
+
+      // Collect all PDF paths
+      const allPdfPaths = [];
+
+      // Calculate total items to process
+      let totalItems = 0;
+      orderHistory.forEach(order => {
+        if (order.ticketData && order.ticketData.qrcodes) {
+          totalItems += order.ticketData.qrcodes.length;
+        }
+      });
+
+      addonsHistory.forEach(addon => {
+        if (addon.pdf_path) {
+          totalItems += 1;
+        }
+      });
+
+      if (totalItems === 0) {
+        alert("No PDF links found!");
+        setDownloadProgress(0);
+        return;
+      }
+
+      let processedItems = 0;
+
+      // Collect PDF paths from orderHistory tickets
+      for (const order of orderHistory) {
+        if (order.ticketData && order.ticketData.qrcodes) {
+          for (const qrcode of order.ticketData.qrcodes) {
+            if (qrcode.pdf_path) {
+              allPdfPaths.push(qrcode.pdf_path);
+            }
+            processedItems++;
+            setDownloadProgress(Math.round((processedItems / totalItems) * 100));
+            // Small delay to ensure UI updates
+            await new Promise(resolve => setTimeout(resolve, 50));
+          }
+        }
+      }
+
+      // Collect PDF paths from addonsHistory
+      for (const addon of addonsHistory) {
+        if (addon.pdf_path) {
+          allPdfPaths.push(addon.pdf_path);
+        }
+        processedItems++;
+        setDownloadProgress(Math.round((processedItems / totalItems) * 100));
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+
+      // Create text file content
+      const textContent = allPdfPaths.join('\n');
+
+      // Create blob and download
+      const blob = new Blob([textContent], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = 'tanweer-tickets-pdfs.txt';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(link.href);
+
+      // Reset progress after a short delay
+      setTimeout(() => {
+        setDownloadProgress(0);
+      }, 1000);
+
+    } catch (error) {
+      console.error('Error downloading PDF links:', error);
+      alert('Failed to download PDF links. Please try again.');
+      setDownloadProgress(0);
+    }
+  };
+
   return (
     <div className="addons flex flex-col min-h-full sm:px-6  lg:px-8 h-[100vh] sm:h-auto pb-0">
       <div className="flex flex-row justify-between items-center shadow-[0_4px_4px_-1px_rgba(0,0,0,0.1)] p-6 sm:px-6 sm:py-6 mx-auto w-full sticky top-0 bg-[#fff] z-10">
@@ -153,9 +233,26 @@ export default function Profile({
         <div className="flex"></div>
       </div>
       <div className="flex flex-1 flex-col px-6 sm:mx-auto sm:w-full sm:max-w-lg   sm:px-6  h-min-[100vh] sm:h-auto pb-0 justify-start">
-        <h2 className="text-[26px] mt-[1rem] mb-[1rem] text-left w-full text-4xl leading-9 tracking-tight text-primary-orange">
-          My profile
-        </h2>
+        <div className="flex justify-between items-center mt-[1rem] mb-[1rem]">
+          <h2 className="text-[26px] text-left text-4xl leading-9 tracking-tight text-primary-orange">
+            My profiles
+          </h2>
+          <button
+            onClick={handleDownloadAllPDFLinks}
+            disabled={downloadProgress > 0 || orderHistory.length === 0}
+            className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition-all ${
+              downloadProgress > 0 || orderHistory.length === 0
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-primary-orange hover:bg-orange-600'
+            }`}
+          >
+            {downloadProgress > 0 ? (
+              <span>{downloadProgress}%</span>
+            ) : (
+              <span>📥 Download</span>
+            )}
+          </button>
+        </div>
         {orderHistory.length ? (
           <div className="my-6 flex flex-col gap-[30px]">
             {orderHistory.map((orderHis, i) => (
