@@ -98,6 +98,8 @@ export default function Profile({
   const [addonsHistory, setAddonsHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -142,7 +144,7 @@ export default function Profile({
 
   const handleDownloadAllPDFLinks = async () => {
     try {
-      setDownloadProgress(1);
+      setDownloadProgress(10);
 
       // Collect all PDF paths
       const allPdfPaths = [];
@@ -167,32 +169,29 @@ export default function Profile({
         return;
       }
 
-      let processedItems = 0;
+      setDownloadProgress(30);
 
-      // Collect PDF paths from orderHistory tickets
-      for (const order of orderHistory) {
+      // Collect PDF paths from orderHistory tickets (no delays - instant)
+      orderHistory.forEach(order => {
         if (order.ticketData && order.ticketData.qrcodes) {
-          for (const qrcode of order.ticketData.qrcodes) {
+          order.ticketData.qrcodes.forEach(qrcode => {
             if (qrcode.pdf_path) {
               allPdfPaths.push(qrcode.pdf_path);
             }
-            processedItems++;
-            setDownloadProgress(Math.round((processedItems / totalItems) * 100));
-            // Small delay to ensure UI updates
-            await new Promise(resolve => setTimeout(resolve, 50));
-          }
+          });
         }
-      }
+      });
 
-      // Collect PDF paths from addonsHistory
-      for (const addon of addonsHistory) {
+      setDownloadProgress(60);
+
+      // Collect PDF paths from addonsHistory (no delays - instant)
+      addonsHistory.forEach(addon => {
         if (addon.pdf_path) {
           allPdfPaths.push(addon.pdf_path);
         }
-        processedItems++;
-        setDownloadProgress(Math.round((processedItems / totalItems) * 100));
-        await new Promise(resolve => setTimeout(resolve, 50));
-      }
+      });
+
+      setDownloadProgress(80);
 
       // Create text file content
       const textContent = allPdfPaths.join('\n');
@@ -207,6 +206,8 @@ export default function Profile({
       document.body.removeChild(link);
       window.URL.revokeObjectURL(link.href);
 
+      setDownloadProgress(100);
+
       // Reset progress after a short delay
       setTimeout(() => {
         setDownloadProgress(0);
@@ -217,6 +218,31 @@ export default function Profile({
       alert('Failed to download PDF links. Please try again.');
       setDownloadProgress(0);
     }
+  };
+
+  // Combine orderHistory and addonsHistory for unified pagination
+  const combinedHistory = [
+    ...orderHistory.map(item => ({ ...item, type: 'ticket' })),
+    ...addonsHistory.map(item => ({ ...item, type: 'addon' }))
+  ];
+
+  // Calculate pagination values
+  const totalPages = Math.ceil(combinedHistory.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedItems = combinedHistory.slice(startIndex, endIndex);
+
+  // Reset to page 1 when data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [orderHistory.length, addonsHistory.length]);
+
+  const handlePreviousPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
   };
 
   return (
@@ -253,154 +279,133 @@ export default function Profile({
             )}
           </button>
         </div>
-        {orderHistory.length ? (
+        {combinedHistory.length > 0 ? (
           <div className="my-6 flex flex-col gap-[30px]">
-            {orderHistory.map((orderHis, i) => (
-              <Link to={`/view-ticket/${orderHis.purchase_number}`}>
+            {paginatedItems.map((item, i) => (
+              <Link key={i} to={`/view-ticket/${item.purchase_number}`}>
                 <div
-                  key={i}
-                  // id={orderHis.id}
                   className={`ticket rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500 ${"bg-d-orange"}   `}
                 >
-                  <div className="flex justify-between ">
-                    <div className="flex flex-col justify-between flex-[0.9]">
-                      <p
-                        className={`text-base  mb-3 ${"font-medium text-white"}`}
-                      >
-                        {orderHis.ticketData[0].ticket_name}
-                      </p>
-                    </div>
-
-                    {orderHis.addonData.length > 0 && (
-                      <div className="flex flex-col justify-between items-end text-right  h-50">
-                        <span>
+                  {item.type === 'ticket' ? (
+                    <>
+                      <div className="flex justify-between ">
+                        <div className="flex flex-col justify-between flex-[0.9]">
                           <p
-                            className={`text-base font-medium text-right  ${"text-white"}`}
+                            className={`text-base  mb-3 ${"font-medium text-white"}`}
                           >
-                            Add-ons: {orderHis.addonData.length}
-                          </p>{" "}
-                          {/* <p
-                        // text-xs
-                        className={`text-[11px] text-right  ${"opacity-50 text-white"}`}
-                      >
-                        {orderHis.items?.packages[0].tickets[0].qty} {"tickets"}
-                      </p> */}
-                        </span>
+                            {item.ticketData[0].ticket_name}
+                          </p>
+                        </div>
+
+                        {item.addonData.length > 0 && (
+                          <div className="flex flex-col justify-between items-end text-right  h-50">
+                            <span>
+                              <p
+                                className={`text-base font-medium text-right  ${"text-white"}`}
+                              >
+                                Add-ons: {item.addonData.length}
+                              </p>
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  <div className="flex">
-                    {orderHis.items?.packages[0].date.map((dt, idx) => (
-                      <p
-                        className={`text-sm opacity-50 text-left ${"text-white"}`}
-                      >
-                        {moment(dt, "YYYY-MM-DD").format("DD-MM-YYYY")}
-                        {orderHis.items?.packages[0].date.length !==
-                          idx + 1 && <span>,&nbsp;</span>}
-                      </p>
-                    ))}
-                  </div>
+                      <div className="flex">
+                        {item.items?.packages[0].date.map((dt, idx) => (
+                          <p
+                            key={idx}
+                            className={`text-sm opacity-50 text-left ${"text-white"}`}
+                          >
+                            {moment(dt, "YYYY-MM-DD").format("DD-MM-YYYY")}
+                            {item.items?.packages[0].date.length !==
+                              idx + 1 && <span>,&nbsp;</span>}
+                          </p>
+                        ))}
+                      </div>
 
-                  {/* py-[1rem]  */}
-                  <div className={`mt-[1rem]`}>
-                    <div className="border border-screen-light opacity-70 mb-5" />{" "}
-                    {/* {Object.keys(orderHis.items.packages[0].addons).map(
-                    (addon) => (
-                      <DataLine
-                        key={addon.text}
-                        leftData={addon.text}
-                        rightData={addon.text}
-                        whiteText
-                      />
-                    )
-                  )} */}
-                    {/* DEMO  */}
-                    <DataLine
-                      leftData={
-                        <Link
-                          to={`/view-ticket/${orderHis.purchase_number}`}
-                          className="flex gap-3"
-                        >
-                          details
-                          <img width="8px" src={caretRightWhite} />
-                        </Link>
-                      }
-                      rightData={"AED " + orderHis.total}
-                      whiteText
-                    />
-                  </div>
+                      <div className={`mt-[1rem]`}>
+                        <div className="border border-screen-light opacity-70 mb-5" />
+                        <DataLine
+                          leftData={
+                            <Link
+                              to={`/view-ticket/${item.purchase_number}`}
+                              className="flex gap-3"
+                            >
+                              details
+                              <img width="8px" src={caretRightWhite} />
+                            </Link>
+                          }
+                          rightData={"AED " + item.total}
+                          whiteText
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between ">
+                        <div className="flex flex-col justify-between flex-[0.9]">
+                          <p
+                            className={`text-base  mb-3 ${"font-medium text-white"}`}
+                          >
+                            {item.name}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className={`mt-[1rem]`}>
+                        <div className="border border-screen-light opacity-70 mb-5" />
+                        <DataLine
+                          leftData={
+                            <Link
+                              to={`/view-ticket/${item.purchase_number}`}
+                              className="flex gap-3"
+                            >
+                              details
+                              <img width="8px" src={caretRightWhite} />
+                            </Link>
+                          }
+                          rightData={"AED " + item.price}
+                          whiteText
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </Link>
             ))}
           </div>
         ) : null}
 
-        {addonsHistory.length ? (
-          <div className="my-6 flex flex-col gap-[30px]">
-            {addonsHistory.map((item, i) => (
-              <Link to={`/view-ticket/${item.purchase_number}`}>
-                <div
-                  key={i}
-                  // id={orderHis.id}
-                  className={`ticket rounded-lg cursor-pointer px-[28px] py-[15px] transition-all ease-in-out duration-500 ${"bg-d-orange"}   `}
-                >
-                  <div className="flex justify-between ">
-                    <div className="flex flex-col justify-between flex-[0.9]">
-                      <p
-                        className={`text-base  mb-3 ${"font-medium text-white"}`}
-                      >
-                        {item.name}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* <div className="flex">
-                  {orderHis.items?.packages[0].date.map((dt, idx) => (
-                    <p
-                      className={`text-sm opacity-50 text-left ${"text-white"}`}
-                    >
-                      {moment(dt, "YYYY-MM-DD").format("DD-MM-YYYY")}
-                      {orderHis.items?.packages[0].date.length !== idx + 1 && (
-                        <span>,&nbsp;</span>
-                      )}
-                    </p>
-                  ))}
-                </div> */}
-
-                  {/* py-[1rem]  */}
-                  <div className={`mt-[1rem]`}>
-                    <div className="border border-screen-light opacity-70 mb-5" />{" "}
-                    {/* {Object.keys(orderHis.items.packages[0].addons).map(
-                    (addon) => (
-                      <DataLine
-                        key={addon.text}
-                        leftData={addon.text}
-                        rightData={addon.text}
-                        whiteText
-                      />
-                    )
-                  )} */}
-                    {/* DEMO  */}
-                    <DataLine
-                      leftData={
-                        <Link
-                          to={`/view-ticket/${item.purchase_number}`}
-                          className="flex gap-3"
-                        >
-                          details
-                          <img width="8px" src={caretRightWhite} />
-                        </Link>
-                      }
-                      rightData={"AED " + item.price}
-                      whiteText
-                    />
-                  </div>
-                </div>
-              </Link>
-            ))}
+        {/* Pagination Controls */}
+        {combinedHistory.length > itemsPerPage && (
+          <div className="flex justify-center items-center gap-4 my-6">
+            <button
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition-all ${
+                currentPage === 1
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-primary-orange hover:bg-orange-600'
+              }`}
+            >
+              Previous
+            </button>
+            <span className="text-primary-orange font-medium">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition-all ${
+                currentPage === totalPages
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-primary-orange hover:bg-orange-600'
+              }`}
+            >
+              Next
+            </button>
           </div>
-        ) : null}
+        )}
 
         <div className="my-10">
           <DataLine leftData={"Full name"} rightData={profileData.name} />
