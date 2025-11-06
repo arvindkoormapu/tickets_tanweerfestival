@@ -18,7 +18,8 @@ export default function LoginRedirect() {
 
       // ✅ safer: read token from query params or state
       const query = new URLSearchParams(location.search);
-      const token = query.get("token") || location.state;
+      const token = query.get("token") || (location.state?.credential || location.state);
+      const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
 
       if (!token) {
         console.error("No token found in redirect");
@@ -58,8 +59,11 @@ export default function LoginRedirect() {
             console.warn("Could not parse user_data", e);
           }
 
-          // redirect user
-          navigate(hasMobile ? "/" : "/complete-profile");
+          // Clean up redirect storage
+          localStorage.removeItem("redirectAfterLogin");
+
+          // redirect user - use stored redirect path if user has mobile, otherwise go to complete-profile
+          navigate(hasMobile ? redirectPath : "/complete-profile");
         }
       } catch (err) {
         console.error("Login redirect failed:", err);

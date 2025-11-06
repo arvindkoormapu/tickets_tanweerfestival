@@ -38,7 +38,9 @@ export default function Signup() {
     document.title = `Sign up - ${title}`;
     if (localStorage.getItem("uuid")) {
       notifyInfo("Redirecting...");
-      setTimeout(() => navigate("/"), 1000);
+      const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
+      localStorage.removeItem("redirectAfterLogin");
+      setTimeout(() => navigate(redirectPath), 1000);
     }
   }, []);
 
@@ -84,7 +86,9 @@ export default function Signup() {
       if (data.data.token) {
         localStorage.setItem("uuid", data.data.token);
         await profileDetails();
-        navigate("/");
+        const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
+        localStorage.removeItem("redirectAfterLogin");
+        navigate(redirectPath);
       }
     }
     setLoading(false);

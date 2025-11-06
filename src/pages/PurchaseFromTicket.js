@@ -10,6 +10,7 @@ import axios from "axios";
 
 export default function PurchaseFromTicket() {
   const Ref = useRef(null);
+  const hasRestoredRef = useRef(false);
 
   const [step, setStep] = useState(0);
   const [addonList, setAddonList] = useState([]);
@@ -29,6 +30,7 @@ export default function PurchaseFromTicket() {
   const [isPopupOpen, setPopupOpen] = useState(false);
   const [closeToStep0, setCloseToStep0] = useState(false);
   const [purchaseData, setPurchaseData] = useState("");
+  const [isRestoring, setIsRestoring] = useState(false);
 
   const navigate = useNavigate();
 
@@ -69,14 +71,100 @@ export default function PurchaseFromTicket() {
           selectedDates: [],
         };
       });
-      setAddonList(tempList);
-      setLoading(false);
+
+      // Check if there's pending summary data (only restore once)
+      const summaryDataStr = localStorage.getItem("pendingSummaryData");
+      console.log("🔍 Checking for pendingSummaryData:", summaryDataStr ? "FOUND" : "NOT FOUND");
+      console.log("🔒 hasRestoredRef.current:", hasRestoredRef.current);
+
+      if (summaryDataStr && !hasRestoredRef.current) {
+        try {
+          const summaryData = JSON.parse(summaryDataStr);
+          console.log("✅ Parsed summary data:", summaryData);
+
+          // Check if data is fresh (< 30 minutes)
+          const thirtyMinutes = 30 * 60 * 1000;
+          const age = Date.now() - summaryData.timestamp;
+          console.log(`⏱️ Data age: ${Math.floor(age / 1000)} seconds (max: ${thirtyMinutes / 1000} seconds)`);
+
+          if (Date.now() - summaryData.timestamp < thirtyMinutes) {
+            console.log("✅ Data is fresh, restoring...");
+
+            // Restore the summary data by merging with fresh inventory
+            const restoredList = tempList.map(inventory => {
+              const savedAddon = summaryData.selectedAddons.find(s => s.id === inventory.id);
+              if (savedAddon) {
+                return {
+                  ...inventory,
+                  qty: savedAddon.qty,
+                  selected: true,
+                  selectedDates: savedAddon.selectedDates
+                };
+              }
+              return inventory;
+            });
+
+            // Calculate payAmount SYNCHRONOUSLY before setting state
+            let total = 0;
+            restoredList.forEach((addon) => {
+              if (addon.qty > 0) {
+                const dateCount = addon.selectedDates && addon.selectedDates.length > 0
+                  ? addon.selectedDates.length
+                  : 1;
+                const addonTotal = addon.price * addon.qty * dateCount;
+                total += addonTotal;
+              }
+            });
+
+            console.log("📊 Restored addonList:", restoredList);
+            console.log("💰 Calculated total:", total);
+
+            // Mark as restored to prevent double execution
+            hasRestoredRef.current = true;
+
+            // Set both addonList and payAmount together
+            setIsRestoring(true);
+            setAddonList(restoredList);
+            setPayAmount(total);
+
+            // Use setTimeout to defer step transition until after state updates complete
+            setTimeout(() => {
+              console.log("🎯 Setting step to 1");
+              setStep(1);
+              setIsRestoring(false); // Reset flag
+              // DON'T remove localStorage here - moved to separate useEffect
+            }, 0);
+
+            setLoading(false);
+            return;
+          } else {
+            console.log("❌ Data expired, clearing...");
+            localStorage.removeItem("pendingSummaryData"); // Expired
+          }
+        } catch (e) {
+          console.error("❌ Error restoring summary data:", e);
+          localStorage.removeItem("pendingSummaryData");
+        }
+      } else {
+        console.log("ℹ️ No pending summary data found or already restored, normal flow");
+      }
+
+      // Normal flow - only if not restored
+      if (!hasRestoredRef.current) {
+        setAddonList(tempList);
+        setLoading(false);
+      }
     };
 
     fetchData();
   }, []);
 
   useEffect(() => {
+    // Skip if we're restoring from localStorage
+    if (isRestoring) {
+      return;
+    }
+
     let total = 0;
     if (addonList.length) {
       // Calculate addon total
@@ -94,7 +182,16 @@ export default function PurchaseFromTicket() {
       // Set total to the pay amount
       setPayAmount(total);
     }
-  }, [addonList]);
+  }, [addonList, isRestoring]);
+
+  // Clean up localStorage when Summary page is confirmed rendered
+  useEffect(() => {
+    if (step === 1 && hasRestoredRef.current) {
+      console.log("✅ Summary page rendered, safe to clear localStorage");
+      localStorage.removeItem("pendingSummaryData");
+      hasRestoredRef.current = false; // Reset for future use
+    }
+  }, [step]);
 
   useEffect(() => {
     if (step === 2) clearTimer(getDeadTime());
@@ -231,6 +328,26 @@ export default function PurchaseFromTicket() {
   };
 
   const handlePay = async () => {
+    // Check if user is authenticated
+    if (!localStorage.getItem("uuid")) {
+      // Save summary data - only selected addons
+      const summaryData = {
+        payAmount: payAmount,
+        selectedAddons: addonList.filter(addon => addon.qty > 0).map(addon => ({
+          id: addon.id,
+          name: addon.name,
+          price: addon.price,
+          qty: addon.qty,
+          selectedDates: addon.selectedDates
+        })),
+        timestamp: Date.now()
+      };
+      localStorage.setItem("pendingSummaryData", JSON.stringify(summaryData));
+      localStorage.setItem("redirectAfterLogin", "/addons");
+      navigate("/signin");
+      return;
+    }
+
     let payload = {addons : addonList
     .filter((addon) => addon.qty > 0) // Filter addons with quantity greater than 0
     .flatMap((addon) => {
@@ -266,6 +383,8 @@ export default function PurchaseFromTicket() {
     if (data.purchase_number) {
       setPurchaseData(data);
       setStep(2);
+      // Clean up pending summary data after successful purchase
+      localStorage.removeItem("pendingSummaryData");
     }
   };
 
