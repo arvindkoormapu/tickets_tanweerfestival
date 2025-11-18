@@ -97,6 +97,10 @@ export default function Addons({
             addon.qty += 1;
             // Check if the selected time slot has enough inventory for the new qty
             if (addon.selectedDates?.length > 0) {
+              let timeSlotsCleared = false;
+              let datesRemoved = false;
+
+              // First pass: Clear time slots that have insufficient inventory
               addon.selectedDates = addon.selectedDates.map((selectedDate) => {
                 const selectedSlot = groupedDates[selectedDate.date]?.find(
                   (slot) => slot.id === selectedDate.time_slot_id
@@ -107,6 +111,7 @@ export default function Addons({
                   selectedSlot &&
                   addon.qty > selectedSlot.available_inventory
                 ) {
+                  timeSlotsCleared = true;
                   return {
                     ...selectedDate,
                     timeSlot: null,
@@ -115,6 +120,40 @@ export default function Addons({
                 }
                 return selectedDate;
               });
+
+              // Second pass: Remove entire dates if ALL time slots for that date have insufficient inventory
+              const datesToRemove = [];
+              addon.selectedDates.forEach((selectedDate) => {
+                const slotsForDate = groupedDates[selectedDate.date];
+                if (slotsForDate) {
+                  const allSlotsInsufficient = slotsForDate.every(
+                    (slot) => addon.qty > slot.available_inventory
+                  );
+                  if (allSlotsInsufficient) {
+                    datesToRemove.push(selectedDate.date);
+                  }
+                }
+              });
+
+              if (datesToRemove.length > 0) {
+                addon.selectedDates = addon.selectedDates.filter(
+                  (selectedDate) => !datesToRemove.includes(selectedDate.date)
+                );
+                datesRemoved = true;
+              }
+
+              // Show appropriate toast notification
+              if (showToast) {
+                if (datesRemoved) {
+                  toast.error(
+                    "Selected date(s) removed due to insufficient inventory."
+                  );
+                } else if (timeSlotsCleared) {
+                  toast.error(
+                    "Selected time slot cleared due to insufficient inventory."
+                  );
+                }
+              }
             }
           } else if (action === quantityActions.DECREMENT && addon.qty > 0) {
             addon.qty -= 1;
@@ -137,7 +176,12 @@ export default function Addons({
     return (
       addonList.length > 0 &&
       addonList.filter((addon) => {
-        const isAvailable = Number(addon.available_inventory) > 0;
+        // Check both root-level and slot-level inventory
+        const hasRootInventory = Number(addon.available_inventory) > 0;
+        const hasSlotInventory = addon.slots && addon.slots.some(
+          (slot) => Number(slot.available_inventory) > 0
+        );
+        const isAvailable = hasRootInventory || hasSlotInventory;
 
         const matchesFilter =
           addonFilter === "All" ||
@@ -164,27 +208,47 @@ export default function Addons({
 
   // Function to group slots by date
   const groupByDate = (slots) => {
+    // Filter out slots with zero or negative inventory at the start
+    const availableSlots = slots.filter(
+      (slot) => Number(slot.available_inventory) > 0
+    );
+
     const availableDates = dates
       .filter((date) => date.selected)
       .map((date) => date.value);
 
     if (availableDates.length === 0) {
       const uniqueDates = [
-        ...new Set(slots.map((slot) => slot.event_date.split(" ")[0])),
+        ...new Set(availableSlots.map((slot) => slot.event_date.split(" ")[0])),
       ];
-      return uniqueDates.reduce((acc, date) => {
-        acc[date] = slots.filter((slot) => slot.event_date.startsWith(date));
+      const grouped = uniqueDates.reduce((acc, date) => {
+        const slotsForDate = availableSlots.filter((slot) =>
+          slot.event_date.startsWith(date)
+        );
+        // Only include dates that have at least one available slot
+        if (slotsForDate.length > 0) {
+          acc[date] = slotsForDate;
+        }
         return acc;
       }, {});
+      return grouped;
     }
 
-    return slots.reduce((acc, slot) => {
+    const grouped = availableSlots.reduce((acc, slot) => {
       const date = slot.event_date.split(" ")[0];
       if (availableDates.includes(date)) {
         if (!acc[date]) {
           acc[date] = [];
         }
         acc[date].push(slot);
+      }
+      return acc;
+    }, {});
+
+    // Return only dates that have at least one available slot
+    return Object.keys(grouped).reduce((acc, date) => {
+      if (grouped[date].length > 0) {
+        acc[date] = grouped[date];
       }
       return acc;
     }, {});
@@ -474,8 +538,13 @@ export default function Addons({
               <>
                 {filteredAddons.map((addon, i) => {
                   const groupedDates = groupByDate(addon.slots, dates);
+                  // Check both root-level and slot-level inventory
+                  const hasRootInventory = Number(addon.available_inventory) > 0;
+                  const hasSlotInventory = addon.slots && addon.slots.some(
+                    (slot) => Number(slot.available_inventory) > 0
+                  );
                   return (
-                    Number(addon.available_inventory) > 0 && (
+                    (hasRootInventory || hasSlotInventory) && (
                       <div
                         key={i}
                         id={`addonCard${addon.id}`}
@@ -720,20 +789,45 @@ export default function Addons({
                                                     );
                                                     setActiveDate(date); // Set active date to show time slots for checkboxes
                                                   }}
-                                                  disabled={addon.qty === 0}
+                                                  disabled={
+                                                    addon.qty === 0 ||
+                                                    getIsTabDisabled(
+                                                      addon,
+                                                      date,
+                                                      groupedDates
+                                                    )
+                                                  }
                                                   className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                                 />
                                                 <label
                                                   htmlFor={date}
-                                                  className="ml-2 text-l-orange text-sm cursor-pointer"
+                                                  className={`ml-2 text-sm cursor-pointer ${
+                                                    addon.qty === 0 ||
+                                                    getIsTabDisabled(
+                                                      addon,
+                                                      date,
+                                                      groupedDates
+                                                    )
+                                                      ? "text-[#ddab69] cursor-not-allowed opacity-50"
+                                                      : "text-l-orange"
+                                                  }`}
                                                   onClick={(e) => {
                                                     e.preventDefault();
-                                                    const inputElement =
-                                                      document.getElementById(
-                                                        date
+                                                    const isDisabled =
+                                                      addon.qty === 0 ||
+                                                      getIsTabDisabled(
+                                                        addon,
+                                                        date,
+                                                        groupedDates
                                                       );
-                                                    if (!inputElement.checked) {
-                                                      inputElement.click();
+                                                    if (!isDisabled) {
+                                                      const inputElement =
+                                                        document.getElementById(
+                                                          date
+                                                        );
+                                                      if (!inputElement.checked) {
+                                                        inputElement.click();
+                                                      }
                                                     }
                                                   }}
                                                 >

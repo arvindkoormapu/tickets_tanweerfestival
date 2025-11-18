@@ -63,7 +63,7 @@ export default function Ticket({
   const [orderDetails, setOrderDetails] = useState([]);
   const [purchaseAddonsDetails, setPurchaseAddonsDetails] = useState([]);
   const [purchaseList, setPurchaseList] = useState();
-  const [calendarDate, setCalendarDate] = useState("2024-11-24");
+  const [calendarDate, setCalendarDate] = useState("2025-11-23");
   const [priceTotal, setPriceTotal] = useState(0);
 
   const params = useParams();
@@ -506,7 +506,7 @@ export default function Ticket({
                 description={`${orderDetails[0].ticketData[0].ticket_name} - #${orderDetails[0].purchase_number} - Entry Ticket for ${orderDetails[0].ticketData[0].qty} People.`}
                 location="Mleiha, Sharjah, United Arab Emirates"
                 startDate={calendarDate}
-                endDate={"2024-11-24"}
+                endDate={"2025-11-23"}
                 timeZone="Asia/Dubai"
                 iCalFileName="TanweerFestival"
                 hideCheckmark={true}

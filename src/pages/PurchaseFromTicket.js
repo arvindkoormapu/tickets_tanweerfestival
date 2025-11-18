@@ -260,7 +260,7 @@ export default function PurchaseFromTicket() {
 
   // Helper function to calculate "Day 1", "Day 2", etc.
   const calculateDay = (dateStr) => {
-    const baseDate = new Date("2024-11-22"); // Base date: 22 Nov 2024
+    const baseDate = new Date("2025-11-21"); // Base date: 21 Nov 2024 (Day 1)
     const selectedDate = new Date(dateStr);
 
     // Calculate the difference in days from the base date
@@ -369,7 +369,7 @@ export default function PurchaseFromTicket() {
           qty: addon.qty,
           price: addon.price, // Assuming you have the price here
           time_slot_id: null, // Set to null if no selectedDates
-          event_date: ["2024-11-22", "2024-11-23", "2024-11-24"], // Set to null if no selectedDates
+          event_date: ["2025-11-21", "2025-11-22", "2025-11-23"], // Set to null if no selectedDates
         };
       }
     })
